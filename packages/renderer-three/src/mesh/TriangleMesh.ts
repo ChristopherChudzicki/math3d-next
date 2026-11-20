@@ -7,7 +7,7 @@ import {
 } from "three/webgpu";
 import type { Material } from "three/webgpu";
 import type { Transparency } from "../shader/material";
-import { MeshUniforms, meshMaterial } from "./meshMaterial";
+import { MeshUniforms, colorSource, meshMaterial } from "./meshMaterial";
 import type { MeshStyle, Shading } from "./meshMaterial";
 
 /** The buffers `TriangleMesh.fill` hands its writer, in the mesh's coordinates. */
@@ -18,8 +18,12 @@ export type MeshBuffers = {
   normal: Float32Array;
   /** RGBA per vertex, as given: no color-space conversion. */
   color: Float32Array;
-  /** A periodic mesh's color value per vertex, as a point on the unit circle. */
-  phase: Float32Array;
+  /**
+   * A map color's value per vertex: a periodic one's as a point on the unit
+   * circle (`phase.ts`), else the value in [0, 1] and its weight toward the
+   * vertex color (`mappedValue.ts`).
+   */
+  mapValue: Float32Array;
   /** A surface's (u, v) in [0, 1]² per vertex, where its gridlines are drawn. */
   parameter: Float32Array;
   /** Three vertex indices per triangle. */
@@ -30,7 +34,7 @@ const ATTRIBUTES = [
   ["position", 3],
   ["normal", 3],
   ["color", 4],
-  ["phase", 2],
+  ["mapValue", 2],
   ["parameter", 2],
 ] as const;
 
@@ -99,7 +103,7 @@ export class TriangleMesh {
       position: attribute("position").array as Float32Array,
       normal: attribute("normal").array as Float32Array,
       color,
-      phase: attribute("phase").array as Float32Array,
+      mapValue: attribute("mapValue").array as Float32Array,
       parameter: attribute("parameter").array as Float32Array,
       index: index.array as Uint32Array,
     });
@@ -118,7 +122,7 @@ export class TriangleMesh {
       translucent ? "translucent" : "opaque",
       this.transparency,
       this.shading,
-      style.colorMap !== undefined,
+      colorSource(style),
     );
     this.mesh.visible = true;
   }

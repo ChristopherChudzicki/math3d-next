@@ -74,7 +74,7 @@ export const colorMapTexture = (map: ColorMap): DataTexture => {
 let blank: DataTexture | undefined;
 
 /**
- * The texture the periodic material is built with; each mesh then supplies
+ * The texture the color-map materials are built with; each mesh then supplies
  * its own. It has the map textures' format and filters, since the shader
  * build reads them from this one.
  */

@@ -12,7 +12,7 @@ const fn = (params: string[], rhs: string) => ({
 
 /**
  * An unshaded, opaque plane z = 0 over `xRange`, one cell wide along x,
- * colored by `mod(value, 1)`.
+ * colored by `value`.
  */
 const plane = (color: string, xRange: string, value: string) => ({
   expr: fn(["x", "y"], "0"),
@@ -22,7 +22,7 @@ const plane = (color: string, xRange: string, value: string) => ({
   },
   samples1: "2",
   color,
-  colorExpr: fn(["x", "y", "z"], `mod(${value}, 1)`),
+  colorExpr: fn(["x", "y", "z"], value),
   shaded: "false",
   opacity: "1",
   gridOpacity: "0",
@@ -36,8 +36,10 @@ export const colorMapPlanes = () => {
   const scene = new SceneBuilder();
   scene.camera({ position: "[1, 2, 8]", target: "[0, 0, 0]" });
   const folder = scene.folder();
-  folder.explicitSurface(plane("bluered", "[-2, 0]", "0.9 + 0.1(x + 2)"));
-  folder.explicitSurface(plane("temperature", "[0, 2]", "0.5"));
+  folder.explicitSurface(
+    plane("bluered", "[-2, 0]", "mod(0.9 + 0.1(x + 2), 1)"),
+  );
+  folder.explicitSurface(plane("temperature", "[0, 2]", "mod(0.5, 1)"));
   return scene;
 };
 
@@ -63,4 +65,40 @@ export const expectColorMapPlanes = async (page: Page) => {
   expect(ends).toBeGreaterThan(pixels / 20);
   expect(purple).toBeLessThan(pixels / 200);
   expect(green).toBeGreaterThan(pixels / 20);
+};
+
+/**
+ * Two one-cell Rainbow planes with no `mod`, seen from above. One runs from
+ * 0.64 to 0.70, through green; the other steps from 0 to 1, both ends red.
+ */
+export const colorMapPlanesNoMod = () => {
+  const scene = new SceneBuilder();
+  scene.camera({ position: "[1, 2, 8]", target: "[0, 0, 0]" });
+  const folder = scene.folder();
+  folder.explicitSurface(plane("rainbow", "[-2, 0]", "0.64 + 0.03(x + 2)"));
+  folder.explicitSurface(plane("rainbow", "[0, 2]", "floor(x/2 + 1/2)"));
+  return scene;
+};
+
+/**
+ * The smooth cell reaches the map's pure green, which blended vertex colors
+ * miss; the step stays red, where a lookup would sweep the whole map.
+ */
+export const expectColorMapPlanesNoMod = async (page: Page) => {
+  const { data } = await decodePng(
+    await page.getByTestId("scene").screenshot(),
+  );
+  let green = 0;
+  let blue = 0;
+  let red = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+    if (r < 20 && g > 235 && b < 20) green += 1;
+    if (b > 200 && r + g < 100) blue += 1;
+    if (r > 235 && g < 20 && b < 20) red += 1;
+  }
+  const pixels = data.length / 4;
+  expect(green).toBeGreaterThan(pixels / 50);
+  expect(blue).toBeLessThan(pixels / 200);
+  expect(red).toBeGreaterThan(pixels / 20);
 };

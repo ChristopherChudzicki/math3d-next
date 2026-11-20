@@ -118,9 +118,14 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
       const [r, g, b] = gradient.getRGB(valueAt(U, V, point));
       return [r, g, b, alpha];
     };
-    const periodicColor =
-      gradient && colorExpr && valueAt && wrapsAtOne(colorExpr)
-        ? { map: gradient.getRGB, valueAt, alpha }
+    const mapColor =
+      gradient && colorExpr && valueAt
+        ? {
+            map: gradient.getRGB,
+            valueAt,
+            alpha,
+            periodic: wrapsAtOne(colorExpr),
+          }
         : undefined;
     // On a gradient, MathBox's default line color.
     const gridColor: RGBA = gradient
@@ -136,7 +141,7 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
       samples: [sampleCount(samples1, 64), sampleCount(samples2, 64)],
       position,
       colorAt,
-      periodicColor,
+      mapColor,
       shaded: shaded ?? true,
       zBias: base.zBias,
       zIndex: base.zIndex,

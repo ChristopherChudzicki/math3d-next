@@ -53,9 +53,9 @@ export type LineSpec = Common & {
 };
 
 /**
- * A color map: `t` in [0, 1] to RGB in [0, 1]. Pure, and the same function
- * for the same map, so a renderer may cache what it builds from it by
- * identity.
+ * A color map: `t` to RGB in [0, 1]; a `t` outside [0, 1] takes the nearer
+ * end. Pure, and the same function for the same map, so a renderer may
+ * cache what it builds from it by identity.
  */
 export type ColorMap = (t: number) => [number, number, number];
 
@@ -75,17 +75,21 @@ export type SurfaceSpec = Common & {
    */
   colorAt: (u: number, v: number, point: Coords) => RGBA;
   /**
-   * Present when `colorAt` is `[...map(valueAt), alpha]` and the value
-   * wraps: where finite it lies in [0, 1) up to rounding, and 0.99 is as
-   * near 0.01 as 0.03 is. A renderer may then draw sharper by blending the
-   * value between samples the short way around and coloring each pixel by
-   * `map`. A renderer that ignores this is still correct.
+   * Present when `colorAt` is `[...map(valueAt), alpha]`. A renderer may
+   * then draw sharper by blending the value between samples, where it
+   * doesn't jump, and coloring each pixel by `map`. A renderer that ignores
+   * this is still correct.
    */
-  periodicColor?: {
+  mapColor?: {
     map: ColorMap;
     /** `point` as in `colorAt`. */
     valueAt: (u: number, v: number, point: Coords) => number;
     alpha: number;
+    /**
+     * Whether the value wraps: where finite it lies in [0, 1) up to
+     * rounding, and 0.99 is as near 0.01 as 0.03 is.
+     */
+    periodic: boolean;
   };
   shaded: boolean;
   grid: {

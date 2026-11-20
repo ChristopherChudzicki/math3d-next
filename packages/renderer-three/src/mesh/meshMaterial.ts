@@ -31,7 +31,7 @@ import {
   vec3,
   vec4,
 } from "three/tsl";
-import type { ColorMap, SurfaceSpec } from "@math3d/viewport-spec";
+import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
@@ -44,17 +44,23 @@ import {
 } from "./colorMapTexture";
 import { phaseValue } from "./phase";
 
+/** With `mapColor`, each pixel is colored as `periodicColor` or `mappedColor` says. */
 export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex"> &
-  Partial<Pick<SurfaceSpec, "grid">> & {
+  Partial<Pick<SurfaceSpec, "grid" | "mapColor">> & {
     /** Whether the surface closes on itself along u and along v. */
     gridClosed?: [boolean, boolean];
-    /**
-     * Colors each pixel by this map at the angle of the interpolated `phase`,
-     * with the `color` attribute's alpha; without it, the mesh takes its
-     * `color` attribute.
-     */
-    colorMap?: ColorMap;
   };
+
+/**
+ * Where a mesh's color comes from: its `color` attribute, or a map color that
+ * wraps (`periodic`) or doesn't (`mapped`).
+ */
+export type ColorSource = "vertex" | "periodic" | "mapped";
+
+export const colorSource = ({ mapColor }: MeshStyle): ColorSource => {
+  if (!mapColor) return "vertex";
+  return mapColor.periodic ? "periodic" : "mapped";
+};
 
 /**
  * One mesh's depth style, gridlines and color map. It sits at
@@ -82,7 +88,7 @@ export class MeshUniforms {
     zIndex,
     grid,
     gridClosed = [false, false],
-    colorMap,
+    mapColor,
   }: MeshStyle): void {
     this.zBias = zBias;
     this.zIndex = zIndex;
@@ -91,27 +97,43 @@ export class MeshUniforms {
     this.gridWidth = grid?.width ?? 0;
     this.gridOpacity = grid?.color[3] ?? 0;
     this.gridClosed.set(Number(gridClosed[0]), Number(gridClosed[1]));
-    this.mapTexture = colorMap && colorMapTexture(colorMap);
+    this.mapTexture = mapColor && colorMapTexture(mapColor.map);
   }
 }
 
 const read = uniformsAt<MeshUniforms>("mesh");
 
-/**
- * A periodic mesh's color: its map at the angle of the interpolated `phase`,
- * with the vertex alpha. The texture is chosen per mesh.
- */
-const periodicColor = (color: Node<"vec4">): Node<"vec4"> => {
-  const position = phaseValue(attribute<"vec2">("phase", "vec2"));
-  const map = texture(
-    blankColorMap(),
-    colorMapCoordinate(position),
-  ).onObjectUpdate(
+/** The mesh's color map at `position` in [0, 1], its texture chosen per mesh. */
+const mapAt = (position: Node<"float">): Node<"vec4"> =>
+  texture(blankColorMap(), colorMapCoordinate(position)).onObjectUpdate(
     ({ object }) =>
       (object?.userData.mesh as MeshUniforms | undefined)?.mapTexture ??
       blankColorMap(),
   );
-  return vec4(map.rgb, color.a);
+
+const mapValue = () => attribute<"vec2">("mapValue", "vec2");
+
+/**
+ * A periodic mesh's color: its map at the angle of the interpolated phase,
+ * with the vertex alpha.
+ */
+const periodicColor = (color: Node<"vec4">): Node<"vec4"> =>
+  vec4(mapAt(phaseValue(mapValue())).rgb, color.a);
+
+/**
+ * A mapped mesh's color: its map at the interpolated value, mixed toward the
+ * vertex color by the interpolated weight, with the vertex alpha.
+ */
+const mappedColor = (color: Node<"vec4">): Node<"vec4"> => {
+  const valueAndWeight = mapValue();
+  const map = mapAt(valueAndWeight.x).rgb;
+  return vec4(mix(map, color.rgb, valueAndWeight.y), color.a);
+};
+
+const COLORS = {
+  vertex: (color: Node<"vec4">) => color,
+  periodic: periodicColor,
+  mapped: mappedColor,
 };
 
 /**
@@ -312,9 +334,8 @@ const withGridlines = (
   return vec4(rgb, alpha);
 };
 
-const build = (shading: Shading | null, periodic: boolean) => () => {
-  const vertexColor = attribute<"vec4">("color", "vec4");
-  const color = periodic ? periodicColor(vertexColor) : vertexColor;
+const build = (shading: Shading | null, source: ColorSource) => () => {
+  const color = COLORS[source](attribute<"vec4">("color", "vec4"));
   // Clamped to 1, as the unorm targets do: OIT accumulates in half float,
   // where a color above 1 would brighten the blend at that pixel.
   const lit = shading ? min(SHADINGS[shading](color, viewNormal()), 1) : color;
@@ -332,29 +353,28 @@ const build = (shading: Shading | null, periodic: boolean) => () => {
   };
 };
 
-const materialsFor = (periodic: boolean) => ({
-  glossy: sharedMaterial("mixed", build("glossy", periodic)),
-  matte: sharedMaterial("mixed", build("matte", periodic)),
-  flat: sharedMaterial("mixed", build(null, periodic)),
+const materialsFor = (source: ColorSource) => ({
+  glossy: sharedMaterial("mixed", build("glossy", source)),
+  matte: sharedMaterial("mixed", build("matte", source)),
+  flat: sharedMaterial("mixed", build(null, source)),
 });
 
-const materials = { vertex: materialsFor(false), periodic: materialsFor(true) };
+const materials = {
+  vertex: materialsFor("vertex"),
+  periodic: materialsFor("periodic"),
+  mapped: materialsFor("mapped"),
+};
 
 /**
  * A triangle mesh's material, shared by every mesh with that shading,
- * opacity, transparency model and source of color (`periodic`: its color map,
- * else its vertex colors). `shading` applies only when `shaded`. The
- * mesh supplies the attributes `TriangleMesh` writes (`MeshBuffers`) and its
- * depth style at `userData.mesh`.
+ * opacity, transparency model and source of color. `shading` applies only
+ * when `shaded`. The mesh supplies the attributes `TriangleMesh` writes
+ * (`MeshBuffers`) and its depth style at `userData.mesh`.
  */
 export const meshMaterial = (
   shaded: boolean,
   opacity: Opacity,
   transparency: Transparency,
   shading: Shading,
-  periodic = false,
-) =>
-  materials[periodic ? "periodic" : "vertex"][shaded ? shading : "flat"](
-    opacity,
-    transparency,
-  );
+  source: ColorSource = "vertex",
+) => materials[source][shaded ? shading : "flat"](opacity, transparency);

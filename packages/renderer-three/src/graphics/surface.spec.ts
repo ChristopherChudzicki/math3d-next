@@ -65,23 +65,48 @@ describe("buildSurface", () => {
     expect(surface.userData.mesh.gridClosed.toArray()).toEqual([1, 0]);
   });
 
-  test("a surface draws through its periodic color's map, and by vertex color once it has none", () => {
+  test("a closed surface's seam copies share their weight toward the vertex color", () => {
+    const tube = surfaceSpec({
+      position: (u, v) => [
+        Math.cos(2 * Math.PI * u),
+        Math.sin(2 * Math.PI * u),
+        v,
+      ],
+      // A step beside the seam's first column; its last column is flat.
+      mapColor: {
+        map: (t): [number, number, number] => [t, 0, 1 - t],
+        valueAt: (u) => (u > 0.1 && u < 0.2 ? 0.5 : 0),
+        alpha: 1,
+        periodic: false,
+      },
+    });
+    const surface = meshOf(buildSurface(tube, "oit", "glossy"));
+    const [cols, rows] = tube.samples;
+    const weights = attributeOf(surface, "mapValue").filter((_, k) => k % 2);
+    const lastColumn = weights.filter((_, k) => k % cols === cols - 1);
+    expect(lastColumn).toEqual(Array(rows).fill(1));
+  });
+
+  test("a surface draws through its map color, periodic or mapped, and by vertex color once it has none", () => {
     const map = (t: number): [number, number, number] => [t, 0, 1 - t];
-    const periodicColor = { map, valueAt: () => 0.5, alpha: 1 };
-    const graphic = buildSurface(
-      surfaceSpec({ periodicColor }),
-      "oit",
-      "glossy",
-    );
+    const mapColor = { map, valueAt: () => 0.5, alpha: 1, periodic: true };
+    const graphic = buildSurface(surfaceSpec({ mapColor }), "oit", "glossy");
     const surface = meshOf(graphic);
     expect(surface.material).toBe(
-      meshMaterial(true, "opaque", "oit", "glossy", true),
+      meshMaterial(true, "opaque", "oit", "glossy", "periodic"),
     );
     expect(surface.userData.mesh.mapTexture).toBe(colorMapTexture(map));
 
+    graphic.update(surfaceSpec({ mapColor: { ...mapColor, periodic: false } }));
+    expect(surface.material).toBe(
+      meshMaterial(true, "opaque", "oit", "glossy", "mapped"),
+    );
+    expect(surface.userData.mesh.mapTexture).toBe(colorMapTexture(map));
+    expect(attributeOf(surface, "color").slice(0, 4)).toEqual([0.5, 0, 0.5, 1]);
+
     graphic.update(surfaceSpec());
     expect(surface.material).toBe(
-      meshMaterial(true, "opaque", "oit", "glossy", false),
+      meshMaterial(true, "opaque", "oit", "glossy", "vertex"),
     );
     expect(attributeOf(surface, "color").slice(0, 4)).toEqual(
       Array.from(new Float32Array([0.2, 0.4, 0.6, 1])),
