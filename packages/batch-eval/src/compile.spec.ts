@@ -52,12 +52,26 @@ const expectMatches = (
 
 const POSITIVE = [BASE.filter((x) => x > 0)];
 
+/** The functions with a loop of their own. */
+const MATH_FUNCTIONS = [
+  "sin",
+  "cos",
+  "tan",
+  "atan",
+  "sinh",
+  "cosh",
+  "tanh",
+  "exp",
+  "abs",
+];
+
 describe("a function of numbers matches mathjs", () => {
   test.each<{ expr: string; scope?: ScopeEntries; columns?: number[][] }>([
     { expr: "f(x) = -x + (+x)" },
     { expr: "f(x) = x^2 + x^(-3) + x^0" },
     { expr: "f(x) = x^0.5", columns: POSITIVE },
-    { expr: "f(x) = sin(x) + exp(x)" },
+    { expr: "f(x) = sqrt(x) + log(x)", columns: POSITIVE },
+    ...MATH_FUNCTIONS.map((name) => ({ expr: `f(x) = ${name}(x)` })),
     { expr: "f(x, y) = max(x, 1, y)" },
     { expr: "f(x, y, z) = add(x, y, z)" },
     {

@@ -33,6 +33,18 @@ const KERNELS_1 = new Map<unknown, Kernel1>([
   [mathWithTransform.unaryMinus, kernels.unaryMinus],
   [mathWithTransform.unaryPlus, kernels.unaryPlus],
 ]);
+/** The functions whose mathjs number implementation is the `Math` function. */
+const MATH_KERNELS_1 = new Map<unknown, Kernel1>([
+  [mathWithTransform.sin, kernels.sin],
+  [mathWithTransform.cos, kernels.cos],
+  [mathWithTransform.tan, kernels.tan],
+  [mathWithTransform.atan, kernels.atan],
+  [mathWithTransform.sinh, kernels.sinh],
+  [mathWithTransform.cosh, kernels.cosh],
+  [mathWithTransform.tanh, kernels.tanh],
+  [mathWithTransform.exp, kernels.exp],
+  [mathWithTransform.abs, kernels.abs],
+]);
 const KERNELS_2 = new Map<unknown, Kernel2>([
   [mathWithTransform.add, kernels.add],
   [mathWithTransform.subtract, kernels.subtract],
@@ -92,7 +104,7 @@ export const compile = (
       };
     }
     if (operands.length === 1) {
-      const kernel = KERNELS_1.get(fn);
+      const kernel = KERNELS_1.get(fn) ?? MATH_KERNELS_1.get(fn);
       if (kernel) {
         return { constant: false, evaluate: call1(kernel, evaluates[0]) };
       }

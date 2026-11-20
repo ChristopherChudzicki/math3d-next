@@ -86,7 +86,19 @@ describe.each(["add", "subtract", "multiply", "divide"] as const)(
   },
 );
 
-describe.each(["unaryMinus", "unaryPlus"] as const)("%s", (name) => {
+describe.each([
+  "unaryMinus",
+  "unaryPlus",
+  "sin",
+  "cos",
+  "tan",
+  "atan",
+  "sinh",
+  "cosh",
+  "tanh",
+  "exp",
+  "abs",
+] as const)("%s", (name) => {
   const kernel: Kernel1 = kernels[name];
   const reference = numberFn(name, 1);
 
@@ -102,7 +114,7 @@ describe.each(["unaryMinus", "unaryPlus"] as const)("%s", (name) => {
   });
 
   test("a number gives a number", () => {
-    expect(run((pool) => kernel(4, -0, pool))(4)).toBe(reference(-0));
+    expect(run((pool) => kernel(4, 0.5, pool))(4)).toBe(reference(0.5));
   });
 });
 
