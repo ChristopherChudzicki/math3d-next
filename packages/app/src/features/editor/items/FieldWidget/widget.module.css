@@ -71,6 +71,15 @@
 
 textarea.field-widget-input {
   resize: none;
+  field-sizing: content;
+  /* An empty field keeps a clickable underline. */
+  min-width: 20px;
+}
+
+@supports not (field-sizing: content) {
+  textarea.field-widget-input {
+    width: 100%;
+  }
 }
 
 .field-widget-input {

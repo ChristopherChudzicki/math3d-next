@@ -1,6 +1,7 @@
 import { test } from "@/fixtures/users";
 import { expect, type Page } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
+import invariant from "tiny-invariant";
 import AppPage from "@/utils/pages/AppPage";
 import type ItemSettings from "@/utils/pages/ItemSettings";
 
@@ -35,7 +36,7 @@ const widens = async (item: ItemSettings, focus: () => Promise<void>) => {
     const key = await prepareScene(scene);
     await page.goto(`/${key}`);
     const item = await new AppPage(page).getUniqueItemSettings({ id: "point" });
-    // The description renders empty first, and MathLive's fonts load late.
+    // Measure once the scene has loaded and MathLive's late fonts are in.
     await expect(item.field("Description")).toHaveValue(description);
     await page.evaluate(() => document.fonts.ready);
 
@@ -45,6 +46,31 @@ const widens = async (item: ItemSettings, focus: () => Promise<void>) => {
     await nextFrames(page);
     expect(await item.root.boundingBox()).toEqual(before);
   });
+});
+
+test("A short description stays narrow, and a long one wraps", async ({
+  page,
+  prepareScene,
+}) => {
+  const long =
+    "A description long enough to wrap across several lines of the sidebar";
+  const scene = new SceneBuilder();
+  const folder = scene.folder();
+  folder.point({ description: "Short" }, "short");
+  folder.point({ description: long }, "long");
+  const key = await prepareScene(scene);
+  await page.goto(`/${key}`);
+  const app = new AppPage(page);
+  const size = async (id: string) => {
+    const item = await app.getUniqueItemSettings({ id });
+    const field = await item.field("Description").boundingBox();
+    const root = await item.root.boundingBox();
+    invariant(field && root);
+    return { width: field.width, height: field.height, itemWidth: root.width };
+  };
+  const short = await size("short");
+  expect(short.width).toBeLessThan(short.itemWidth / 2);
+  expect((await size("long")).height).toBeGreaterThan(short.height * 1.5);
 });
 
 test("The settings button of a widened item opens its settings", async ({

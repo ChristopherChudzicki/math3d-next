@@ -39,8 +39,6 @@ vitest.mock("mathlive", () => vi.importActual("@/__mocks__/mathlive"));
  */
 vitest.mock("@/util/hooks/useShadowStylesheet");
 
-vitest.mock("@/ui/TextareaAutoWidthHeight/TextMeasurer");
-
 /**
  * Sentry isn't initialized in tests, so capturing is a no-op either way; these
  * spies let any spec assert on what was reported.

@@ -1,30 +1,17 @@
 import classNames from "classnames";
 import React, { useCallback } from "react";
-import TextareaAutoWidthHeight from "@/ui/TextareaAutoWidthHeight";
 
 import { IWidgetProps, WidgetChangeEvent } from "./types";
 import styles from "./widget.module.css";
 
-const EXTRA_WIDTH = 20;
-
+/** Sized to its text by CSS `field-sizing: content`; wraps at its `max-width`. */
 const AutosizeText: React.FC<
   IWidgetProps & {
     ref?: React.Ref<HTMLTextAreaElement>;
   }
 > = (props) => {
-  const {
-    onChange,
-    name,
-    label,
-    error,
-    itemId,
-    style = {},
-    className,
-    ref,
-    placeholder,
-    ...others
-  } = props;
-  const { width, height, ...styleWithoutSize } = style;
+  const { onChange, name, label, error, itemId, className, ref, ...others } =
+    props;
   const onInputChange: React.ChangeEventHandler<HTMLTextAreaElement> =
     useCallback(
       (e) => {
@@ -37,9 +24,11 @@ const AutosizeText: React.FC<
       [onChange, name],
     );
   return (
-    <TextareaAutoWidthHeight
+    <textarea
       {...others}
-      extraWidth={EXTRA_WIDTH}
+      ref={ref}
+      // Browsers without field-sizing show one line and scroll the rest.
+      rows={1}
       aria-label={label}
       className={classNames(
         { [styles["has-error"]]: error },
@@ -48,8 +37,6 @@ const AutosizeText: React.FC<
       )}
       name={name}
       onChange={onInputChange}
-      style={styleWithoutSize}
-      ref={ref}
     />
   );
 };
