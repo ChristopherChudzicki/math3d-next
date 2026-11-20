@@ -256,7 +256,7 @@ mathjs.import({
 
 /** mathjs's own pow. */
 const principalPow = mathjs.pow;
-const { nthRoot } = mathjs;
+const { nthRoot, mod: mathjsMod } = mathjs;
 
 mathjs.import(
   {
@@ -280,6 +280,20 @@ mathjs.import(
         x < 0 && Math.abs(n % 2) !== 1 ? NaN : nthRoot(x, n),
       any: nthRoot,
       "any, any": nthRoot,
+    }),
+    // In [0, y) for y > 0 (in (y, 0] for y < 0). mathjs's number mod is
+    // x - y * floor(x / y) with a corrected floor that costs ~2.5 µs a call
+    // and can leave [0, y): its mod(0.3, 0.1) is -5.6e-17.
+    mod: mathjs.typed("mod", {
+      "number, number": (x: number, y: number) => {
+        if (y === 0) return x;
+        // `%` is exact and takes x's sign; adding y can round to y itself.
+        const r = x % y;
+        const m = r !== 0 && r < 0 !== y < 0 ? r + y : r;
+        return m === y ? 0 : m + 0;
+      },
+      // A matrix's entries go through mathjs's number mod, not the one above.
+      "any, any": mathjsMod,
     }),
   },
   { override: true },

@@ -137,6 +137,23 @@ describe("mathjs instance", () => {
     },
   );
 
+  test.each([
+    // mathjs's own mod gives -5.6e-17.
+    { x: 0.3, y: 0.1, expected: 0.09999999999999998 },
+    { x: -0.5, y: 1, expected: 0.5 },
+    { x: -1, y: 1, expected: 0 },
+    // 1 - 1e-17 rounds to 1.
+    { x: -1e-17, y: 1, expected: 0 },
+    { x: 0.5, y: -1, expected: -0.5 },
+    { x: 2.5, y: 0, expected: 2.5 },
+  ])("mod($x, $y) is $expected", ({ x, y, expected }) => {
+    expect(math.mod(x, y)).toBe(expected);
+  });
+
+  it("leaves mod of anything but two numbers to mathjs", () => {
+    expect(math.mod([1.5, -0.5], 1)).toEqual([0.5, 0.5]);
+  });
+
   it("defines expected constants", () => {
     expect(math.i).toEqual([1, 0, 0]);
     expect(math.j).toEqual([0, 1, 0]);
