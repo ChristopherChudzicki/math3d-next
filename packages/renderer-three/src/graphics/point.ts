@@ -17,11 +17,7 @@ export const buildPoint = (
   labels.mesh.renderOrder = 2;
   const set = (next: PointSpec) => {
     discs.set(next.positions, { ...next, diameter: next.size });
-    labels.set(next.positions, next.label, {
-      ...ITEM_LABEL,
-      zBias: next.zBias,
-      zIndex: next.zIndex,
-    });
+    labels.set(next.positions, next.label, ITEM_LABEL);
   };
   set(spec);
   return {

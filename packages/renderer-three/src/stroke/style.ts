@@ -99,18 +99,6 @@ export const arrowLengthAt = (
   return full.mul(shortfall.mul(shortfall).mul(shortfall).oneMinus());
 };
 
-/**
- * How far an arrowhead reaches from its tip, in CSS pixels at view depth 1:
- * the cone's slant at its full size.
- */
-export const headReach = (
-  style: Pick<StrokeStyle, "width" | "arrowSize">,
-): number => {
-  const coneLength =
-    (style.arrowSize ?? 0) * style.width * 0.5 * LENGTH_TO_RADIUS;
-  return Math.hypot(coneLength, coneLength / LENGTH_TO_RADIUS);
-};
-
 type PointAttribute = (typeof SEGMENT_LAYOUT | typeof ARROW_LAYOUT)[number][0];
 
 /** A per-instance point, in view space. */
