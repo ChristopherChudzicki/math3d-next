@@ -92,3 +92,13 @@ textarea.field-widget-input {
   border: none;
   outline: none;
 }
+
+.autosize-text {
+  field-sizing: content;
+}
+
+@supports not (field-sizing: content) {
+  .autosize-text {
+    width: 100%;
+  }
+}

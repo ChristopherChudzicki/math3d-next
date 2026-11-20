@@ -1,4 +1,5 @@
 declare const styles: {
+  readonly "autosize-text": string;
   readonly "detail-text": string;
   readonly "error-tooltip": string;
   readonly "field-widget": string;
