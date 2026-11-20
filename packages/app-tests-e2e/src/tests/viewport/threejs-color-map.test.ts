@@ -21,10 +21,14 @@ test("three.js draws a color map with an outer mod per pixel, each surface by it
 
   await expectThreeViewport(page);
   await expectColorMapPlanes(page);
+  await expect(page.getByTestId("scene").locator("canvas")).toHaveAttribute(
+    "data-backend",
+    "webgl2",
+  );
   expect(errors).toEqual([]);
 });
 
-test("three.js draws a color map without a mod per pixel, but blends a step", async ({
+test("three.js draws a color map per pixel when it has no mod, but blends a step", async ({
   page,
   prepareScene,
 }) => {
@@ -34,5 +38,9 @@ test("three.js draws a color map without a mod per pixel, but blends a step", as
 
   await expectThreeViewport(page);
   await expectColorMapPlanesNoMod(page);
+  await expect(page.getByTestId("scene").locator("canvas")).toHaveAttribute(
+    "data-backend",
+    "webgl2",
+  );
   expect(errors).toEqual([]);
 });

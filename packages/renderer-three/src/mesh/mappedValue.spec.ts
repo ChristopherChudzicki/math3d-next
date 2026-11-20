@@ -47,14 +47,14 @@ test("the diagonal each cell is split along counts as an edge", () => {
 });
 
 test("values compare after clamping to [0, 1]", () => {
-  expect(written(2, [1.2, 50, 1, 7])).toEqual(Array(4).fill([1, 0]));
-  expect(written(2, [-3, -0.5, 0, -40])).toEqual(Array(4).fill([0, 0]));
+  expect(written(2, [1.2, Infinity, 1, 7])).toEqual(Array(4).fill([1, 0]));
+  expect(written(2, [-3, -Infinity, 0, -40])).toEqual(Array(4).fill([0, 0]));
 });
 
 test("a value of NaN blends itself and every vertex sharing an edge with it, and sends 0", () => {
   const out = written(3, [0.5, 0.5, 0.5, 0.5, NaN, 0.5, 0.5, 0.5, 0.5]);
   expect(out[4]).toEqual([0, 1]);
-  // Corners (0, 0) and (2, 2) are off the center's edges and diagonals.
+  // Only corners (0, 0) and (2, 2) share no edge with the center.
   expect(out.map(([, weight]) => weight)).toEqual([0, 1, 1, 1, 1, 1, 1, 1, 0]);
 });
 

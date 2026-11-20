@@ -44,12 +44,7 @@ import {
 } from "./colorMapTexture";
 import { phaseValue } from "./phase";
 
-/**
- * With `mapColor`, each pixel takes `map` at the interpolated `mapValue` and
- * the `color` attribute's alpha: periodic, at its angle; else at its value,
- * mixed toward the `color` attribute by its weight. Without it, the mesh
- * takes its `color` attribute.
- */
+/** With `mapColor`, each pixel is colored as `periodicColor` or `mappedColor` says. */
 export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex"> &
   Partial<Pick<SurfaceSpec, "grid" | "mapColor">> & {
     /** Whether the surface closes on itself along u and along v. */
@@ -57,8 +52,8 @@ export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex"> &
   };
 
 /**
- * Where a mesh's color comes from: a periodic map color, a mapped one (any
- * other map color), or its vertices.
+ * Where a mesh's color comes from: its `color` attribute, or a map color that
+ * wraps (`periodic`) or doesn't (`mapped`).
  */
 export type ColorSource = "vertex" | "periodic" | "mapped";
 

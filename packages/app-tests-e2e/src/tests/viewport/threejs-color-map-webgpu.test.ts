@@ -32,7 +32,7 @@ test("three.js draws a color map with an outer mod per pixel on the WebGPU backe
   expect(errors).toEqual([]);
 });
 
-test("three.js draws a color map without a mod per pixel on the WebGPU backend", async ({
+test("three.js draws a color map per pixel when it has no mod, but blends a step, on the WebGPU backend", async ({
   page,
   prepareScene,
 }) => {

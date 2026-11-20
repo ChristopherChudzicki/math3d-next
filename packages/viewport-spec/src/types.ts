@@ -53,9 +53,9 @@ export type LineSpec = Common & {
 };
 
 /**
- * A color map: `t` in [0, 1] to RGB in [0, 1]. Pure, and the same function
- * for the same map, so a renderer may cache what it builds from it by
- * identity.
+ * A color map: `t` to RGB in [0, 1]; a `t` outside [0, 1] takes the nearer
+ * end. Pure, and the same function for the same map, so a renderer may
+ * cache what it builds from it by identity.
  */
 export type ColorMap = (t: number) => [number, number, number];
 
@@ -76,8 +76,9 @@ export type SurfaceSpec = Common & {
   colorAt: (u: number, v: number, point: Coords) => RGBA;
   /**
    * Present when `colorAt` is `[...map(valueAt), alpha]`. A renderer may
-   * then draw sharper by blending the value between samples and coloring
-   * each pixel by `map`. A renderer that ignores this is still correct.
+   * then draw sharper by blending the value between samples, where it
+   * doesn't jump, and coloring each pixel by `map`. A renderer that ignores
+   * this is still correct.
    */
   mapColor?: {
     map: ColorMap;

@@ -65,6 +65,28 @@ describe("buildSurface", () => {
     expect(surface.userData.mesh.gridClosed.toArray()).toEqual([1, 0]);
   });
 
+  test("a closed surface's seam copies share their weight toward the vertex color", () => {
+    const tube = surfaceSpec({
+      position: (u, v) => [
+        Math.cos(2 * Math.PI * u),
+        Math.sin(2 * Math.PI * u),
+        v,
+      ],
+      // A step beside the seam's first column; its last column is flat.
+      mapColor: {
+        map: (t): [number, number, number] => [t, 0, 1 - t],
+        valueAt: (u) => (u > 0.1 && u < 0.2 ? 0.5 : 0),
+        alpha: 1,
+        periodic: false,
+      },
+    });
+    const surface = meshOf(buildSurface(tube, "oit", "glossy"));
+    const [cols, rows] = tube.samples;
+    const weights = attributeOf(surface, "mapValue").filter((_, k) => k % 2);
+    const lastColumn = weights.filter((_, k) => k % cols === cols - 1);
+    expect(lastColumn).toEqual(Array(rows).fill(1));
+  });
+
   test("a surface draws through its map color, periodic or mapped, and by vertex color once it has none", () => {
     const map = (t: number): [number, number, number] => [t, 0, 1 - t];
     const mapColor = { map, valueAt: () => 0.5, alpha: 1, periodic: true };

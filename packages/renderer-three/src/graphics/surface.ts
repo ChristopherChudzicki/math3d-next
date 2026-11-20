@@ -31,24 +31,27 @@ export const buildSurface = (
   shading: Shading,
 ): Graphic<SurfaceSpec> => {
   const surface = new TriangleMesh(transparency, shading);
-  let drawn: { spec: SurfaceSpec; grid: ParametricGrid } | null = null;
+  let drawn: {
+    spec: SurfaceSpec;
+    grid: ParametricGrid;
+    closed: [boolean, boolean];
+  } | null = null;
   const set = (next: SurfaceSpec) => {
-    // Same positions: reuse the sampled grid; the buffer writes below are
-    // cheap next to sampling.
-    const grid =
-      drawn && samePositions(drawn.spec, next)
-        ? drawn.grid
-        : sampleGrid(next.samples, next.position);
+    // Same positions: reuse the sampled grid and its closed axes; the buffer
+    // writes below are cheap next to sampling.
+    const reuse = drawn && samePositions(drawn.spec, next) ? drawn : null;
+    const grid = reuse?.grid ?? sampleGrid(next.samples, next.position);
+    const closed = reuse?.closed ?? closedAxes(grid);
     const { cols, rows } = grid;
-    const style = { ...next, gridClosed: closedAxes(grid) };
+    const style = { ...next, gridClosed: closed };
     surface.fill(cols * rows, 6 * (cols - 1) * (rows - 1), style, (out) => {
       writePositions(grid, out.position);
       if (next.shaded) writeNormals(grid, out.normal);
       writeIndex(cols, rows, out.index);
-      writeColors(grid, next, style.gridClosed, out);
+      writeColors(grid, next, closed, out);
       writeParameters(grid, out.parameter);
     });
-    drawn = { spec: next, grid };
+    drawn = { spec: next, grid, closed };
   };
   set(spec);
   return {

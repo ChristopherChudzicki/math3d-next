@@ -29,7 +29,7 @@ const OFFSETS = [
 
 /* eslint-disable no-param-reassign */
 
-/** Gives the weights at `a` and `b`, one vertex at a seam, the larger of the two. */
+/** Sets `a` and `b`, two copies of one seam vertex, to the larger of their weights. */
 const joinWeights = (out: Float32Array, a: number, b: number) => {
   const weight = Math.max(out[2 * a + 1], out[2 * b + 1]);
   out[2 * a + 1] = weight;

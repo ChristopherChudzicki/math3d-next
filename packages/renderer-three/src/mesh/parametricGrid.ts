@@ -67,9 +67,8 @@ const setColor = (
 
 /**
  * Writes each vertex's RGBA and, for a map color, its `mapValue`: a periodic
- * color's phase, with only alpha in `color`; else its clamped value and
- * weight, joined at the seam of each `closed` axis. A periodic cell with no
- * finite value draws the map's low end.
+ * color's phase, with only alpha in `color`; else `writeMappedValues`'s value
+ * and weight. A periodic cell with no finite value draws the map's low end.
  */
 export const writeColors = (
   { cols, rows, points }: ParametricGrid,
