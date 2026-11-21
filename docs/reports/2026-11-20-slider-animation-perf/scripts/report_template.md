@@ -19,7 +19,7 @@ Production: `next.math3d.org` at release `{{RELEASE}}` (`{{COMMIT}}`) vs `math3d
 
 ## Native CPU speed
 
-math3d-react vs math3d-next (three.js). Frames per second, and main-thread task time per frame (ms). Medians of {{N_X1}} runs, 5 s each, interleaved between the apps. 60 fps is the display cap, so where both hit it, main-thread time shows the headroom. Result compares frame rates when they differ by more than 10%, otherwise main-thread time when it differs by more than 15%. Run-to-run spread ((max − min) / median of ms per frame): {{SPREAD_X1}}.
+math3d-react vs math3d-next (three.js). Frames per second, and main-thread task time per frame (ms). Medians of {{N_X1}} runs, 5 s each, interleaved between the apps. 60 fps is the display cap, so where both hit it, main-thread time shows the headroom. Result compares frame rates when they differ by more than 10%, otherwise main-thread time when it differs by more than 15%: 🟢 math3d-next ahead, 🟢🟢 ahead with at least twice the frame rate or at most half the main-thread time, 🔵 even, 🟠 math3d-next behind. Run-to-run spread ((max − min) / median of ms per frame): {{SPREAD_X1}}.
 
 {{TABLE_X1}}
 

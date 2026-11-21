@@ -150,16 +150,14 @@ def fmt_fps(x: float) -> str:
 def verdict(r: dict, n: dict) -> str:
     # Frame rates more than 10% apart decide; otherwise (including both at the
     # 60 fps cap) main-thread time more than 15% apart does.
-    if n["fps"] > r["fps"] * 1.1:
-        return "math3d-next ahead"
-    if n["fps"] < r["fps"] * 0.9:
-        return "math3d-next behind"
-    ratio = n["main"] / r["main"]
-    if ratio < 1 / 1.15:
-        return "math3d-next ahead"
-    if ratio > 1.15:
-        return "math3d-next behind"
-    return "even"
+    fps, ms = n["fps"] / r["fps"], n["main"] / r["main"]
+    if fps > 1.1 or (fps >= 0.9 and ms < 1 / 1.15):
+        if fps >= 2 or ms <= 0.5:
+            return "🟢🟢 math3d-next ahead, 2× or more"
+        return "🟢 math3d-next ahead"
+    if fps < 0.9 or ms > 1.15:
+        return "🟠 math3d-next behind"
+    return "🔵 even"
 
 
 def spread(m: dict) -> str:
