@@ -59,3 +59,24 @@ def test_a_vector_field_zero_count_written_as_one_is_allowlisted():
         TOL,
     )
     assert any(entry.matches(pair) for entry in ALLOWLIST)
+
+
+@pytest.mark.parametrize(
+    ("legacy", "next_", "allowlisted"),
+    [
+        (2000, 1024, True),
+        # Not the cap: not the translator's clamp.
+        (2000, 1500, False),
+    ],
+)
+def test_only_a_sample_count_clamped_to_the_cap_is_allowlisted(
+    legacy, next_, allowlisted
+):
+    pair = label(
+        spec(item_type="EXPLICIT_SURFACE", next_field="samples2"),
+        Side(OK, legacy),
+        Side(OK, next_),
+        TOL,
+    )
+    assert pair.outcome == "differ"
+    assert any(entry.matches(pair) for entry in ALLOWLIST) == allowlisted

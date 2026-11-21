@@ -21,6 +21,7 @@ import {
   zOrder,
   samples1,
   EvaluatedDomain1,
+  MAX_SAMPLES,
 } from "../shared";
 
 interface ParametricCurveProperties {
@@ -124,7 +125,7 @@ const config: IMathItemConfig<
     start,
     end,
     domain: domain1,
-    samples1: { ...samples1, label: "Samples" },
+    samples1: { ...samples1(MAX_SAMPLES.curve), label: "Samples" },
   },
   settingsProperties: [
     "color",

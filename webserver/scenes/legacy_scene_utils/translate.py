@@ -126,6 +126,29 @@ def divide(numerator: float, denominator: float | str) -> float | str:
     return numerator / denominator
 
 
+# The largest value math3d-next accepts in each samples field, by item kind
+# (packages/mathitem-configs/src/shared.ts `MAX_SAMPLES`).
+MAX_SAMPLES = {
+    "curve": 16384,
+    "surface": 1024,
+    "implicit_surface": 192,
+    "vector_field": 128,
+}
+
+_LITERAL_COUNT = re.compile(r"(?:\s|\\ )*(\d+(?:\.\d*)?)(?:\s|\\ )*")
+
+
+def capped_samples(count: str, cap: int) -> str:
+    """A literal count above ``cap`` becomes ``cap``, so the item draws instead
+    of failing validation; an expression is kept for math3d-next to validate
+    (owner decision, 2026-11-21)."""
+    match = _LITERAL_COUNT.fullmatch(count)
+    # float, as JS parses it; Fraction refuses strings over 4300 digits.
+    if match and float(match[1]) > cap:
+        return str(cap)
+    return count
+
+
 def vector_text(components: list[float | str]) -> str:
     if all(isinstance(c, float) for c in components):
         return str(components)
@@ -260,9 +283,11 @@ class ItemMigrator:
         (validators/src/domainFuncs.ts), giving it samples1/grid1."""
         first = domain.items[0]
         swap = any(depends_on(first.rhs, param) for param in first.params)
+        u_samples = capped_samples(x.uSamples, MAX_SAMPLES["surface"])
+        v_samples = capped_samples(x.vSamples, MAX_SAMPLES["surface"])
         return {
-            "samples1": x.vSamples if swap else x.uSamples,
-            "samples2": x.uSamples if swap else x.vSamples,
+            "samples1": v_samples if swap else u_samples,
+            "samples2": u_samples if swap else v_samples,
             "grid1": x.gridV if swap else x.gridU,
             "grid2": x.gridU if swap else x.gridV,
         }
@@ -524,7 +549,7 @@ class ItemMigrator:
             lhs=self.function_assignment(x.lhs),
             rhs=self.function_assignment(x.rhs),
             opacity=x.opacity,
-            samples=x.samples,
+            samples=capped_samples(x.samples, MAX_SAMPLES["implicit_surface"]),
             shaded=stringify(x.shaded),
             **self.visibility(x),
             zBias=x.zBias,
@@ -568,7 +593,7 @@ class ItemMigrator:
             end=stringify(x.end),
             expr=self.function_assignment(x.expr),
             opacity=x.opacity,
-            samples1=x.samples,
+            samples1=capped_samples(x.samples, MAX_SAMPLES["curve"]),
             start=stringify(x.start),
             size=x.size,
             **self.visibility(x),
@@ -659,7 +684,10 @@ class ItemMigrator:
 
     def translate_vector_field(self, props) -> VectorFieldProperties:
         x = self.legacy(old.VectorFieldProperties, props)
-        counts = self.vector_field_samples(x.samples)
+        counts = [
+            capped_samples(count, MAX_SAMPLES["vector_field"])
+            for count in self.vector_field_samples(x.samples)
+        ]
         samples1, range_x = self.flatten_zero_samples(counts[0], x.rangeX)
         samples2, range_y = self.flatten_zero_samples(counts[1], x.rangeY)
         samples3, range_z = self.flatten_zero_samples(counts[2], x.rangeZ)

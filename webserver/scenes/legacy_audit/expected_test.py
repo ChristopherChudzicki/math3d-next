@@ -353,5 +353,27 @@ def test_vector_field_zero_samples_become_one_over_the_first_bound():
     assert got["domain.items.2.expr"] == "\\left[5,5\\right]"
 
 
+HUGE = "64" + "0" * 99
+
+
+@pytest.mark.parametrize(
+    ("item_type", "legacy", "props"),
+    [
+        ("PARAMETRIC_CURVE", {"samples": "20000\\ "}, ["samples1"]),
+        (
+            "EXPLICIT_SURFACE",
+            {"uSamples": HUGE, "vSamples": HUGE},
+            ["samples1", "samples2"],
+        ),
+        ("IMPLICIT_SURFACE", {"samples": "300"}, ["samples"]),
+        ("VECTOR_FIELD", {"samples": "[200, 2, 5]"}, ["samples1"]),
+    ],
+)
+def test_literal_sample_count_above_the_cap_becomes_the_cap(item_type, legacy, props):
+    got = values({**rehydrated(item_type), **legacy})
+    for prop in props:
+        assert got[prop] == str(table.MAX_SAMPLES[item_type])
+
+
 def test_blank_z_index_becomes_zero():
     assert values({**rehydrated("GRID"), "zIndex": ""})["zIndex"] == "0"

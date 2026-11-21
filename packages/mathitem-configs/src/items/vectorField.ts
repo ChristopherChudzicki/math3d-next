@@ -23,6 +23,7 @@ import {
   zBias,
   zIndex,
   zOrder,
+  MAX_SAMPLES,
 } from "../shared";
 
 interface VectorFieldProperties {
@@ -138,9 +139,9 @@ const config: IMathItemConfig<
     start,
     end,
     domain: domain3,
-    samples1,
-    samples2,
-    samples3,
+    samples1: samples1(MAX_SAMPLES.vectorField),
+    samples2: samples2(MAX_SAMPLES.vectorField),
+    samples3: samples3(MAX_SAMPLES.vectorField),
     scale: {
       name: "scale",
       label: "Scale Multiplier",

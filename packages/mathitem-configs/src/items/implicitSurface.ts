@@ -17,6 +17,8 @@ import {
   zBias,
   zIndex,
   zOrder,
+  MAX_SAMPLES,
+  sampleCount,
 } from "../shared";
 
 interface ImplicitSurfaceProperties {
@@ -117,7 +119,7 @@ const config: IMathItemConfig<
       name: "samples",
       label: "Samples",
       widget: WidgetType.MathValue,
-      validate: validators.positive,
+      validate: sampleCount(MAX_SAMPLES.implicitSurface),
     },
     shaded,
     domain: domain3,

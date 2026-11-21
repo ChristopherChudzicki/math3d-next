@@ -4,7 +4,12 @@ import pytest
 
 from scenes.legacy_scene_utils.issue_log import Severity
 from scenes.legacy_scene_utils.symbols import depends_on
-from scenes.legacy_scene_utils.translate import ItemMigrator, wrapped_at_one
+from scenes.legacy_scene_utils.translate import (
+    MAX_SAMPLES,
+    ItemMigrator,
+    capped_samples,
+    wrapped_at_one,
+)
 from scenes.schemas.math_items import VariableItem
 
 
@@ -941,3 +946,38 @@ def test_wrapped_at_one_wraps(body):
 )
 def test_wrapped_at_one_keeps_a_blank_body_or_a_mod_one_call(body):
     assert wrapped_at_one(body) == body
+
+
+HUGE = "64" + "0" * 99
+
+
+@pytest.mark.parametrize(
+    ("legacy", "props", "kind"),
+    [
+        ({"type": "PARAMETRIC_CURVE", "samples": "20000\\ "}, ["samples1"], "curve"),
+        (
+            {"type": "EXPLICIT_SURFACE", "uSamples": HUGE, "vSamples": HUGE},
+            ["samples1", "samples2"],
+            "surface",
+        ),
+        (
+            {"type": "IMPLICIT_SURFACE", "samples": "300"},
+            ["samples"],
+            "implicit_surface",
+        ),
+        (
+            {"type": "VECTOR_FIELD", "samples": "[200, 2, 5]"},
+            ["samples1"],
+            "vector_field",
+        ),
+    ],
+)
+def test_literal_sample_count_above_its_kind_cap_becomes_the_cap(legacy, props, kind):
+    item = ItemMigrator().translate_item(legacy, "some-id")
+    for prop in props:
+        assert getattr(item.properties, prop) == str(MAX_SAMPLES[kind])
+
+
+@pytest.mark.parametrize("count", ["64\\ ", "2^{11}"])
+def test_sample_count_within_the_cap_or_computed_is_kept(count):
+    assert capped_samples(count, 1024) == count
