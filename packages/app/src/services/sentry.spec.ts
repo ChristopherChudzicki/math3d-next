@@ -59,7 +59,7 @@ describe("Sentry init", () => {
 
   test("wraps the real createBrowserRouter for route instrumentation", async () => {
     await import("./sentry");
-    const { createBrowserRouter } = await import("react-router-dom");
+    const { createBrowserRouter } = await import("react-router");
     expect(Sentry.wrapCreateBrowserRouterV7).toHaveBeenCalledWith(
       createBrowserRouter,
     );
