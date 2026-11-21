@@ -1,12 +1,12 @@
 import * as Sentry from "@sentry/react";
 import { useEffect } from "react";
 import {
+  createBrowserRouter,
   createRoutesFromChildren,
   matchRoutes,
   useLocation,
   useNavigationType,
 } from "react-router";
-import { createBrowserRouter } from "react-router-dom";
 import { APP_VERSION } from "@/config/version";
 
 const dsn = import.meta.env.VITE_SENTRY_DSN;

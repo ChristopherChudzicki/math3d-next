@@ -1,4 +1,3 @@
-// Use `react-router` (not `react-router-dom`) to match the repo convention (21 src files).
 import type React from "react";
 import { useCallback } from "react";
 import { useNavigate } from "react-router";

@@ -1,10 +1,10 @@
 import { render, waitFor } from "@testing-library/react";
 import React from "react";
 import { createMemoryRouter, parsePath } from "react-router";
+import type { InitialEntry } from "react-router";
 import { getStore } from "@/store/store";
 import { takeSignInDraft } from "@/services/auth/signInDraft";
 
-import { InitialEntry } from "history";
 import type { QueryClient } from "@tanstack/react-query";
 import { mockAuth, seedDb } from "@math3d/mock-api";
 import type { User } from "@math3d/api";
