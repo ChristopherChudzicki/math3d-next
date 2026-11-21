@@ -24,6 +24,7 @@ import {
   zOrder,
   domain2,
   EvaluatedDomain2,
+  MAX_SAMPLES,
 } from "../shared";
 
 interface ExplicitSurfacePolarProperties {
@@ -152,8 +153,8 @@ const config: IMathItemConfig<
     opacity,
     domain: domain2,
     shaded,
-    samples1,
-    samples2,
+    samples1: samples1(MAX_SAMPLES.surface),
+    samples2: samples2(MAX_SAMPLES.surface),
     ...visibilityProps,
     zBias,
     zIndex,

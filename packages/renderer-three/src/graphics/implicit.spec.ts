@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from "vitest";
 import type { BufferAttribute, Mesh } from "three/webgpu";
 import type { ImplicitSurfaceSpec } from "@math3d/viewport-spec";
 import { sampleScalarGrid } from "../mesh/scalarGrid";
-import { MAX_IMPLICIT_CELLS, buildImplicit } from "./implicit";
+import { buildImplicit } from "./implicit";
 
 /** A unit sphere, and how many times it has been evaluated. */
 const countedSphere = () => {
@@ -63,13 +63,10 @@ describe("buildImplicit", () => {
     expect(mesh.userData.mesh.gridLines.toArray()).toEqual([0, 0]);
   });
 
-  test("samples the corners of `samples` cells per axis, up to the cap", () => {
-    const few = countedSphere();
-    build(implicitSpec({ samples: 8, value: few.value }));
-    expect(few.calls).toBe(9 ** 3);
-    const many = countedSphere();
-    build(implicitSpec({ samples: MAX_IMPLICIT_CELLS + 1, value: many.value }));
-    expect(many.calls).toBe((MAX_IMPLICIT_CELLS + 1) ** 3);
+  test("samples the corners of `samples` cells per axis", () => {
+    const sphere = countedSphere();
+    build(implicitSpec({ samples: 8, value: sphere.value }));
+    expect(sphere.calls).toBe(9 ** 3);
   });
 
   test("restyles the same field without sampling it again", () => {

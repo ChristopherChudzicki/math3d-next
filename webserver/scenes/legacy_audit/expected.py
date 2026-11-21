@@ -196,6 +196,29 @@ def _parse_func_assignment(text: Any) -> tuple[str, list[str], str] | None:
     return m.group("name"), params, m.group("rhs")
 
 
+# The largest value next accepts in each samples field, by item type
+# (next:mathitem-configs/src/shared.ts `MAX_SAMPLES`).
+MAX_SAMPLES = {
+    "PARAMETRIC_CURVE": 16384,
+    "PARAMETRIC_SURFACE": 1024,
+    "EXPLICIT_SURFACE": 1024,
+    "EXPLICIT_SURFACE_POLAR": 1024,
+    "IMPLICIT_SURFACE": 192,
+    "VECTOR_FIELD": 128,
+}
+
+
+def _samples(value: Any, item_type: str) -> str:
+    """A literal count above ``item_type``'s cap becomes the cap (owner decision
+    2026-11-21, tk-a-sample-count-of-infinity-for-example-1-0-throw-99ff1b)."""
+    text = _text(value)
+    number = text.replace("\\ ", " ").strip()
+    cap = MAX_SAMPLES[item_type]
+    if re.fullmatch(r"\d+(?:\.\d*)?", number) and float(number) > cap:
+        return str(cap)
+    return text
+
+
 def _split_vector(text: Any) -> list[str] | None:
     """Components of a literal ``[a, b, c]`` / ``\\left[a, b, c\\right]``."""
     if not isinstance(text, str):
@@ -681,7 +704,12 @@ def _parametric_curve(item: dict, ctx: Context) -> list[Expectation]:
     out.expr_domain(item, ("range",))
     # Interval width (react:components/MathBox/MathBoxComponents.js:754-758);
     # next: next:app/src/features/viewport/mathbox/graphics/ParametricCurve.tsx:63-69.
-    out.add("samples1", _text(item.get("samples")), "render", "samples")
+    out.add(
+        "samples1",
+        _samples(item.get("samples"), "PARAMETRIC_CURVE"),
+        "render",
+        "samples",
+    )
     return out.items
 
 
@@ -822,8 +850,9 @@ def _make_surface(
         swapped = first is not None and _depends_on(first[1], first[0])
         u_src, v_src = ("vSamples", "uSamples") if swapped else ("uSamples", "vSamples")
         gu_src, gv_src = ("gridV", "gridU") if swapped else ("gridU", "gridV")
-        out.add("samples1", _text(item.get(u_src)), "render", u_src)
-        out.add("samples2", _text(item.get(v_src)), "render", v_src)
+        item_type = item["type"]
+        out.add("samples1", _samples(item.get(u_src), item_type), "render", u_src)
+        out.add("samples2", _samples(item.get(v_src), item_type), "render", v_src)
         out.add("grid1", _text(item.get(gu_src)), "render", gu_src)
         out.add("grid2", _text(item.get(gv_src)), "render", gv_src)
         # react:components/MathBox/MathBoxComponents.js:830-842
@@ -842,7 +871,12 @@ def _implicit_surface(item: dict, ctx: Context) -> list[Expectation]:
     out.func_assignment("lhs", item.get("lhs"), "lhs")
     out.func_assignment("rhs", item.get("rhs"), "rhs")
     out.expr_domain(item, ("rangeX", "rangeY", "rangeZ"))
-    out.add("samples", _text(item.get("samples")), "render", "samples")
+    out.add(
+        "samples",
+        _samples(item.get("samples"), "IMPLICIT_SURFACE"),
+        "render",
+        "samples",
+    )
     return out.items
 
 
@@ -871,7 +905,7 @@ def _vector_field(item: dict, ctx: Context) -> list[Expectation]:
     for i in range(3):
         value: str | NeedsEval
         if parts is not None and len(parts) == 3:
-            value = parts[i]
+            value = _samples(parts[i], "VECTOR_FIELD")
         else:
             value = NeedsEval(
                 f"samples={item.get('samples')!r} is not a literal 3-vector"
@@ -935,8 +969,8 @@ _SURFACE_COVERAGE = {
     "colorExpr": "colorExpr: `_f(X,Y,Z,p1,p2)=rhs` -> `x,y,z,p1,p2` (explicit `p1,p2,z`), X -> rescale_x(x) etc.; a Rainbow rhs not blank and not wholly `mod(g, 1)` -> `mod(rhs, 1)`",
     "gridOpacity": "gridOpacity (identity)",
     "gridWidth": "gridWidth (identity)",
-    "uSamples": "samples1 (samples2 when rangeU depends on the 2nd parameter)",
-    "vSamples": "samples2 (samples1 when rangeU depends on the 2nd parameter)",
+    "uSamples": "samples1 (samples2 when rangeU depends on the 2nd parameter); a literal above 1024 -> 1024",
+    "vSamples": "samples2 (samples1 when rangeU depends on the 2nd parameter); a literal above 1024 -> 1024",
     "gridU": "grid1 (grid2 when rangeU depends on the 2nd parameter)",
     "gridV": "grid2 (grid1 when rangeU depends on the 2nd parameter)",
 }
@@ -1027,7 +1061,7 @@ COVERAGE: dict[str, dict[str, str]] = {
         **_LINE_COVERAGE,
         "expr": "expr: `_f(t)=rhs` -> function-assignment",
         "range": "domain.items.0.expr (identity)",
-        "samples": "samples1 (identity)",
+        "samples": "samples1 (identity); a literal above 16384 -> 16384",
     },
     "PARAMETRIC_SURFACE": dict(_SURFACE_COVERAGE),
     "EXPLICIT_SURFACE": dict(_SURFACE_COVERAGE),
@@ -1038,14 +1072,14 @@ COVERAGE: dict[str, dict[str, str]] = {
         "shaded": 'shaded (bool -> "true"/"false")',
         "lhs": "lhs: `_f(x,y,z)=rhs` -> function-assignment",
         "rhs": "rhs: `_f(x,y,z)=rhs` -> function-assignment",
-        "samples": "samples (identity)",
+        "samples": "samples (identity); a literal above 192 -> 192",
     },
     "VECTOR_FIELD": {
         **_UNIVERSAL_COVERAGE,
         **_LINE_COVERAGE,
         **_VOLUME_RANGES,
         "expr": "expr: `_f(x,y,z)=rhs` -> function-assignment",
-        "samples": "samples1/samples2/samples3: components of the literal 3-vector",
+        "samples": "samples1/samples2/samples3: components of the literal 3-vector; a component above 128 -> 128",
         "scale": "scale (identity)",
     },
 }

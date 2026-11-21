@@ -23,6 +23,7 @@ import {
   zIndex,
   zOrder,
   domain2,
+  MAX_SAMPLES,
 } from "../shared";
 import type { EvaluatedDomain2 } from "../shared";
 
@@ -152,8 +153,8 @@ const config: IMathItemConfig<
     gridWidth,
     opacity,
     shaded,
-    samples1,
-    samples2,
+    samples1: samples1(MAX_SAMPLES.surface),
+    samples2: samples2(MAX_SAMPLES.surface),
     ...visibilityProps,
     zBias,
     zIndex,

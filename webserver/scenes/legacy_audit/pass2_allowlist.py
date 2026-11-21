@@ -17,7 +17,12 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from scenes.legacy_audit.evaluation import SURFACE_DOMAIN_TYPES, _is_complex
+from scenes.legacy_audit.evaluation import (
+    SURFACE_DOMAIN_TYPES,
+    _is_complex,
+    _is_number,
+)
+from scenes.legacy_audit.expected import MAX_SAMPLES
 
 if TYPE_CHECKING:
     from scenes.legacy_audit.evaluation import Pair
@@ -72,6 +77,22 @@ def _ranges_flattened(legacy: Any, nxt: Any) -> bool:
         )
     )
 
+
+def _capped_samples(cap: int) -> Callable[[Any, Any], bool]:
+    """math3d-react's count is above `cap` and math3d-next's is `cap`."""
+    return lambda legacy, nxt: _is_number(legacy) and legacy > cap and nxt == cap
+
+
+_SAMPLE_FIELDS = [
+    ("PARAMETRIC_CURVE", "samples1"),
+    *(
+        (item_type, next_field)
+        for item_type in SURFACE_DOMAIN_TYPES
+        for next_field in ("samples1", "samples2")
+    ),
+    ("IMPLICIT_SURFACE", "samples"),
+    *(("VECTOR_FIELD", f"samples{i}") for i in (1, 2, 3)),
+]
 
 ZERO_SAMPLES_DECISION = (
     "owner decision 2026-11-04 "
@@ -202,6 +223,20 @@ ALLOWLIST: list[Entry] = (
             ("VECTOR", "components"),
             ("VECTOR", "tail"),
         )
+    ]
+    + [
+        Entry(
+            "differ",
+            "",
+            "math3d-next rejects a count above its cap, so the translator clamps a "
+            "literal one to the cap (scenes/legacy_scene_utils/translate.py "
+            "`capped_samples`) and the item draws at the cap; owner decision "
+            "2026-11-21 (tk-a-sample-count-of-infinity-for-example-1-0-throw-99ff1b)",
+            item_type,
+            next_field,
+            values=_capped_samples(MAX_SAMPLES[item_type]),
+        )
+        for item_type, next_field in _SAMPLE_FIELDS
     ]
 )
 

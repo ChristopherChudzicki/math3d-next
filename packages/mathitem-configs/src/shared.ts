@@ -159,26 +159,47 @@ const size: PropertyConfig<"size", number> = {
   validate: validators.nonnegative,
 };
 
-const samples1: PropertyConfig<"samples1", number> = {
+/**
+ * Largest value each samples field accepts, by item kind. Curves stop where
+ * MathBox draws nothing (its 16,384-wide data texture); the others bound load
+ * and re-evaluation time. Above about 147 per axis, a vector field's arrows
+ * exceed WebGPU's default maximum buffer size and three.js draws nothing.
+ * Mirrored in webserver/scenes/legacy_scene_utils/translate.py and
+ * webserver/scenes/legacy_audit/expected.py.
+ */
+const MAX_SAMPLES = {
+  curve: 16384,
+  surface: 1024,
+  implicitSurface: 192,
+  vectorField: 128,
+} as const;
+
+const sampleCount = (max: number) => (value: unknown) => {
+  const count = validators.positive(value);
+  if (count > max) throw new Error(`Samples must be at most ${max}`);
+  return count;
+};
+
+const samples1 = (max: number): PropertyConfig<"samples1", number> => ({
   name: "samples1",
   label: "Samples (1st parameter)",
   widget: WidgetType.MathValue,
-  validate: validators.positive,
-};
+  validate: sampleCount(max),
+});
 
-const samples2: PropertyConfig<"samples2", number> = {
+const samples2 = (max: number): PropertyConfig<"samples2", number> => ({
   name: "samples2",
   label: "Samples (2nd parameter)",
   widget: WidgetType.MathValue,
-  validate: validators.positive,
-};
+  validate: sampleCount(max),
+});
 
-const samples3: PropertyConfig<"samples3", number> = {
+const samples3 = (max: number): PropertyConfig<"samples3", number> => ({
   name: "samples3",
   label: "Samples (3rd parameter)",
   widget: WidgetType.MathValue,
-  validate: validators.positive,
-};
+  validate: sampleCount(max),
+});
 
 const visible: PropertyConfig<"visible"> = {
   name: "visible",
@@ -267,6 +288,8 @@ export {
   range1,
   range2,
   range3,
+  MAX_SAMPLES,
+  sampleCount,
   samples1,
   samples2,
   samples3,

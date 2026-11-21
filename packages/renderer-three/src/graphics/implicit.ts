@@ -7,12 +7,6 @@ import type { Shading } from "../mesh/meshMaterial";
 import type { Transparency } from "../shader/material";
 import type { Graphic } from "./builders";
 
-/**
- * Per-axis cell cap. Sampling evaluates the surface's equation (cells + 1)³
- * times, on the main thread: about a second at 128.
- */
-export const MAX_IMPLICIT_CELLS = 128;
-
 /** Whether two specs sample the same field at the same points. */
 const sameField = (a: ImplicitSurfaceSpec, b: ImplicitSurfaceSpec) =>
   a.value === b.value &&
@@ -38,7 +32,7 @@ export const buildImplicit = (
         ? null
         : marchingCubes(
             sampleScalarGrid(
-              Math.min(next.samples, MAX_IMPLICIT_CELLS),
+              next.samples,
               next.domain,
               next.value,
               next.values,
@@ -61,7 +55,7 @@ export const buildImplicit = (
     update: set,
     dispose: () => {
       surface.dispose();
-      // The meshing buffers only grow, to megabytes at the cell cap. Another
+      // The meshing buffers only grow, to tens of megabytes on a fine grid. Another
       // surface's next remesh allocates them anew.
       freeGridBuffer();
       freeMeshBuffers();
