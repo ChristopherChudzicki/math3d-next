@@ -109,7 +109,7 @@
     "vite": "^7.3.8",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.1.12",
-    "wrangler": "4.147.0"
+    "wrangler": "4.166.0"
   },
   "proxy": "http://localhost:3001",
   "msw": {
