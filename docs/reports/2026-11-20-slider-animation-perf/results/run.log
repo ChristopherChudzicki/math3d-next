@@ -1,3 +1,4 @@
+# Recorded 2026-11-20 (local time) by an earlier version of scripts/run.sh whose round headers had no date.
 == x1 round 21:23 Now drawing from 'AC Power'
 react.sphere_colormap                    rep 0 fps  53.4  p50  16.7  p90  33.3  main   18.1 ms/frame  busy  97%
 next.sphere_colormap                     rep 0 fps  60.0  p50  16.7  p90  16.7  main    9.0 ms/frame  busy  54%

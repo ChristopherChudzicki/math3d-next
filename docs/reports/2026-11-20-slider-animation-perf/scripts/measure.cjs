@@ -1,34 +1,36 @@
-// Usage: node measure.cjs <outdir> <reps> <throttle> <label=url>...
-// For each URL and rep: open a fresh page, wait for the canvas, let it settle,
-// then for WINDOW_MS record rAF frame intervals and the main thread's task
-// time (CDP Performance.getMetrics TaskDuration). Writes <outdir>/results.jsonl
-// and a screenshot per label (last rep). Needs Playwright's full Chromium
-// (`yarn playwright install chromium`); its default headless shell has no WebGPU.
+// Usage: node scripts/measure.cjs <outdir> <throttle> <app=baseUrl>...
+// One run per scene in scene_keys.json and app, scenes outermost so the apps
+// alternate. Each run opens a fresh page, waits for the canvas, settles 5 s,
+// then for 5 s records rAF frame intervals and the main thread's task time
+// (CDP Performance.getMetrics TaskDuration). Appends a row per run to
+// <outdir>/results.jsonl and screenshots each page to <outdir>/<app>.<scene>.png.
+// Needs Playwright's full Chromium (`yarn playwright install chromium`); its
+// default headless shell has no WebGPU.
 const { chromium } = require("playwright");
 const fs = require("fs");
+const path = require("path");
 
-const [outdir, repsArg, throttleArg, ...targets] = process.argv.slice(2);
-const REPS = Number(repsArg);
+const [outdir, throttleArg, ...apps] = process.argv.slice(2);
 const THROTTLE = Number(throttleArg);
-const SETTLE_MS = Number(process.env.SETTLE_MS ?? 5000);
-const WINDOW_MS = Number(process.env.WINDOW_MS ?? 5000);
+const SETTLE_MS = 5000;
+const WINDOW_MS = 5000;
+const keys = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "scene_keys.json"), "utf8"),
+);
 fs.mkdirSync(outdir, { recursive: true });
 
-const metric = async (cdp) => {
+const taskSeconds = async (cdp) => {
   const { metrics } = await cdp.send("Performance.getMetrics");
-  const m = Object.fromEntries(metrics.map((x) => [x.name, x.value]));
-  return {
-    task: m.TaskDuration,
-    script: m.ScriptDuration,
-    heap: m.JSHeapUsedSize,
-  };
+  return metrics.find((m) => m.name === "TaskDuration").value;
 };
 
 (async () => {
   const browser = await chromium.launch({ channel: "chromium" });
-  for (const t of targets) {
-    const [label, url] = t.split(/=(.*)/s);
-    for (let rep = 0; rep < REPS; rep += 1) {
+  for (const [scene, key] of Object.entries(keys)) {
+    for (const app of apps) {
+      const [name, base] = app.split(/=(.*)/s);
+      const label = `${name}.${scene}`;
+      const url = `${base}/${key}`;
       const context = await browser.newContext({
         viewport: { width: 1400, height: 900 },
       });
@@ -40,6 +42,13 @@ const metric = async (cdp) => {
         await cdp.send("Performance.enable");
         await page.goto(url);
         await page.waitForSelector("canvas", { timeout: 60000 });
+        // Which build the page was served: its own scripts' URLs are hashed.
+        const build = await page.evaluate(() =>
+          [...document.scripts]
+            .map((s) => s.src)
+            .filter((src) => src.startsWith(location.origin))
+            .join(" "),
+        );
         await page.waitForTimeout(SETTLE_MS);
         if (THROTTLE > 1) {
           await cdp.send("Emulation.setCPUThrottlingRate", { rate: THROTTLE });
@@ -53,51 +62,41 @@ const metric = async (cdp) => {
           };
           requestAnimationFrame(f);
         });
-        const before = await metric(cdp);
+        const before = await taskSeconds(cdp);
         await page.waitForTimeout(WINDOW_MS);
-        const after = await metric(cdp);
+        const after = await taskSeconds(cdp);
         const s = await page.evaluate(() => {
           const f = window.__f;
-          const d = f
-            .slice(1)
-            .map((x, i) => x - f[i])
-            .sort((a, b) => a - b);
           const span = f.at(-1) - f[0];
           return {
             frames: f.length - 1,
             span,
             fps: (f.length - 1) / (span / 1000),
-            p50: d[d.length >> 1],
-            p90: d[Math.floor(d.length * 0.9)],
-            max: d.at(-1),
           };
         });
         if (THROTTLE > 1)
           await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
-        const taskMs = (after.task - before.task) * 1000;
-        const scriptMs = (after.script - before.script) * 1000;
+        const taskMs = (after - before) * 1000;
         const row = {
           label,
           url,
-          rep,
           throttle: THROTTLE,
+          time: new Date().toISOString(),
+          build,
           ...s,
           taskPerFrame: taskMs / s.frames,
-          scriptPerFrame: scriptMs / s.frames,
-          busy: taskMs / s.span,
           errors: errors.slice(0, 3),
         };
         fs.appendFileSync(
-          `${outdir}/results.jsonl`,
+          path.join(outdir, "results.jsonl"),
           `${JSON.stringify(row)}\n`,
         );
-        if (rep === REPS - 1)
-          await page.screenshot({ path: `${outdir}/${label}.png` });
+        await page.screenshot({ path: path.join(outdir, `${label}.png`) });
         console.log(
-          `${label.padEnd(40)} rep ${rep} fps ${s.fps.toFixed(1).padStart(5)}  p50 ${s.p50.toFixed(1).padStart(5)}  p90 ${s.p90.toFixed(1).padStart(5)}  main ${row.taskPerFrame.toFixed(1).padStart(6)} ms/frame  busy ${(row.busy * 100).toFixed(0).padStart(3)}%${errors.length ? `  ERR ${errors[0]}` : ""}`,
+          `${label.padEnd(30)} fps ${s.fps.toFixed(1).padStart(5)}  main ${row.taskPerFrame.toFixed(1).padStart(6)} ms/frame${errors.length ? `  ERR ${errors[0]}` : ""}`,
         );
       } catch (e) {
-        console.log(`${label} rep ${rep} ERROR ${e.message.split("\n")[0]}`);
+        console.log(`${label} ERROR ${e.message.split("\n")[0]}`);
       }
       await context.close();
     }

@@ -1,17 +1,20 @@
-"""Saves the benchmark scenes as new legacy scenes and prints their keys.
+"""Saves scenes from scenes.py as new legacy scenes and records their keys.
 
-python3 scripts/post_scenes.py https://api.math3d.org > scripts/scene_keys.json
+python3 scripts/post_scenes.py https://api.math3d.org [name ...]
 
-Only needed for a new or changed scene: the keys in scene_keys.json already
-work on both math3d.org and next.math3d.org. Add "sphere_colormap", an
-existing scene, back by hand.
+Posts the named scenes (default: all) and, once every post has succeeded,
+merges their keys into scene_keys.json. Only needed for a new or changed
+scene: the keys already there work on math3d.org and next.math3d.org.
 """
 
 import json
 import sys
 import urllib.request
+from pathlib import Path
 
 from scenes import SCENES
+
+KEYS = Path(__file__).with_name("scene_keys.json")
 
 
 def post(api: str, scene: dict) -> str:
@@ -26,7 +29,7 @@ def post(api: str, scene: dict) -> str:
 
 
 if __name__ == "__main__":
-    api = sys.argv[1].rstrip("/")
-    print(
-        json.dumps({name: post(api, scene) for name, scene in SCENES.items()}, indent=2)
-    )
+    api, names = sys.argv[1].rstrip("/"), sys.argv[2:] or list(SCENES)
+    posted = {name: post(api, SCENES[name]) for name in names}
+    KEYS.write_text(json.dumps(json.loads(KEYS.read_text()) | posted, indent=2) + "\n")
+    print(json.dumps(posted, indent=2))

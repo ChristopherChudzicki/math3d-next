@@ -3,8 +3,9 @@
 python3 scripts/build_report.py <release>   e.g. v2026.11.21.1
 
 Fills the tables with medians per scene and app, and converts the last x1 run's
-screenshots to images/*.jpg (macOS `sips`). The summary is hand-written in the
-template.
+screenshots to images/*.jpg (macOS `sips`). The summary and other per-run facts
+are hand-written in the template (listed in its leading comment, which is
+dropped from README.md). Warns about runs with page errors or missing runs.
 """
 
 import json
@@ -18,6 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 RELEASE = sys.argv[1]
 COMMIT = subprocess.run(
     ["git", "rev-parse", "--short=8", f"{RELEASE}^{{commit}}"],
+    cwd=ROOT,
     capture_output=True,
     text=True,
     check=True,
@@ -112,20 +114,33 @@ SCENES = [
 ]
 
 
-def medians(kind: str) -> dict:
+def load(kind: str) -> dict:
     runs = defaultdict(list)
     for line in (ROOT / "results" / kind / "results.jsonl").open():
         row = json.loads(line)
         app, scene = row["label"].split(".", 1)
         runs[(scene, app)].append(row)
-    return {
-        key: {
+        if row["errors"]:
+            print(f"warning: {kind} {row['label']} had page errors: {row['errors']}")
+    counts = {len(rows) for rows in runs.values()}
+    if len(counts) > 1:
+        print(f"warning: {kind} scenes have unequal run counts {sorted(counts)}")
+    if {scene for scene, _ in runs} != {key for key, *_ in SCENES}:
+        print(f"warning: {kind} scenes don't match SCENES in build_report.py")
+    return runs
+
+
+def stats(runs: dict) -> dict:
+    out = {}
+    for key, rows in runs.items():
+        ms = [r["taskPerFrame"] for r in rows]
+        out[key] = {
             "fps": statistics.median(r["fps"] for r in rows),
-            "main": statistics.median(r["taskPerFrame"] for r in rows),
+            "main": statistics.median(ms),
+            "spread": (max(ms) - min(ms)) / statistics.median(ms),
             "n": len(rows),
         }
-        for key, rows in runs.items()
-    }
+    return out
 
 
 def fmt_fps(x: float) -> str:
@@ -133,18 +148,26 @@ def fmt_fps(x: float) -> str:
 
 
 def verdict(r: dict, n: dict) -> str:
-    ratio = n["main"] / r["main"]
-    if n["fps"] >= 58 and r["fps"] >= 58:
-        if ratio < 0.8:
-            return "math3d-next faster"
-        if ratio > 1.25:
-            return "both 60 fps, math3d-next costlier"
-        return "even"
+    # Frame rates more than 10% apart decide; otherwise (including both at the
+    # 60 fps cap) main-thread time more than 15% apart does.
     if n["fps"] > r["fps"] * 1.1:
-        return "math3d-next faster"
+        return "math3d-next ahead"
     if n["fps"] < r["fps"] * 0.9:
-        return "math3d-next slower"
+        return "math3d-next behind"
+    ratio = n["main"] / r["main"]
+    if ratio < 1 / 1.15:
+        return "math3d-next ahead"
+    if ratio > 1.15:
+        return "math3d-next behind"
     return "even"
+
+
+def spread(m: dict) -> str:
+    def span(app: str) -> str:
+        values = [v["spread"] * 100 for (_, a), v in m.items() if a == app]
+        return f"{min(values):.0f}–{max(values):.0f}%"
+
+    return f"math3d-next {span('next')}, math3d-react {span('react')}"
 
 
 def table(m: dict) -> str:
@@ -181,41 +204,43 @@ def convert_screenshots() -> None:
     for key, *_ in SCENES:
         for app in ("react", "next"):
             src = ROOT / "results" / "x1" / f"{app}.{key}.png"
-            if src.exists():
-                subprocess.run(
-                    [
-                        "sips",
-                        "-s",
-                        "format",
-                        "jpeg",
-                        "-s",
-                        "formatOptions",
-                        "72",
-                        "-Z",
-                        "800",
-                        str(src),
-                        "--out",
-                        str(ROOT / "images" / f"{app}.{key}.jpg"),
-                    ],
-                    check=True,
-                    capture_output=True,
-                )
+            if not src.exists():
+                print(f"warning: no screenshot {src.name}")
+                continue
+            subprocess.run(
+                [
+                    "sips",
+                    "-s",
+                    "format",
+                    "jpeg",
+                    "-s",
+                    "formatOptions",
+                    "72",
+                    "-Z",
+                    "800",
+                ]
+                + [str(src), "--out", str(ROOT / "images" / f"{app}.{key}.jpg")],
+                check=True,
+                capture_output=True,
+            )
 
 
-x1, x4 = medians("x1"), medians("x4")
+x1, x4 = stats(load("x1")), stats(load("x4"))
 convert_screenshots()
+template = (ROOT / "scripts" / "report_template.md").read_text()
+template = template[template.index("-->") + len("-->") :].lstrip()
 report = (
-    (ROOT / "scripts" / "report_template.md")
-    .read_text()
-    .replace("{{RELEASE}}", RELEASE)
+    template.replace("{{RELEASE}}", RELEASE)
     .replace("{{COMMIT}}", COMMIT)
     .replace("{{N_X1}}", str(min(v["n"] for v in x1.values())))
     .replace("{{N_X4}}", str(min(v["n"] for v in x4.values())))
+    .replace("{{SPREAD_X1}}", spread(x1))
+    .replace("{{SPREAD_X4}}", spread(x4))
     .replace("{{TABLE_X1}}", table(x1))
     .replace("{{TABLE_X4}}", table(x4))
     .replace("{{SHOTS}}", shots(x1))
 )
 (ROOT / "README.md").write_text(report)
 # As the repo's pre-commit hook would, so a rebuild doesn't churn the file.
-subprocess.run(["npx", "prettier", "--write", str(ROOT / "README.md")], check=True)
+subprocess.run(["npx", "prettier", "--write", "README.md"], cwd=ROOT, check=True)
 print("wrote README.md")
