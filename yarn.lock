@@ -4404,7 +4404,7 @@ __metadata:
     classnames: "npm:2.5.1"
     concurrently: "npm:^9.2.5"
     eslint: "npm:^8.57.1"
-    fast-json-patch: "npm:^3.1.1"
+    fast-json-patch: "npm:^3.1.2"
     js-yaml: "npm:^4.3.2"
     jsdom: "npm:^26.1.0"
     lodash-es: "npm:4.18.1"
@@ -6459,10 +6459,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-json-patch@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "fast-json-patch@npm:3.1.1"
-  checksum: 10/3e56304e1c95ad1862a50e5b3f557a74c65c0ff2ba5b15caab983b43e70e86ddbc5bc887e9f7064f0aacfd0f0435a29ab2f000fe463379e72b906486345e6671
+"fast-json-patch@npm:^3.1.2":
+  version: 3.1.2
+  resolution: "fast-json-patch@npm:3.1.2"
+  checksum: 10/cde213746a3a306e1b775f87a65c5f3fa26a8ed4f8da99ac6d9dd76abe418328c07661118d9bf4bf9e9f2a19a49aa0ec5f08cc352402400e30ed27a5733836b2
   languageName: node
   linkType: hard
 
