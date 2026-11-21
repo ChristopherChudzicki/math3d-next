@@ -12,14 +12,14 @@ Production: `next.math3d.org` at release `{{RELEASE}}` (`{{COMMIT}}`) vs `math3d
 
 - **Native CPU (M1 Pro): math3d-next is ahead on color maps and implicit surfaces, and about even on solid-color surfaces and vector fields.**
   - Solid-color surfaces and vector fields: math3d-next uses 0–12% more main-thread time per frame; both hold 60 fps, except on the shell, where both run at about 56.
-  - Color maps: math3d-next is ahead on all four color-mapped scenes; the 128 × 128 rainbow ripple runs at 60 fps on 11.9 ms against math3d-react's 56 fps on 17.6 ms.
+  - Color maps: math3d-next uses 26–51% less main-thread time on all four color-mapped scenes, and has the higher frame rate on two (sphere 60 vs 53, 256 × 256 ripple 27 vs 20); the 128 × 128 ripple runs at 60 vs 56 and the torus at 60 in both.
   - Implicit surfaces: math3d-next holds 60 fps at 20 and 40 samples; math3d-react falls to 3.6 fps (gyroid, 40), using 3–43× more main-thread time.
-- **With the CPU slowed 4×, math3d-next is behind on solid-color surfaces and vector fields**: 1.2–1.3× math3d-react's main-thread time, and fewer fps on the shell (13 vs 16) and the 4,000 arrows (48 vs 60). It stays ahead on color maps and implicit surfaces.
+- **With the CPU slowed 4×, math3d-next is behind on solid-color surfaces and vector fields**: 1.2–1.3× math3d-react's main-thread time, and fewer fps on the shell (13 vs 16) and the 4,000 arrows (48 vs 60); the 64 × 64 ripple and the 500 arrows still run at about 60 in both. It stays ahead on color maps and implicit surfaces.
 - _Likely causes of the 4× gap, from profiling not included here:_ evaluating the expression at every sample (math3d-react's mathjs 3 compiles each expression to JavaScript; math3d-next evaluates its parsed expression tree), and the store update and React re-render on each slider step.
 
 ## Native CPU speed
 
-math3d-react vs math3d-next (three.js). Frames per second, and main-thread task time per frame (ms). Medians of {{N_X1}} runs, 5 s each, interleaved between the apps. 60 fps is the display cap, so where both hit it, main-thread time shows the headroom. Result compares frame rates when they differ by more than 10%, otherwise main-thread time when it differs by more than 15%: 🟢 math3d-next ahead, 🟢🟢 ahead with at least twice the frame rate or at most half the main-thread time, 🔵 even, 🟠 math3d-next behind. Run-to-run spread ((max − min) / median of ms per frame): {{SPREAD_X1}}.
+math3d-react vs math3d-next (three.js). Frames per second, and main-thread task time per frame (ms). Medians of {{N_X1}} runs, 5 s each, interleaved between the apps. 60 fps is the display cap, so where both hit it, main-thread time shows the headroom. Result compares frame rates: 🟢 math3d-next more than 10% higher, 🟢🟢 at least twice as high, 🔵 within 10% (with math3d-next's main-thread time against math3d-react's when it differs by more than 15%), 🟠 more than 10% lower. Run-to-run spread ((max − min) / median of ms per frame): {{SPREAD_X1}}.
 
 {{TABLE_X1}}
 
