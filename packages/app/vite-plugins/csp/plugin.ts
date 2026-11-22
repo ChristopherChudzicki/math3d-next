@@ -21,9 +21,10 @@ const sentrySecurityEndpoint = (dsn: string, release?: string): string => {
 };
 
 /**
- * The app's Content-Security-Policy and reporting headers. It sets no
- * `frame-ancestors`, so any site may embed the app; the session cookie is
- * SameSite=Lax, so a cross-site embed is always signed out.
+ * The app's Content-Security-Policy and reporting headers. Embedding is a
+ * supported feature, as it was in math3d-react, so the policy sets no
+ * `frame-ancestors`; a cross-site embed is signed out because the session
+ * cookie is SameSite=Lax.
  */
 export const securityHeaders = ({
   apiBaseUrl,
@@ -39,15 +40,15 @@ export const securityHeaders = ({
     "script-src 'self' https://static.cloudflareinsights.com 'report-sample'",
     // MathLive writes `<style>` elements and inline `style` attributes.
     "style-src 'self' 'unsafe-inline'",
-    // Scene thumbnails come from the screenshots Worker, whose origin the
-    // backend knows and this build does not.
+    // The backend builds scene thumbnail URLs from its own screenshots-Worker
+    // origin; allowing any https host avoids repeating that config here.
     "img-src 'self' data: https:",
     "font-src 'self' data:",
     `connect-src ${connect.join(" ")}`,
     "object-src 'none'",
     "base-uri 'self'",
-    // No `form-action`: browsers apply it to each redirect after sign-in's POST,
-    // a chain through Google's pages that we don't control.
+    // No `form-action`: Chrome applies it to each redirect after sign-in's
+    // POST, a chain through Google's pages that we don't control.
   ];
   if (!sentryDsn) {
     return { "Content-Security-Policy": directives.join("; ") };
