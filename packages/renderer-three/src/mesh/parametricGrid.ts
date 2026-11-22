@@ -161,14 +161,11 @@ export const writeIndex = (cols: number, rows: number, out: Uint32Array) => {
 /* eslint-enable no-param-reassign, prefer-destructuring */
 
 /**
- * Whether the grid's first and last columns (u) and rows (v) coincide, as a
- * torus's do at its seams: there, each edge gridline is half of one line.
+ * A test of whether the samples at two indices are the same point, to a
+ * millionth of the grid's extent. Two samples undefined alike count as the same, so a row
+ * a surface of revolution leaves undefined doesn't open its seam.
  */
-export const closedAxes = ({
-  cols,
-  rows,
-  points,
-}: ParametricGrid): [boolean, boolean] => {
+const samePoint = ({ points }: ParametricGrid) => {
   let extent = 0;
   points.forEach((point) =>
     point.forEach((x) => {
@@ -176,19 +173,49 @@ export const closedAxes = ({
     }),
   );
   const tolerance = 1e-6 * extent;
-  // Two samples undefined alike count as the same, so a row a surface of
-  // revolution leaves undefined doesn't open its seam.
-  const same = (a: number, b: number) =>
+  return (a: number, b: number) =>
     points[a].every((x, k) => {
       const y = points[b][k];
       return Number.isFinite(x) || Number.isFinite(y)
         ? Math.abs(x - y) <= tolerance
         : true;
     });
+};
+
+/**
+ * Whether the grid's first and last columns (u) and rows (v) coincide, as a
+ * torus's do at its seams: there, each edge gridline is half of one line.
+ */
+export const closedAxes = (grid: ParametricGrid): [boolean, boolean] => {
+  const { cols, rows } = grid;
+  const same = samePoint(grid);
   let u = true;
   for (let j = 0; j < rows && u; j += 1)
     u = same(j * cols, j * cols + cols - 1);
   let v = true;
   for (let i = 0; i < cols && v; i += 1) v = same(i, (rows - 1) * cols + i);
   return [u, v];
+};
+
+/**
+ * The curve a surface traces when it ignores exactly one parameter, and so
+ * has no area: `ignored` is that parameter's axis (0 for u), and `path` the
+ * samples along the other. Null otherwise.
+ */
+export const degenerateCurve = (
+  grid: ParametricGrid,
+): { ignored: 0 | 1; path: Coords[] } | null => {
+  const { cols, rows, points } = grid;
+  const same = samePoint(grid);
+  let u = true;
+  for (let k = 0; k < points.length && u; k += 1) u = same(k, k - (k % cols));
+  let v = true;
+  for (let k = cols; k < points.length && v; k += 1) v = same(k, k % cols);
+  if (u === v) return null;
+  return u
+    ? {
+        ignored: 0,
+        path: Array.from({ length: rows }, (_, j) => points[j * cols]),
+      }
+    : { ignored: 1, path: points.slice(0, cols) };
 };

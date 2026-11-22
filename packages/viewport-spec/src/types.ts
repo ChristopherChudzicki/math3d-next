@@ -96,7 +96,11 @@ export type SurfaceSpec = Common & {
     /** Gridlines along each parameter: 0 for none, else at least 2. */
     lines: [number, number];
     width: number;
-    /** three.js uses only the alpha, drawing lines in contrast to the surface. */
+    /**
+     * three.js uses only the alpha, drawing lines in contrast to the surface,
+     * unless the surface ignores a parameter: then its lines trace one curve,
+     * in this color.
+     */
     color: RGBA;
   };
 };
