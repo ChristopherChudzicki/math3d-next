@@ -32,8 +32,7 @@ This project uses a two-stage release process: **RC (Release Candidate) → Prod
 4. The workflow will:
    - Create production git tag `v2025.12.20.1`
    - Update GitHub release from pre-release to full release
-   - Build and deploy frontend to AWS S3
-   - Invalidate CloudFront cache
+   - Build and deploy frontend to Cloudflare Workers
    - Deploy backend to Heroku
    - Both frontend and backend receive `APP_VERSION=2025.12.20.1`
 
@@ -85,7 +84,7 @@ APP_VERSION = os.environ.get("APP_VERSION", "unknown")  # Set at runtime
 3. **`.github/workflows/deploy-reusable.yml`** - Reusable Deployment
    - Accepts `environment` and `version` inputs
    - Builds frontend with `VITE_APP_VERSION`
-   - Deploys to AWS S3 and invalidates CloudFront
+   - Deploys the frontend to Cloudflare Workers
    - Deploys to Heroku with `HD_APP_VERSION`
 
 ### Tag Conventions
