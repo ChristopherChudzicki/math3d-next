@@ -18,7 +18,9 @@ export const contentSecurityPolicy = ({
   if (sentryDsn) connect.push(new URL(sentryDsn).origin);
   return [
     "default-src 'self'",
-    "script-src 'self' 'report-sample'",
+    // Cloudflare Web Analytics injects its beacon script at the edge; the
+    // beacon reports to the same origin.
+    "script-src 'self' https://static.cloudflareinsights.com 'report-sample'",
     // MathLive writes `<style>` elements and inline `style` attributes.
     "style-src 'self' 'unsafe-inline'",
     // Scene thumbnails come from the screenshots Worker, whose origin the
