@@ -11,35 +11,6 @@ import { APP_VERSION } from "@/config/version";
 
 const dsn = import.meta.env.VITE_SENTRY_DSN;
 
-// Reports reduce a non-HTTP(S) URL to its bare scheme, e.g. "chrome-extension".
-const EXTENSION_SCHEME = /^(chrome|moz|safari(-web)?)-extension(:|$)/;
-
-/**
- * Sends each Content-Security-Policy violation to Sentry, except those caused
- * by browser extensions. Sentry's default dedupe drops immediate repeats.
- */
-const reportCspViolations = () => {
-  document.addEventListener("securitypolicyviolation", (event) => {
-    if (
-      EXTENSION_SCHEME.test(event.sourceFile) ||
-      EXTENSION_SCHEME.test(event.blockedURI)
-    ) {
-      return;
-    }
-    Sentry.captureMessage(
-      `CSP violation: ${event.effectiveDirective} blocked ${event.blockedURI}`,
-      {
-        level: "warning",
-        extra: {
-          sourceFile: event.sourceFile,
-          lineNumber: event.lineNumber,
-          sample: event.sample,
-        },
-      },
-    );
-  });
-};
-
 // Unset DSN ⇒ no-op. Production is the only environment that supplies one.
 if (dsn) {
   Sentry.init({
@@ -58,7 +29,6 @@ if (dsn) {
       }),
     ],
   });
-  reportCspViolations();
 }
 
 // Scene URLs are `/:sceneKey`; the wrapper names transactions by matched route

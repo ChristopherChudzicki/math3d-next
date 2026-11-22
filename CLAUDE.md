@@ -71,7 +71,7 @@ Regenerate both with:
 
 This app is deployed as a true react SPA hosted on a CDN with APIs powered by Django hosted elsewhere. There is no server-side rendering of React/HTML.
 
-The production build puts a Content-Security-Policy `<meta>` tag in `index.html` (`packages/app/vite-plugins/csp/`), so a new origin the app loads from must be added there. Violations are reported to Sentry, and any violation fails an E2E test in CI, which runs against the production build. The dev server has no policy, so local E2E runs against it don't check one.
+The production build writes the Content-Security-Policy header into `dist/_headers` (`packages/app/vite-plugins/csp/`), so a new origin the app loads from must be added there. Browsers report violations to Sentry, and any violation fails an E2E test in CI, which runs against the production build. The dev server has no policy, so local E2E runs against it don't check one.
 
 ### Monorepo Layout (Yarn Workspaces + Turbo)
 
