@@ -9,6 +9,7 @@ import type { PluginOption } from "vite";
 import { realpathSync } from "node:fs";
 import { markdown } from "./vite-plugins/markdown/plugin";
 import { compileHelpDoc } from "./vite-plugins/help-docs/compileHelpDoc";
+import { csp } from "./vite-plugins/csp/plugin";
 
 /**
  * Identify which checkout this server serves, so the e2e suite can refuse to
@@ -130,6 +131,7 @@ export default defineConfig({
       }),
     }),
     checkoutIdentity(),
+    csp(),
     ...sentryPlugins(),
   ],
   build: {

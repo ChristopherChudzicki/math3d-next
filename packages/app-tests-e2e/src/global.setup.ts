@@ -32,6 +32,15 @@ setup("Verify the server serves this checkout", async ({ request }) => {
   ).toBe(checkoutRoot);
 });
 
+setup("Verify a production build carries the CSP", async ({ request }) => {
+  const html = await (await request.get(env.TEST_APP_URL)).text();
+  setup.skip(html.includes("/@vite/client"), "The dev server has no policy");
+  expect(
+    html,
+    "The production build has no Content-Security-Policy <meta> tag, so the suite's CSP checks would pass vacuously.",
+  ).toContain('http-equiv="Content-Security-Policy"');
+});
+
 setup("Verify DISPLAY_AUTH_FLOWS is enabled", async ({ page }) => {
   await page.goto(env.TEST_APP_URL);
   const flag = await page.evaluate(

@@ -1,4 +1,4 @@
-import { test as base } from "@playwright/test";
+import { expect, test as base } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { createV1Client } from "@math3d/api";
 import type { Scene } from "@math3d/api";
@@ -146,7 +146,23 @@ const test = base.extend<Fixtures, WorkerFixtures>({
         localStorage.setItem("disable3dScene", "true");
       });
     }
+    // The policy is only in production builds, so this checks CI's preview
+    // server; the dev server sends none.
+    const cspViolations: string[] = [];
+    await page.exposeBinding("reportCspViolation", (_source, v: string) => {
+      cspViolations.push(v);
+    });
+    await page.addInitScript(() => {
+      document.addEventListener("securitypolicyviolation", (event) => {
+        const report = (window as unknown as Record<string, unknown>)
+          .reportCspViolation as (v: string) => void;
+        report(
+          `${event.effectiveDirective} blocked ${event.blockedURI} (${event.sourceFile}:${event.lineNumber})`,
+        );
+      });
+    });
     await use(page);
+    expect(cspViolations, "Content-Security-Policy violations").toEqual([]);
   },
   // eslint-disable-next-line no-empty-pattern
   getPrepareScene: async ({}, user) => {
