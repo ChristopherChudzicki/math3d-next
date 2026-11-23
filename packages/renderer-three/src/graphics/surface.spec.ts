@@ -168,18 +168,17 @@ describe("buildSurface", () => {
     expect(position).toHaveBeenCalledTimes(next.samples[0] * next.samples[1]);
   });
 
-  describe("a surface that ignores u", () => {
+  describe("a surface with no area", () => {
     const curve = (_u: number, v: number): Coords => [v, v * v, 0];
 
-    test("draws its gridlines along v as one stroke in the grid's style", () => {
-      const base = surfaceSpec({ position: curve });
-      // Lines at steps of v don't matter: each would collapse to a point.
-      const spec: SurfaceSpec = {
-        ...base,
-        grid: { ...base.grid, lines: [3, 0] },
-      };
+    test("strokes every gridline in the grid's style", () => {
+      const spec = surfaceSpec({ position: curve });
       const { line } = partsOf(buildSurface(spec, "oit", "glossy"));
-      expect(line.geometry.instanceCount).toBe(spec.samples[1] - 1);
+      const [uLines, vLines] = spec.grid.lines;
+      const [cols, rows] = spec.samples;
+      expect(line.geometry.instanceCount).toBe(
+        uLines * (rows - 1) + vLines * (cols - 1),
+      );
       const { color, width, zBias, zIndex } = line.userData.stroke;
       expect({ color: color.toArray(), width, zBias, zIndex }).toEqual({
         color: spec.grid.color,
@@ -192,28 +191,14 @@ describe("buildSurface", () => {
     test.each<[string, (spec: SurfaceSpec) => SurfaceSpec]>([
       ["it gains area", (spec) => ({ ...spec, position: plane() })],
       [
-        "no gridlines run along v",
-        (spec) => ({ ...spec, grid: { ...spec.grid, lines: [0, 4] } }),
-      ],
-      [
         "its gridlines have no width",
         (spec) => ({ ...spec, grid: { ...spec.grid, width: 0 } }),
       ],
-    ])("draws no stroke once %s", (_, change) => {
+    ])("strokes none once %s", (_, change) => {
       const spec = surfaceSpec({ position: curve });
       const graphic = buildSurface(spec, "oit", "glossy");
       graphic.update(change(spec));
       expect(partsOf(graphic).line.geometry.instanceCount).toBe(0);
     });
-  });
-
-  test("a surface that ignores v draws its gridlines along u", () => {
-    const base = surfaceSpec({ position: (u): Coords => [u, u * u, 0] });
-    const spec: SurfaceSpec = {
-      ...base,
-      grid: { ...base.grid, lines: [0, 3] },
-    };
-    const { line } = partsOf(buildSurface(spec, "oit", "glossy"));
-    expect(line.geometry.instanceCount).toBe(spec.samples[0] - 1);
   });
 });

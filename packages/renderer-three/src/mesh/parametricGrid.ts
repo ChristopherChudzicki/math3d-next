@@ -161,12 +161,14 @@ export const writeIndex = (cols: number, rows: number, out: Uint32Array) => {
 /* eslint-enable no-param-reassign, prefer-destructuring */
 
 /**
- * A test of whether the samples at two indices are the same point, to a
- * millionth of the largest coordinate's magnitude. Two samples undefined
- * alike count as the same, so a row a surface of revolution leaves undefined
- * doesn't open its seam.
+ * Whether the grid's first and last columns (u) and rows (v) coincide, as a
+ * torus's do at its seams: there, each edge gridline is half of one line.
  */
-const samePoint = ({ points }: ParametricGrid) => {
+export const closedAxes = ({
+  cols,
+  rows,
+  points,
+}: ParametricGrid): [boolean, boolean] => {
   let extent = 0;
   points.forEach((point) =>
     point.forEach((x) => {
@@ -174,22 +176,15 @@ const samePoint = ({ points }: ParametricGrid) => {
     }),
   );
   const tolerance = 1e-6 * extent;
-  return (a: number, b: number) =>
+  // Two samples undefined alike count as the same, so a row a surface of
+  // revolution leaves undefined doesn't open its seam.
+  const same = (a: number, b: number) =>
     points[a].every((x, k) => {
       const y = points[b][k];
       return Number.isFinite(x) || Number.isFinite(y)
         ? Math.abs(x - y) <= tolerance
         : true;
     });
-};
-
-/**
- * Whether the grid's first and last columns (u) and rows (v) coincide, as a
- * torus's do at its seams: there, each edge gridline is half of one line.
- */
-export const closedAxes = (grid: ParametricGrid): [boolean, boolean] => {
-  const { cols, rows } = grid;
-  const same = samePoint(grid);
   let u = true;
   for (let j = 0; j < rows && u; j += 1)
     u = same(j * cols, j * cols + cols - 1);
@@ -198,25 +193,67 @@ export const closedAxes = (grid: ParametricGrid): [boolean, boolean] => {
   return [u, v];
 };
 
+/** Whether triangle `abc`'s corners are collinear, to rounding. */
+const collinear = (a: Coords, b: Coords, c: Coords) => {
+  const e0 = b[0] - a[0];
+  const e1 = b[1] - a[1];
+  const e2 = b[2] - a[2];
+  const f0 = c[0] - a[0];
+  const f1 = c[1] - a[1];
+  const f2 = c[2] - a[2];
+  const x = e1 * f2 - e2 * f1;
+  const y = e2 * f0 - e0 * f2;
+  const z = e0 * f1 - e1 * f0;
+  const cross = x * x + y * y + z * z;
+  // Negated, so an undefined corner counts as collinear.
+  return !(
+    cross >
+    1e-12 * (e0 * e0 + e1 * e1 + e2 * e2) * (f0 * f0 + f1 * f1 + f2 * f2)
+  );
+};
+
 /**
- * The curve a surface traces when it ignores exactly one parameter, and so
- * has no area: `ignored` is that parameter's axis (0 for u), and `path` the
- * samples along the other. Null otherwise.
+ * Whether none of `writeIndex`'s triangles has area, as when the surface
+ * ignores a parameter. Scaling an axis keeps collinear corners collinear,
+ * so this holds on screen too.
  */
-export const degenerateCurve = (
-  grid: ParametricGrid,
-): { ignored: 0 | 1; path: Coords[] } | null => {
-  const { cols, rows, points } = grid;
-  const same = samePoint(grid);
-  let u = true;
-  for (let k = 0; k < points.length && u; k += 1) u = same(k, k - (k % cols));
-  let v = true;
-  for (let k = cols; k < points.length && v; k += 1) v = same(k, k % cols);
-  if (u === v) return null;
-  return u
-    ? {
-        ignored: 0,
-        path: Array.from({ length: rows }, (_, j) => points[j * cols]),
-      }
-    : { ignored: 1, path: points.slice(0, cols) };
+export const hasNoArea = ({ cols, rows, points }: ParametricGrid): boolean => {
+  for (let j = 0; j < rows - 1; j += 1) {
+    for (let i = 0; i < cols - 1; i += 1) {
+      const a = j * cols + i;
+      const up = a + cols;
+      if (!collinear(points[a], points[a + 1], points[up])) return false;
+      if (!collinear(points[up + 1], points[up], points[a + 1])) return false;
+    }
+  }
+  return true;
+};
+
+// MathBox resamples the grid with nearest filtering, so each gridline lies
+// on the sample row or column nearest its even spacing.
+const nearestSample = (line: number, lineCount: number, sampleCount: number) =>
+  lineCount > 1
+    ? Math.floor((line * (sampleCount - 1)) / (lineCount - 1) + 0.5)
+    : 0;
+
+/**
+ * Gridlines along sampled columns and rows: `uLines` at fixed u, each
+ * running along v, then `vLines` at fixed v, each running along u.
+ */
+export const isolines = (
+  { cols, rows, points }: ParametricGrid,
+  [uLines, vLines]: [number, number],
+): Coords[][] => {
+  const paths: Coords[][] = [];
+  for (let line = 0; line < uLines; line += 1) {
+    const i = nearestSample(line, uLines, cols);
+    const path: Coords[] = new Array(rows);
+    for (let j = 0; j < rows; j += 1) path[j] = points[j * cols + i];
+    paths.push(path);
+  }
+  for (let line = 0; line < vLines; line += 1) {
+    const j = nearestSample(line, vLines, rows);
+    paths.push(points.slice(j * cols, (j + 1) * cols));
+  }
+  return paths;
 };

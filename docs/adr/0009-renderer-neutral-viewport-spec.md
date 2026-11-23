@@ -163,10 +163,12 @@ parent, so anything sized in pixels is built in the shader, in view space:
   color, as wide as a stroke of the grid's width at that depth. The line is
   part of the surface's fragment, so OIT never averages it with the surface,
   and it needs no depth offset. A surface at opacity 0 still draws its lines.
-  A surface that ignores one parameter (a zero-width domain, say) has no area
-  to draw them on: its lines along the other parameter all trace one curve,
-  drawn as a stroke in the grid's color, its `zBias` the surface's plus 5
-  (MathBox's gridlines take 5 outright).
+  A surface with no area to rounding (it ignores a parameter, say, or is a
+  function of u + v sampled at equal steps) has no pixels to draw them on, so
+  it strokes every gridline in the grid's color, its `zBias` the surface's
+  plus 5 (MathBox's gridlines take 5 outright); lines that coincide stack. A
+  surface with nearly no area (a sliver, or a domain of nearly zero width)
+  keeps its shader lines, so a strip thinner than a pixel draws faintly.
 - **An implicit surface is meshed on the CPU** (`graphics/implicit.ts`), so
   it draws on WebGL2 too. The equation is sampled once on a grid of `samples`
   cells per axis, 128 at most, then meshed by marching cubes with shared
@@ -237,8 +239,8 @@ brightness. Here a line is the lit surface color, darkened on a surface
 whose color is light and lightened on one whose color is dark (lightness
 about L\* 38, counting the background behind a translucent one), so it
 stays visible however the surface is lit and keeps one shade along its
-length. The grid color's alpha still applies; its RGB colors only the curve
-drawn for a surface that ignores a parameter.
+length. The grid color's alpha still applies; its RGB colors only the
+gridlines a surface with no area strokes.
 
 #### Transparency
 
