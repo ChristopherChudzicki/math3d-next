@@ -11,23 +11,26 @@ import { storeWithScene } from "@/test_util/storeWithScene";
 import type { SceneInput } from "@/test_util/storeWithScene";
 import { repoRoot } from "@/test_util/repoRoot";
 
-const QA_DIR = path.join(repoRoot, "webserver/scenes/seed_scenes/qa");
+const SEED_DIR = path.join(repoRoot, "webserver/scenes/seed_scenes");
 
-type QaScene = {
+type SeedScene = {
   key: string;
   title: string;
   items: MathItem[];
   itemOrder: Record<string, string[]>;
 };
 
-const qaScenes: SceneInput[] = readdirSync(QA_DIR)
-  .filter((file) => file.endsWith(".json"))
-  .map((file) => {
-    const scene: QaScene = JSON.parse(
-      readFileSync(path.join(QA_DIR, file), "utf8"),
-    );
-    return { ...scene, isLegacy: false, author: null };
-  });
+const seedScenes = (folder: string): SceneInput[] =>
+  readdirSync(path.join(SEED_DIR, folder))
+    .filter((file) => file.endsWith(".json"))
+    .map((file) => {
+      const scene: SeedScene = JSON.parse(
+        readFileSync(path.join(SEED_DIR, folder, file), "utf8"),
+      );
+      return { ...scene, isLegacy: false, author: null };
+    });
+
+const qaScenes = seedScenes("qa");
 
 test.each(qaScenes.map((scene) => ({ key: scene.key, scene })))(
   "every visible graphic in QA scene $key produces a spec",
@@ -85,4 +88,48 @@ test("in the QA scenes, an implicit surface's `values` agree with its `value`", 
   });
   expect(mismatches).toEqual([]);
   expect(compared).toBeGreaterThan(0);
+});
+
+test("in the seed scenes, a surface's `positions` agree with its `position`", () => {
+  const COLS = 5;
+  const ROWS = 4;
+  const samples = Array.from({ length: COLS * ROWS }, (_, k) => [
+    (k % COLS) / (COLS - 1),
+    Math.floor(k / COLS) / (ROWS - 1),
+  ]);
+  const us = Float64Array.from(samples, ([U]) => U);
+  const vs = Float64Array.from(samples, ([, V]) => V);
+  const compared = {
+    [MathItemType.ExplicitSurface]: 0,
+    [MathItemType.ExplicitSurfacePolar]: 0,
+    [MathItemType.ParametricSurface]: 0,
+  };
+  const isSurface = (item: MathItem): item is MathItem<keyof typeof compared> =>
+    item.type in compared;
+  const mismatches: unknown[] = [];
+  [...qaScenes, ...seedScenes("examples")].forEach((scene) => {
+    const surfaces = scene.items.filter(isSurface);
+    if (surfaces.length === 0) return;
+    const specs = collectGraphicSpecs(
+      scene,
+      surfaces.map((item) => item.id),
+    );
+    surfaces.forEach(({ id, type }) => {
+      const spec = specs[id];
+      if (spec?.kind !== "surface") return;
+      // Declining is always allowed: the renderer then calls `position`.
+      const columns = spec.positions?.(us, vs);
+      if (!columns) return;
+      compared[type] += 1;
+      samples.forEach(([U, V], k) => {
+        const expected = spec.position(U, V);
+        const actual = columns.map((column) => column[k]);
+        if (!expected.every((x, c) => Object.is(actual[c], x))) {
+          mismatches.push({ scene: scene.key, id, U, V, actual, expected });
+        }
+      });
+    });
+  });
+  expect(mismatches).toEqual([]);
+  Object.values(compared).forEach((count) => expect(count).toBeGreaterThan(0));
 });
