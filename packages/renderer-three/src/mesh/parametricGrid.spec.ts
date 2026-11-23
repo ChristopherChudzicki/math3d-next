@@ -181,7 +181,9 @@ describe("hasNoArea", () => {
 
   test("holds for a surface that ignores a parameter, or is a function of u + v at equal steps", () => {
     const ignoresU = (_u: number, v: number): Coords => [v, v * v, 1];
+    const ignoresV = (u: number): Coords => [u, 0, u];
     expect(hasNoArea(sampleGrid([4, 3], ignoresU))).toBe(true);
+    expect(hasNoArea(sampleGrid([3, 4], ignoresV))).toBe(true);
     expect(hasNoArea(sampleGrid([8, 8], circle))).toBe(true);
   });
 
