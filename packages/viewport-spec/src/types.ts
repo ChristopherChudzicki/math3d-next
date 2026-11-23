@@ -70,6 +70,15 @@ export type SurfaceSpec = Common & {
    */
   position: (u: number, v: number) => Coords;
   /**
+   * `position` at many points: entry `k` of the three arrays is
+   * `position(us[k], vs[k])`. Returns `undefined` to decline, and the renderer
+   * then calls `position`. The result is overwritten by the next call.
+   */
+  positions?: (
+    us: Float64Array,
+    vs: Float64Array,
+  ) => [Float64Array, Float64Array, Float64Array] | undefined;
+  /**
    * Color (with opacity) at normalized parameters in [0, 1]². `point` is
    * `position(u, v)`, passed so it isn't evaluated again.
    */

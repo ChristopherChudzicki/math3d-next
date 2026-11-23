@@ -33,6 +33,31 @@ describe("sampleGrid", () => {
       [1, 1, 0],
     ]);
   });
+
+  test("takes its points from `positions` when given, without calling `position`", () => {
+    const position = vi.fn(flat);
+    const positions = (us: Float64Array, vs: Float64Array) =>
+      [us.map((u) => u + 10), vs, us.map((u, k) => u * vs[k])] as [
+        Float64Array,
+        Float64Array,
+        Float64Array,
+      ];
+    expect(sampleGrid([3, 2], position, positions).points).toEqual([
+      [10, 0, 0],
+      [10.5, 0, 0],
+      [11, 0, 0],
+      [10, 1, 0],
+      [10.5, 1, 0.5],
+      [11, 1, 1],
+    ]);
+    expect(position).not.toHaveBeenCalled();
+  });
+
+  test("calls `position` when `positions` declines", () => {
+    expect(sampleGrid([3, 2], flat, () => undefined)).toEqual(
+      sampleGrid([3, 2], flat),
+    );
+  });
 });
 
 describe("writeNormals", () => {
