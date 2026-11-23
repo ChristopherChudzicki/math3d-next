@@ -79,7 +79,7 @@ The production build writes the Content-Security-Policy header into `dist/_heade
 
 - **`packages/custom-mathjs`** — Configured Math.js instance with custom functions (numerical derivatives: `diff`, `unitT`, `unitN`, `unitB`) and curated function subset. Overrides `pow`: a negative base to an odd-denominator fraction takes its real root (`realRootSign.ts`)
 - **`packages/mathjs-utils`** — Math.js utilities: dependency extraction from AST nodes, LaTeX conversion
-- **`packages/batch-eval`** — An optional second form of a function of numbers, evaluated over arrays of samples at once: identical results or it declines. `parser` registers each function `fastCompile` builds; implicit surfaces sample through it. A speed-up only, removable by itself
+- **`packages/batch-eval`** — An optional second form of a function of numbers that returns a number or a vector, evaluated over arrays of samples at once: identical results or it declines. `parser` registers each function `fastCompile` builds; implicit, parametric, explicit and polar surfaces and vector fields sample through it. A speed-up only, removable by itself
 - **`packages/parser`** — Parses LaTeX-style input (from MathLive) into Math.js AST. Handles fractions, exponents, subscripts, partial derivatives via transformation rules
 - **`packages/mathscope`** — Evaluation engine: manages a scope of named expressions with dependency tracking (topological sort), cycle detection, and change events
 - **`packages/validators`** — Validates parsed math expressions against expected types (e.g., "must be a 3D vector")
