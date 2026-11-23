@@ -173,14 +173,15 @@ test("finds which axes close on themselves", () => {
 });
 
 describe("hasNoArea", () => {
+  const circle = (u: number, v: number): Coords => [
+    Math.cos(u + v),
+    Math.sin(u + v),
+    0,
+  ];
+
   test("holds for a surface that ignores a parameter, or is a function of u + v at equal steps", () => {
     const ignoresU = (_u: number, v: number): Coords => [v, v * v, 1];
     const ignoresV = (u: number): Coords => [u, 0, u];
-    const circle = (u: number, v: number): Coords => [
-      Math.cos(u + v),
-      Math.sin(u + v),
-      0,
-    ];
     expect(hasNoArea(sampleGrid([4, 3], ignoresU))).toBe(true);
     expect(hasNoArea(sampleGrid([3, 4], ignoresV))).toBe(true);
     expect(hasNoArea(sampleGrid([8, 8], circle))).toBe(true);
@@ -198,6 +199,13 @@ describe("hasNoArea", () => {
     ["last", (u, v) => [u * (1 - v), v, 0]],
   ])("fails for a fan whose %s row collapses to its apex", (_, fan) => {
     expect(hasNoArea(sampleGrid([3, 2], fan))).toBe(false);
+  });
+
+  // A limit, not a goal: the tolerance covers rounding only, so a sliver
+  // keeps its faint shader lines. Counting slivers as having no area would be
+  // an improvement; change this case with it.
+  test("fails for a sliver: a function of u + v at unequal steps", () => {
+    expect(hasNoArea(sampleGrid([8, 6], circle))).toBe(false);
   });
 
   test("fails for a strip of any width, however narrow", () => {
