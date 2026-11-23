@@ -2,7 +2,8 @@ import { describe, expect, test, vi } from "vitest";
 import type { Coords, RGBA } from "@math3d/viewport-spec";
 import {
   closedAxes,
-  degenerateCurve,
+  hasNoArea,
+  isolines,
   sampleGrid,
   writeColors,
   writeIndex,
@@ -171,31 +172,64 @@ test("finds which axes close on themselves", () => {
   expect(closedAxes(sampleGrid([16, 8], flat))).toEqual([false, false]);
 });
 
-describe("degenerateCurve", () => {
-  test("is the curve along v of a surface that ignores u, and the reverse", () => {
-    const alongV = (_u: number, v: number): Coords => [v, v * v, 1];
-    expect(degenerateCurve(sampleGrid([4, 3], alongV))).toEqual({
-      ignored: 0,
-      path: [
-        [0, 0, 1],
-        [0.5, 0.25, 1],
-        [1, 1, 1],
-      ],
-    });
-    const alongU = (u: number): Coords => [u, 0, 0];
-    expect(degenerateCurve(sampleGrid([3, 4], alongU))).toEqual({
-      ignored: 1,
-      path: [
-        [0, 0, 0],
-        [0.5, 0, 0],
-        [1, 0, 0],
-      ],
-    });
+describe("hasNoArea", () => {
+  const circle = (u: number, v: number): Coords => [
+    Math.cos(u + v),
+    Math.sin(u + v),
+    0,
+  ];
+
+  test("holds for a surface that ignores a parameter, or is a function of u + v at equal steps", () => {
+    const ignoresU = (_u: number, v: number): Coords => [v, v * v, 1];
+    const ignoresV = (u: number): Coords => [u, 0, u];
+    expect(hasNoArea(sampleGrid([4, 3], ignoresU))).toBe(true);
+    expect(hasNoArea(sampleGrid([3, 4], ignoresV))).toBe(true);
+    expect(hasNoArea(sampleGrid([8, 8], circle))).toBe(true);
   });
 
-  test("is null for a surface with area, though one row collapses, or for a point", () => {
+  test("counts a cell with an undefined corner as having no area", () => {
+    const withHole = (_u: number, v: number): Coords =>
+      v === 0.5 ? [NaN, NaN, NaN] : [v, v * v, 1];
+    expect(hasNoArea(sampleGrid([4, 3], withHole))).toBe(true);
+  });
+
+  test("fails for a surface with area, though one row collapses", () => {
     const cone = (u: number, v: number): Coords => [u * v, v, 0];
-    expect(degenerateCurve(sampleGrid([3, 3], cone))).toBeNull();
-    expect(degenerateCurve(sampleGrid([3, 3], () => [1, 2, 3]))).toBeNull();
+    expect(hasNoArea(sampleGrid([3, 3], cone))).toBe(false);
+  });
+
+  // A limit, not a goal: the tolerance covers rounding only, so a sliver
+  // keeps its faint shader lines. Counting slivers as having no area would be
+  // an improvement; change this case with it.
+  test("fails for a sliver: a function of u + v at unequal steps", () => {
+    expect(hasNoArea(sampleGrid([8, 6], circle))).toBe(false);
+  });
+
+  test("fails for a strip of any width, however narrow", () => {
+    const strip = (u: number, v: number): Coords => [u, 1e-9 * v, 0];
+    expect(hasNoArea(sampleGrid([3, 3], strip))).toBe(false);
+  });
+});
+
+describe("isolines", () => {
+  test("runs gridlines along the sample rows and columns nearest even spacing", () => {
+    const grid = sampleGrid([64, 32], flat);
+    const paths = isolines(grid, [6, 2]);
+    expect(paths).toHaveLength(8);
+    // MathBox's resample: line k samples index round(k * 63 / 5).
+    const uIndices = paths.slice(0, 6).map((path) => path[0][0] * 63);
+    expect(uIndices.map(Math.round)).toEqual([0, 13, 25, 38, 50, 63]);
+    paths.slice(0, 6).forEach((path) => {
+      expect(path).toHaveLength(32);
+      expect(new Set(path.map(([u]) => u)).size).toBe(1);
+    });
+    const vPaths = paths.slice(6);
+    expect(vPaths.map((path) => path[0][1])).toEqual([0, 1]);
+    vPaths.forEach((path) => expect(path).toHaveLength(64));
+  });
+
+  test("runs at most one line per sample", () => {
+    const grid = sampleGrid([4, 3], flat);
+    expect(isolines(grid, [Infinity, 100])).toHaveLength(4 + 3);
   });
 });
