@@ -98,8 +98,7 @@ export type SurfaceSpec = Common & {
     width: number;
     /**
      * three.js uses only the alpha, drawing lines in contrast to the surface,
-     * unless the surface ignores a parameter: then its lines trace one curve,
-     * in this color.
+     * unless the surface has no area: then it strokes them in this color.
      */
     color: RGBA;
   };
