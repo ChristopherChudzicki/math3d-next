@@ -1,4 +1,4 @@
-import { batchOf } from "@math3d/batch-eval";
+import { batchOf, vectorBatchOf } from "@math3d/batch-eval";
 import math from "@math3d/custom-mathjs";
 import { describe, expect, test } from "vitest";
 import { getValidatedEvaluate } from "./evaluate";
@@ -30,39 +30,52 @@ const columns = (params: number): number[][] =>
     VALUES.map((_x, i) => VALUES[(i + 5 * k) % VALUES.length]),
   );
 
-const runForm = (f: Fn, cols: number[][]) =>
-  batchOf(f)?.run(
-    cols[0].length,
-    ...cols.map((column) => Float64Array.from(column)),
-  );
+/** What `f`'s batched form gives: one array per component, one for a number. */
+const runForm = (f: Fn, cols: number[][]): Float64Array[] | undefined => {
+  const count = cols[0].length;
+  const args = cols.map((column) => Float64Array.from(column));
+  const vector = vectorBatchOf(f);
+  if (vector) return vector.run(count, ...args);
+  const result = batchOf(f)?.run(count, ...args);
+  return result && [result];
+};
 
 /** Asserts `f`'s batched form gives what `f` gives at every sample. */
 const expectMatches = (f: Fn, cols = columns(f.length)) => {
   const result = runForm(f, cols);
-  expect(result).toBeInstanceOf(Float64Array);
+  expect(result).toBeDefined();
   const mismatches = cols[0].flatMap((_x, i) => {
-    const expected = f(...cols.map((column) => column[i]));
-    return Object.is(result![i], expected)
-      ? []
-      : [{ i, actual: result![i], expected }];
+    const expected = [f(...cols.map((column) => column[i]))].flat();
+    expect(expected).toHaveLength(result!.length);
+    return expected.flatMap((x, k) =>
+      Object.is(result![k][i], x)
+        ? []
+        : [{ i, k, actual: result![k][i], expected: x }],
+    );
   });
   expect(mismatches).toEqual([]);
 };
 
 describe("a batched form agrees with the function the app holds", () => {
   const batching = functionCases.filter((c) => c.batches);
+  /** `f`'s form of the kind the case says it has. */
+  const formOf = (f: Fn, batches: boolean | "vector") =>
+    batches === "vector" ? vectorBatchOf(f) : batchOf(f);
 
   test.each(functionCases.filter((c) => !c.batches))(
     "no form for $title: $expr",
     ({ expr, scope }) => {
-      expect(batchOf(define(expr, scope))).toBeUndefined();
+      const f = define(expr, scope);
+      expect(batchOf(f)).toBeUndefined();
+      expect(vectorBatchOf(f)).toBeUndefined();
     },
   );
 
   test.each(batching.filter((c) => !c.declines))(
     "$title: $expr",
-    ({ expr, scope, point }) => {
+    ({ expr, scope, point, batches }) => {
       const f = define(expr, scope);
+      expect(formOf(f, batches)).toBeDefined();
       expectMatches(
         f,
         (point as number[]).map((x) => [x]),
@@ -73,9 +86,9 @@ describe("a batched form agrees with the function the app holds", () => {
 
   test.each(batching.filter((c) => c.declines))(
     "declines where the value isn't a number: $title: $expr",
-    ({ expr, scope, point }) => {
+    ({ expr, scope, point, batches }) => {
       const f = define(expr, scope);
-      expect(batchOf(f)).toBeDefined();
+      expect(formOf(f, batches)).toBeDefined();
       expect(
         runForm(
           f,
@@ -99,7 +112,7 @@ describe("a batched form agrees with the function the app holds", () => {
     const scope = new Map<string, unknown>([["a", 2]]);
     const f = define("f(x) = a x", scope);
     scope.set("a", 100);
-    expect(runForm(f, [[3]])).toEqual(Float64Array.of(6));
+    expect(runForm(f, [[3]])).toEqual([Float64Array.of(6)]);
   });
 
   test("a call with the wrong number of arguments declines, as the function throws", () => {
@@ -115,5 +128,27 @@ describe("a batched form agrees with the function the app holds", () => {
     const g = define("g = f", { f });
     expect(batchOf(g)).toBeUndefined();
     expectMatches(define("h(x) = g(x) + 1", { g }));
+  });
+  test("a call to a vector function, with varying and with constant arguments", () => {
+    const c = define("c(t) = [sin(t), t, 1]");
+    expectMatches(define("f(u, v) = u * [cos(v), sin(v), 0] + c(u)", { c }));
+    expectMatches(define("f(u, v) = c(2) + u * [v, 1, 0]", { c }));
+  });
+
+  test("a vector passed to a function of one number has no form", () => {
+    const s = define("s(p) = 2 p");
+    const f = define("f(u, v) = s([u, v, 0])", { s });
+    expect(f(1, 2)).toEqual([2, 4, 0]);
+    expect(batchOf(f)).toBeUndefined();
+    expect(vectorBatchOf(f)).toBeUndefined();
+  });
+
+  test("a call to a vector function that has no form declines", () => {
+    const g = define("g(a) = [a, norm([a, 1]), 0]");
+    expect(vectorBatchOf(g)).toBeUndefined();
+    const f = define("f(u) = g(u) + [1, 0, 0]", { g });
+    expect(f(2)).toEqual([3, Math.sqrt(5), 0]);
+    expect(vectorBatchOf(f)).toBeDefined();
+    expect(runForm(f, [[2]])).toBeUndefined();
   });
 });
