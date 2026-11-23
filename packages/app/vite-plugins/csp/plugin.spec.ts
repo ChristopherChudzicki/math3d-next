@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { csp, headersRule, parseHeadersRule, securityHeaders } from "./plugin";
@@ -77,6 +77,7 @@ test("parseHeadersRule reads back the rule among others in _headers", () => {
 
 test("the build appends the rule after the rules public/_headers supplies", () => {
   const outDir = mkdtempSync(path.join(tmpdir(), "csp-"));
+  onTestFinished(() => rmSync(outDir, { recursive: true }));
   const headersFile = path.join(outDir, "_headers");
   const copied =
     "/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n";
