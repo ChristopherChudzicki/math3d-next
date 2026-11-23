@@ -7,9 +7,11 @@
  * the SPA shell via HTMLRewriter. It also rewrites og:image/twitter:image
  * (plus their alt text) to point at a per-scene render, gated on the
  * SCREENSHOTS_ORIGIN env var — unset, the shell's static default card is left
- * untouched. Every other request passes straight through to env.ASSETS
- * untouched. The SPA never reads anything this injects — it's crawler-facing
- * metadata only (abandonability invariant).
+ * untouched. It is also the SPA fallback: any other path gets the shell
+ * unchanged, except /assets/ misses, which 404. The SPA never reads anything
+ * this injects — it's crawler-facing metadata only (abandonability invariant).
+ * Dropping the Worker means setting `not_found_handling` back to
+ * "single-page-application".
  *
  * Design: docs/superpowers/specs/2026-07-11-og-metadata-worker-design.md
  */
@@ -162,14 +164,27 @@ const rewriteShell = (
 };
 
 export default {
+  // Static Assets invokes the Worker only for requests that match no asset
+  // (wrangler.jsonc), so every request here is a miss.
   async fetch(request: Request, env: Env): Promise<Response> {
-    const key = sceneKeyFromPath(new URL(request.url).pathname);
-    if (key === null) return env.ASSETS.fetch(request);
+    const url = new URL(request.url);
+    // A missing hashed chunk (a client on an older build) must fail as a 404,
+    // not as HTML that _headers would mark immutable for /assets/*.
+    if (url.pathname.startsWith("/assets/")) {
+      return new Response("Not found", {
+        status: 404,
+        headers: { "Cache-Control": "no-store" },
+      });
+    }
+
+    const shellRequest = new Request(new URL("/", url), request);
+    const key = sceneKeyFromPath(url.pathname);
+    if (key === null) return env.ASSETS.fetch(shellRequest);
 
     // Scene-key path: fetch the shell and the title in parallel so the lookup
     // never adds its full latency on top of the shell fetch.
     const [shell, rawTitle] = await Promise.all([
-      env.ASSETS.fetch(request),
+      env.ASSETS.fetch(shellRequest),
       fetchTitle(env, key),
     ]);
 

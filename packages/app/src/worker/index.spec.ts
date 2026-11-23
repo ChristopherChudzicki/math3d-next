@@ -122,15 +122,27 @@ it("escapes a hostile title (no tag/attribute breakout)", async () => {
 });
 
 it.each(["/app", "/app/frame/x", "/foo.png", "/", "/x"])(
-  "passes through non-candidate/invalid paths without touching /meta/ (%s)",
+  "serves the unchanged shell for non-candidate/invalid paths without touching /meta/ (%s)",
   async (path) => {
     const spy = vi.fn();
     vi.stubGlobal("fetch", spy);
-    const res = await call(path, makeEnv());
+    const env = makeEnv();
+    const res = await call(path, env);
     expect(spy).not.toHaveBeenCalled(); // no /meta/ fetch
+    const [shellRequest] = env.ASSETS.fetch.mock.calls[0] as unknown as [
+      Request,
+    ];
+    expect(new URL(shellRequest.url).pathname).toBe("/");
     expect(await res.text()).toContain(`<title>${DEFAULT_TITLE}</title>`);
   },
 );
+
+it("404s a missing /assets/ file instead of serving the shell", async () => {
+  const env = makeEnv();
+  const res = await call("/assets/index-old.js", env);
+  expect(res.status).toBe(404);
+  expect(env.ASSETS.fetch).not.toHaveBeenCalled();
+});
 
 it.each([
   ["404", { status: 404 } as ResponseInit, { title: "ignored" }],
