@@ -5,11 +5,8 @@
   "main": "./src/worker/index.ts",
   "assets": {
     "directory": "./dist",
-    // Only requests that match no asset invoke the Worker, which serves the SPA
-    // shell itself (rewritten for scene keys) and 404s misses under /assets/.
-    // "single-page-application" would serve navigation misses without the
-    // Worker, and serve the shell for /assets/ misses with _headers' immutable
-    // caching. Validate with `wrangler dev` when changing this.
+    // Only asset misses invoke the Worker, which serves the shell and 404s
+    // /assets/ misses; SPA mode would skip it for navigations.
     "not_found_handling": "none",
     "binding": "ASSETS"
   }

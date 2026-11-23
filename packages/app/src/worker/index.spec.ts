@@ -20,9 +20,11 @@ const SHELL_HTML = `<!doctype html><html><head>
 
 const makeEnv = () => ({
   ASSETS: {
-    fetch: vi.fn(
-      async () =>
-        new Response(SHELL_HTML, { headers: { "content-type": "text/html" } }),
+    // Like Static Assets with not_found_handling "none": only "/" is the shell.
+    fetch: vi.fn(async (req: Request) =>
+      new URL(req.url).pathname === "/"
+        ? new Response(SHELL_HTML, { headers: { "content-type": "text/html" } })
+        : new Response("Not found", { status: 404 }),
     ),
   },
   API_BASE: "https://api.example.test",
@@ -121,18 +123,13 @@ it("escapes a hostile title (no tag/attribute breakout)", async () => {
   expect(imgElements).toBe(0);
 });
 
-it.each(["/app", "/app/frame/x", "/foo.png", "/", "/x"])(
+it.each(["/app", "/app/frame/x", "/foo.png", "/x"])(
   "serves the unchanged shell for non-candidate/invalid paths without touching /meta/ (%s)",
   async (path) => {
     const spy = vi.fn();
     vi.stubGlobal("fetch", spy);
-    const env = makeEnv();
-    const res = await call(path, env);
+    const res = await call(path, makeEnv());
     expect(spy).not.toHaveBeenCalled(); // no /meta/ fetch
-    const [shellRequest] = env.ASSETS.fetch.mock.calls[0] as unknown as [
-      Request,
-    ];
-    expect(new URL(shellRequest.url).pathname).toBe("/");
     expect(await res.text()).toContain(`<title>${DEFAULT_TITLE}</title>`);
   },
 );
@@ -141,6 +138,7 @@ it("404s a missing /assets/ file instead of serving the shell", async () => {
   const env = makeEnv();
   const res = await call("/assets/index-old.js", env);
   expect(res.status).toBe(404);
+  expect(res.headers.get("cache-control")).toBe("no-store");
   expect(env.ASSETS.fetch).not.toHaveBeenCalled();
 });
 

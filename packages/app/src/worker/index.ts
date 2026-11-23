@@ -1,7 +1,7 @@
 /**
  * OG metadata Worker (pass 1: per-scene text; pass 2: per-scene image).
  *
- * Fronts the Static-Assets deployment. For a single-segment scene-key
+ * Runs for requests that match no static asset. For a single-segment scene-key
  * navigation it looks up the scene title via the read-only
  * `GET /scenes/{key}/meta/` endpoint and rewrites a fixed set of <head> tags in
  * the SPA shell via HTMLRewriter. It also rewrites og:image/twitter:image
@@ -168,8 +168,8 @@ export default {
   // (wrangler.jsonc), so every request here is a miss.
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    // A missing hashed chunk (a client on an older build) must fail as a 404,
-    // not as HTML that _headers would mark immutable for /assets/*.
+    // A missing chunk must 404 uncacheably: the shell breaks the import, and
+    // ASSETS's own 404 would get _headers' immutable /assets/* rule.
     if (url.pathname.startsWith("/assets/")) {
       return new Response("Not found", {
         status: 404,
@@ -195,7 +195,6 @@ export default {
 
     // Anything served under a scene URL — a rewrite or a transient fail-open
     // shell — is per-scene and must not be cached by shared intermediaries.
-    // (The real passthrough above keeps the asset's own caching.)
     response.headers.set(
       "Cache-Control",
       "private, max-age=0, must-revalidate",
