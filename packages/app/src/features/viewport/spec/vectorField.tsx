@@ -6,6 +6,7 @@ import {
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
 import type { GraphicSpec } from "@math3d/viewport-spec";
+import { vectorValues } from "@/features/viewport/shared/vectorValues";
 import { useLineStyle } from "./line";
 import { sampleVectorField } from "./sampleVectorField";
 import { useReportSpec } from "./collector";
@@ -41,7 +42,8 @@ const VectorField: SpecComponent<MIT.VectorField> = ({ item }) => {
     const samples = [samples1, samples2, samples3].map((n) =>
       Math.round(n ?? 0),
     ) as [number, number, number];
-    return sampleVectorField(expr, domain, samples, scale);
+    const values = vectorValues(expr, 3, 3);
+    return sampleVectorField(expr, domain, samples, scale, values);
   }, [visible, expr, domain, samples1, samples2, samples3, scale]);
   const spec = useMemo<GraphicSpec | null>(
     () => paths && { kind: "line", paths, ...style, label: null },
