@@ -1,9 +1,9 @@
 import math from "@math3d/custom-mathjs";
 import { describe, expect, test } from "vitest";
 import { MATH_KERNELS } from "./kernels";
-import { batchOf, registerBatch } from "./registry";
+import { batchOf, registerBatch, vectorBatchOf } from "./registry";
 import { randomDoubles, SPECIAL } from "./testColumns";
-import { define, mismatches, runForm } from "./testForms";
+import { define, mismatches, runForm, vectorMismatches } from "./testForms";
 import type { Fn } from "./testForms";
 
 type ScopeEntries = Record<string, unknown>;
@@ -98,5 +98,40 @@ describe("run", () => {
     const fromG = runForm(g, [[1, 2]]);
     expect(fromF).toEqual(Float64Array.of(2, 3));
     expect(fromG).toEqual(Float64Array.of(10, 20));
+  });
+});
+
+describe("a function of numbers that returns a vector matches mathjs", () => {
+  test.each<{ expr: string; scope?: ScopeEntries }>([
+    { expr: "f(u, v) = [u, v, 0]" },
+    { expr: "f(u, v) = [cos(u), sin(v), u * v] + [1, 0, u]" },
+    { expr: "f(u, v) = 2 * [u, v, 1] - [u, v, 1] / v" },
+    {
+      expr: "f(u, v) = g(u + v, v) + a",
+      scope: { g: define("g(a, b) = [a * b, sin(a), b]"), a: [1, -0, 0] },
+    },
+  ])("$expr", ({ expr, scope }) => {
+    expect(vectorMismatches(define(expr, scope), defaultColumns(2))).toEqual(
+      [],
+    );
+  });
+
+  test("returns arrays it owns", () => {
+    const columns = [Float64Array.of(1, 2), Float64Array.of(3, 4)];
+    const result = vectorBatchOf(define("f(u, v) = [u, v, 0]"))!.run(
+      2,
+      ...columns,
+    )!;
+    expect(result).toEqual([
+      Float64Array.of(1, 2),
+      Float64Array.of(3, 4),
+      Float64Array.of(0, 0),
+    ]);
+    columns.forEach((column) => expect(result).not.toContain(column));
+  });
+
+  test("each lookup returns only its own kind", () => {
+    expect(batchOf(define("f(u) = [u, 1]"))).toBeUndefined();
+    expect(vectorBatchOf(define("f(u) = u + 1"))).toBeUndefined();
   });
 });

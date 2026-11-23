@@ -14,7 +14,10 @@ export class Decline extends Error {}
 /** A subexpression over a function's argument columns. */
 export type Evaluate = (count: number, args: Column[], pool: Pool) => Column;
 
-export type Compiled = { params: number; evaluate: Evaluate };
+/** A function of numbers that returns a number, or one number per component. */
+export type Compiled =
+  | { params: number; evaluate: Evaluate }
+  | { params: number; components: Evaluate[] };
 
 /** The batched form of a function of `params` numbers that returns a number. */
 export type BatchForm = {
@@ -24,4 +27,16 @@ export type BatchForm = {
    * Read-only, and overwritten by this form's next `run`.
    */
   run: (count: number, ...args: Column[]) => Float64Array | undefined;
+};
+
+/** The batched form of a function of `params` numbers that returns `size` numbers. */
+export type VectorBatchForm = {
+  params: number;
+  size: number;
+  /**
+   * One array per component, each with one entry per sample, or `undefined`
+   * when it declines. Never throws. Read-only, and overwritten by this
+   * form's next `run`.
+   */
+  run: (count: number, ...args: Column[]) => Float64Array[] | undefined;
 };

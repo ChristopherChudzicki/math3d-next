@@ -1,5 +1,5 @@
 import math from "@math3d/custom-mathjs";
-import { batchOf, registerBatch } from "./registry";
+import { batchOf, registerBatch, vectorBatchOf } from "./registry";
 
 export type Fn = (...args: number[]) => unknown;
 
@@ -33,5 +33,30 @@ export const mismatches = (f: Fn, columns: number[][]) => {
     return Object.is(result[i], expected)
       ? []
       : [{ i, actual: result[i], expected }];
+  });
+};
+
+/** What `f`'s vector form gives over `columns`, one per parameter. */
+const runVectorForm = (f: Fn, columns: number[][]) =>
+  vectorBatchOf(f)?.run(
+    columns[0].length,
+    ...columns.map((column) => Float64Array.from(column)),
+  );
+
+/** The components of samples where `f`'s vector form doesn't give what `f` gives. */
+export const vectorMismatches = (f: Fn, columns: number[][]) => {
+  const result = runVectorForm(f, columns);
+  if (!result) throw new Error("No vector form, or it declined.");
+  return columns[0].flatMap((_x, i) => {
+    const value = f(...columns.map((column) => column[i]));
+    const expected = (
+      math.isMatrix(value) ? value.toArray() : value
+    ) as number[];
+    if (expected.length !== result.length) throw new Error("Wrong size.");
+    return expected.flatMap((x, k) =>
+      Object.is(result[k][i], x)
+        ? []
+        : [{ i, k, actual: result[k][i], expected: x }],
+    );
   });
 };
