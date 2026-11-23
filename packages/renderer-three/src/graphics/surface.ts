@@ -36,8 +36,7 @@ const samePositions = (a: SurfaceSpec, b: SurfaceSpec) =>
  * Parametric, explicit and polar surfaces. The surface's shader draws its
  * gridlines, so they are lit and blended with the surface under them. A
  * surface with no area (one that ignores a parameter, say) has no pixels to
- * draw them on, so it strokes them as MathBox does; lines that coincide
- * stack.
+ * draw them on, so it strokes them, as MathBox does.
  */
 export const buildSurface = (
   spec: SurfaceSpec,

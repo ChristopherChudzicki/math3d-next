@@ -193,7 +193,10 @@ export const closedAxes = ({
   return [u, v];
 };
 
-/** Whether triangle `abc`'s corners are collinear, to rounding. */
+/**
+ * Whether triangle `abc`'s corners are collinear: the sine of the angle at
+ * `a` is at most 1e-6, which allows for rounding at any scale.
+ */
 const collinear = (a: Coords, b: Coords, c: Coords) => {
   const e0 = b[0] - a[0];
   const e1 = b[1] - a[1];
@@ -205,7 +208,8 @@ const collinear = (a: Coords, b: Coords, c: Coords) => {
   const y = e2 * f0 - e0 * f2;
   const z = e0 * f1 - e1 * f0;
   const cross = x * x + y * y + z * z;
-  // Negated, so an undefined corner counts as collinear.
+  // |e × f|² ≤ 1e-12 |e|² |f|². Negated, so an undefined corner counts as
+  // collinear.
   return !(
     cross >
     1e-12 * (e0 * e0 + e1 * e1 + e2 * e2) * (f0 * f0 + f1 * f1 + f2 * f2)
@@ -214,8 +218,8 @@ const collinear = (a: Coords, b: Coords, c: Coords) => {
 
 /**
  * Whether none of `writeIndex`'s triangles has area, as when the surface
- * ignores a parameter. Scaling an axis keeps collinear corners collinear,
- * so this holds on screen too.
+ * ignores a parameter. Scaling an axis keeps exactly collinear corners
+ * collinear, so such a surface has no area on screen either.
  */
 export const hasNoArea = ({ cols, rows, points }: ParametricGrid): boolean => {
   for (let j = 0; j < rows - 1; j += 1) {
@@ -232,27 +236,29 @@ export const hasNoArea = ({ cols, rows, points }: ParametricGrid): boolean => {
 // MathBox resamples the grid with nearest filtering, so each gridline lies
 // on the sample row or column nearest its even spacing.
 const nearestSample = (line: number, lineCount: number, sampleCount: number) =>
-  lineCount > 1
-    ? Math.floor((line * (sampleCount - 1)) / (lineCount - 1) + 0.5)
-    : 0;
+  lineCount > 1 ? Math.round((line * (sampleCount - 1)) / (lineCount - 1)) : 0;
 
 /**
  * Gridlines along sampled columns and rows: `uLines` at fixed u, each
- * running along v, then `vLines` at fixed v, each running along u.
+ * running along v, then `vLines` at fixed v, each running along u. At most
+ * one line per sample: more would only repeat, and the count has no other
+ * bound.
  */
 export const isolines = (
   { cols, rows, points }: ParametricGrid,
   [uLines, vLines]: [number, number],
 ): Coords[][] => {
   const paths: Coords[][] = [];
-  for (let line = 0; line < uLines; line += 1) {
-    const i = nearestSample(line, uLines, cols);
+  const uCount = Math.min(uLines, cols);
+  const vCount = Math.min(vLines, rows);
+  for (let line = 0; line < uCount; line += 1) {
+    const i = nearestSample(line, uCount, cols);
     const path: Coords[] = new Array(rows);
     for (let j = 0; j < rows; j += 1) path[j] = points[j * cols + i];
     paths.push(path);
   }
-  for (let line = 0; line < vLines; line += 1) {
-    const j = nearestSample(line, vLines, rows);
+  for (let line = 0; line < vCount; line += 1) {
+    const j = nearestSample(line, vCount, rows);
     paths.push(points.slice(j * cols, (j + 1) * cols));
   }
   return paths;

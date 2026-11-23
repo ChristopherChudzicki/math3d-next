@@ -173,14 +173,15 @@ test("finds which axes close on themselves", () => {
 });
 
 describe("hasNoArea", () => {
+  const circle = (u: number, v: number): Coords => [
+    Math.cos(u + v),
+    Math.sin(u + v),
+    0,
+  ];
+
   test("holds for a surface that ignores a parameter, or is a function of u + v at equal steps", () => {
     const ignoresU = (_u: number, v: number): Coords => [v, v * v, 1];
     const ignoresV = (u: number): Coords => [u, 0, u];
-    const circle = (u: number, v: number): Coords => [
-      Math.cos(u + v),
-      Math.sin(u + v),
-      0,
-    ];
     expect(hasNoArea(sampleGrid([4, 3], ignoresU))).toBe(true);
     expect(hasNoArea(sampleGrid([3, 4], ignoresV))).toBe(true);
     expect(hasNoArea(sampleGrid([8, 8], circle))).toBe(true);
@@ -192,9 +193,16 @@ describe("hasNoArea", () => {
     expect(hasNoArea(sampleGrid([4, 3], withHole))).toBe(true);
   });
 
-  test("fails for a surface with area, though one row collapses", () => {
-    const cone = (u: number, v: number): Coords => [u * v, v, 0];
-    expect(hasNoArea(sampleGrid([3, 3], cone))).toBe(false);
+  // Each cell of a fan has one triangle with area and one without.
+  test.each<[string, (u: number, v: number) => Coords]>([
+    ["first", (u, v) => [u * v, v, 0]],
+    ["last", (u, v) => [u * (1 - v), v, 0]],
+  ])("fails for a fan whose %s row collapses to its apex", (_, fan) => {
+    expect(hasNoArea(sampleGrid([3, 2], fan))).toBe(false);
+  });
+
+  test("fails for a sliver: a function of u + v at unequal steps", () => {
+    expect(hasNoArea(sampleGrid([8, 6], circle))).toBe(false);
   });
 
   test("fails for a strip of any width, however narrow", () => {
@@ -205,18 +213,23 @@ describe("hasNoArea", () => {
 
 describe("isolines", () => {
   test("runs gridlines along the sample rows and columns nearest even spacing", () => {
-    const grid = sampleGrid([64, 64], flat);
+    const grid = sampleGrid([64, 32], flat);
     const paths = isolines(grid, [6, 2]);
     expect(paths).toHaveLength(8);
     // MathBox's resample: line k samples index round(k * 63 / 5).
     const uIndices = paths.slice(0, 6).map((path) => path[0][0] * 63);
     expect(uIndices.map(Math.round)).toEqual([0, 13, 25, 38, 50, 63]);
     paths.slice(0, 6).forEach((path) => {
-      expect(path).toHaveLength(64);
+      expect(path).toHaveLength(32);
       expect(new Set(path.map(([u]) => u)).size).toBe(1);
     });
     const vPaths = paths.slice(6);
     expect(vPaths.map((path) => path[0][1])).toEqual([0, 1]);
     vPaths.forEach((path) => expect(path).toHaveLength(64));
+  });
+
+  test("runs at most one line per sample", () => {
+    const grid = sampleGrid([4, 3], flat);
+    expect(isolines(grid, [Infinity, 100])).toHaveLength(4 + 3);
   });
 });

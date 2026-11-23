@@ -191,6 +191,10 @@ describe("buildSurface", () => {
     test.each<[string, (spec: SurfaceSpec) => SurfaceSpec]>([
       ["it gains area", (spec) => ({ ...spec, position: plane() })],
       [
+        "it has no gridlines",
+        (spec) => ({ ...spec, grid: { ...spec.grid, lines: [0, 0] } }),
+      ],
+      [
         "its gridlines have no width",
         (spec) => ({ ...spec, grid: { ...spec.grid, width: 0 } }),
       ],

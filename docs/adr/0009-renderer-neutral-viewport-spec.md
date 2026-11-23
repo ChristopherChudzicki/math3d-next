@@ -163,10 +163,11 @@ parent, so anything sized in pixels is built in the shader, in view space:
   color, as wide as a stroke of the grid's width at that depth. The line is
   part of the surface's fragment, so OIT never averages it with the surface,
   and it needs no depth offset. A surface at opacity 0 still draws its lines.
-  A surface with no area to rounding (it ignores a parameter, say, or is a
-  function of u + v sampled at equal steps) has no pixels to draw them on, so
-  it strokes every gridline in the grid's color, its `zBias` the surface's
-  plus 5 (MathBox's gridlines take 5 outright); lines that coincide stack. A
+  A surface none of whose triangles has area (it ignores a parameter, say, or
+  is a function of u + v sampled at equal steps) has no pixels to draw them
+  on, so it strokes every gridline in the grid's color, at the surface's
+  `zBias` plus 5 (MathBox's gridlines take 5 outright). Translucent lines
+  that coincide compound, so a collapsed surface reads darker. A
   surface with nearly no area (a sliver, or a domain of nearly zero width)
   keeps its shader lines, so a strip thinner than a pixel draws faintly.
 - **An implicit surface is meshed on the CPU** (`graphics/implicit.ts`), so
