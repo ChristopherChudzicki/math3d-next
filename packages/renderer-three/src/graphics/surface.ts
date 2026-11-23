@@ -3,6 +3,7 @@ import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { TriangleMesh } from "../mesh/TriangleMesh";
 import {
   closedAxes,
+  degenerateCurve,
   sampleGrid,
   writeColors,
   writeIndex,
@@ -10,10 +11,20 @@ import {
   writeParameters,
   writePositions,
 } from "../mesh/parametricGrid";
-import type { ParametricGrid } from "../mesh/parametricGrid";
 import type { Shading } from "../mesh/meshMaterial";
+import { Stroke } from "../stroke/Stroke";
 import type { Transparency } from "../shader/material";
 import type { Graphic } from "./builders";
+
+// Added to the surface's zBias, so the curve wins over another surface it
+// lies on.
+// MathBox's gridlines take 5 outright.
+const GRIDLINE_Z_BIAS = 5;
+
+const sample = ({ samples, position }: SurfaceSpec) => {
+  const grid = sampleGrid(samples, position);
+  return { grid, closed: closedAxes(grid), degenerate: degenerateCurve(grid) };
+};
 
 /** Whether two specs sample the same positions. */
 const samePositions = (a: SurfaceSpec, b: SurfaceSpec) =>
@@ -23,7 +34,9 @@ const samePositions = (a: SurfaceSpec, b: SurfaceSpec) =>
 
 /**
  * Parametric, explicit and polar surfaces. The surface's shader draws its
- * gridlines, so they are lit and blended with the surface under them.
+ * gridlines, so they are lit and blended with the surface under them. A
+ * surface that ignores one parameter has no area to draw them on: its
+ * gridlines along the other all trace one curve, drawn as a stroke.
  */
 export const buildSurface = (
   spec: SurfaceSpec,
@@ -31,17 +44,13 @@ export const buildSurface = (
   shading: Shading,
 ): Graphic<SurfaceSpec> => {
   const surface = new TriangleMesh(transparency, shading);
-  let drawn: {
-    spec: SurfaceSpec;
-    grid: ParametricGrid;
-    closed: [boolean, boolean];
-  } | null = null;
+  const curve = new Stroke(transparency);
+  let drawn: (ReturnType<typeof sample> & { spec: SurfaceSpec }) | null = null;
   const set = (next: SurfaceSpec) => {
-    // Same positions: reuse the sampled grid and its closed axes; the buffer
+    // Same positions: reuse the sampled grid and what it implies; the buffer
     // writes below are cheap next to sampling.
-    const reuse = drawn && samePositions(drawn.spec, next) ? drawn : null;
-    const grid = reuse?.grid ?? sampleGrid(next.samples, next.position);
-    const closed = reuse?.closed ?? closedAxes(grid);
+    const { grid, closed, degenerate } =
+      drawn && samePositions(drawn.spec, next) ? drawn : sample(next);
     const { cols, rows } = grid;
     const style = { ...next, gridClosed: closed };
     surface.fill(cols * rows, 6 * (cols - 1) * (rows - 1), style, (out) => {
@@ -51,12 +60,25 @@ export const buildSurface = (
       writeColors(grid, next, closed, out);
       writeParameters(grid, out.parameter);
     });
-    drawn = { spec: next, grid, closed };
+    const { lines, width, color } = next.grid;
+    // `lines[k]` counts lines at steps of parameter k; if the surface ignores
+    // k, they all trace the curve.
+    const traced = degenerate && lines[degenerate.ignored] > 0 && width > 0;
+    curve.set(traced ? [degenerate.path] : [], {
+      width,
+      color,
+      zBias: next.zBias + GRIDLINE_Z_BIAS,
+      zIndex: next.zIndex,
+    });
+    drawn = { spec: next, grid, closed, degenerate };
   };
   set(spec);
   return {
-    object: new Group().add(surface.mesh),
+    object: new Group().add(surface.mesh, ...curve.objects),
     update: set,
-    dispose: () => surface.dispose(),
+    dispose: () => {
+      surface.dispose();
+      curve.dispose();
+    },
   };
 };

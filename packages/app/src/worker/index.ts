@@ -1,15 +1,17 @@
 /**
  * OG metadata Worker (pass 1: per-scene text; pass 2: per-scene image).
  *
- * Fronts the Static-Assets deployment. For a single-segment scene-key
+ * Runs for requests that match no static asset. For a single-segment scene-key
  * navigation it looks up the scene title via the read-only
  * `GET /scenes/{key}/meta/` endpoint and rewrites a fixed set of <head> tags in
  * the SPA shell via HTMLRewriter. It also rewrites og:image/twitter:image
  * (plus their alt text) to point at a per-scene render, gated on the
  * SCREENSHOTS_ORIGIN env var — unset, the shell's static default card is left
- * untouched. Every other request passes straight through to env.ASSETS
- * untouched. The SPA never reads anything this injects — it's crawler-facing
- * metadata only (abandonability invariant).
+ * untouched. It is also the SPA fallback: any other path gets the shell
+ * unchanged, except /assets/ misses, which 404. The SPA never reads anything
+ * this injects — it's crawler-facing metadata only (abandonability invariant).
+ * Dropping the Worker means setting `not_found_handling` back to
+ * "single-page-application".
  *
  * Design: docs/superpowers/specs/2026-07-11-og-metadata-worker-design.md
  */
@@ -162,14 +164,27 @@ const rewriteShell = (
 };
 
 export default {
+  // Static Assets invokes the Worker only for requests that match no asset
+  // (wrangler.jsonc), so every request here is a miss.
   async fetch(request: Request, env: Env): Promise<Response> {
-    const key = sceneKeyFromPath(new URL(request.url).pathname);
-    if (key === null) return env.ASSETS.fetch(request);
+    const url = new URL(request.url);
+    // A missing chunk must 404 uncacheably: the shell breaks the import, and
+    // ASSETS's own 404 would get _headers' immutable /assets/* rule.
+    if (url.pathname.startsWith("/assets/")) {
+      return new Response("Not found", {
+        status: 404,
+        headers: { "Cache-Control": "no-store" },
+      });
+    }
+
+    const shellRequest = new Request(new URL("/", url), request);
+    const key = sceneKeyFromPath(url.pathname);
+    if (key === null) return env.ASSETS.fetch(shellRequest);
 
     // Scene-key path: fetch the shell and the title in parallel so the lookup
     // never adds its full latency on top of the shell fetch.
     const [shell, rawTitle] = await Promise.all([
-      env.ASSETS.fetch(request),
+      env.ASSETS.fetch(shellRequest),
       fetchTitle(env, key),
     ]);
 
@@ -180,7 +195,6 @@ export default {
 
     // Anything served under a scene URL — a rewrite or a transient fail-open
     // shell — is per-scene and must not be cached by shared intermediaries.
-    // (The real passthrough above keeps the asset's own caching.)
     response.headers.set(
       "Cache-Control",
       "private, max-age=0, must-revalidate",

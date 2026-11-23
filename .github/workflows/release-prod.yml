@@ -132,8 +132,6 @@ jobs:
       version: ${{ needs.validate-rc.outputs.version }}
       ref: refs/tags/${{ needs.validate-rc.outputs.prod_tag }}
     secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       SENTRY_ORG_TOKEN: ${{ secrets.SENTRY_ORG_TOKEN }}

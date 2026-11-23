@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import type { Coords, RGBA } from "@math3d/viewport-spec";
 import {
   closedAxes,
+  degenerateCurve,
   sampleGrid,
   writeColors,
   writeIndex,
@@ -168,4 +169,33 @@ test("finds which axes close on themselves", () => {
   expect(closedAxes(sampleGrid([16, 8], torus))).toEqual([true, true]);
   expect(closedAxes(sampleGrid([16, 8], cylinder))).toEqual([true, false]);
   expect(closedAxes(sampleGrid([16, 8], flat))).toEqual([false, false]);
+});
+
+describe("degenerateCurve", () => {
+  test("is the curve along v of a surface that ignores u, and the reverse", () => {
+    const alongV = (_u: number, v: number): Coords => [v, v * v, 1];
+    expect(degenerateCurve(sampleGrid([4, 3], alongV))).toEqual({
+      ignored: 0,
+      path: [
+        [0, 0, 1],
+        [0.5, 0.25, 1],
+        [1, 1, 1],
+      ],
+    });
+    const alongU = (u: number): Coords => [u, 0, 0];
+    expect(degenerateCurve(sampleGrid([3, 4], alongU))).toEqual({
+      ignored: 1,
+      path: [
+        [0, 0, 0],
+        [0.5, 0, 0],
+        [1, 0, 0],
+      ],
+    });
+  });
+
+  test("is null for a surface with area, though one row collapses, or for a point", () => {
+    const cone = (u: number, v: number): Coords => [u * v, v, 0];
+    expect(degenerateCurve(sampleGrid([3, 3], cone))).toBeNull();
+    expect(degenerateCurve(sampleGrid([3, 3], () => [1, 2, 3]))).toBeNull();
+  });
 });
