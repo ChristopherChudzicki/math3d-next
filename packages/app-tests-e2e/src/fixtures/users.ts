@@ -1,4 +1,4 @@
-import { test as base } from "@playwright/test";
+import { expect, test as base } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { createV1Client } from "@math3d/api";
 import type { Scene } from "@math3d/api";
@@ -146,7 +146,36 @@ const test = base.extend<Fixtures, WorkerFixtures>({
         localStorage.setItem("disable3dScene", "true");
       });
     }
+    // Only production builds send a policy, so against the dev server this
+    // checks nothing.
+    const cspViolations: string[] = [];
+    await page
+      .context()
+      .exposeBinding("reportCspViolation", (_source, v: string) => {
+        cspViolations.push(v);
+      });
+    await page.context().addInitScript(() => {
+      document.addEventListener("securitypolicyviolation", (event) => {
+        const sample = event.sample ? ` "${event.sample}"` : "";
+        (
+          window as unknown as { reportCspViolation: (v: string) => void }
+        ).reportCspViolation(
+          `${window.location.pathname}: ${event.effectiveDirective} blocked ${event.blockedURI}${sample} (${event.sourceFile}:${event.lineNumber})`,
+        );
+      });
+    });
     await use(page);
+    // Let violations already queued in the page reach the binding. The page
+    // may be closed or mid-navigation by now.
+    await page
+      .evaluate(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(resolve, 0);
+          }),
+      )
+      .catch(() => {});
+    expect(cspViolations, "Content-Security-Policy violations").toEqual([]);
   },
   // eslint-disable-next-line no-empty-pattern
   getPrepareScene: async ({}, user) => {

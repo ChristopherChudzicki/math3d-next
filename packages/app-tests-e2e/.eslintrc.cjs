@@ -4,5 +4,28 @@
 module.exports = {
   rules: {
     "import/no-extraneous-dependencies": ["error", { devDependencies: true }],
+    "no-restricted-imports": [
+      "error",
+      {
+        paths: [
+          {
+            name: "@playwright/test",
+            importNames: ["test"],
+            message:
+              "Import `test` from @/fixtures/users, which fails a test on any Content-Security-Policy violation.",
+          },
+        ],
+      },
+    ],
   },
+  overrides: [
+    {
+      files: [
+        "src/fixtures/users.ts",
+        "src/global.setup.ts",
+        "src/**/*.unit.ts",
+      ],
+      rules: { "no-restricted-imports": "off" },
+    },
+  ],
 };

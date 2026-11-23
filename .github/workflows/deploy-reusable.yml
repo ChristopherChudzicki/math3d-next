@@ -151,6 +151,20 @@ jobs:
           SITE_ORIGIN: ${{ vars.VITE_SITE_ORIGIN }}
           SCREENSHOTS_ORIGIN: ${{ vars.SCREENSHOTS_ORIGIN }}
 
+      # CI checks the policy against `vite preview`, which can't tell whether
+      # Cloudflare sends it, so check the live site. The query string bypasses
+      # a cached copy of `/` from before the deploy.
+      - name: Verify the deployed site sends its Content-Security-Policy
+        run: |
+          for _ in 1 2 3 4 5; do
+            curl -fsSI "$SITE_ORIGIN/?csp-check=$GITHUB_RUN_ID" | grep -qi '^content-security-policy:' && exit 0
+            sleep 10
+          done
+          echo "::error::$SITE_ORIGIN/ sends no Content-Security-Policy header"
+          exit 1
+        env:
+          SITE_ORIGIN: ${{ vars.VITE_SITE_ORIGIN }}
+
   # Experimental, var-gated (SCREENSHOTS_ORIGIN) render Worker — deployed in its OWN
   # job, in PARALLEL with the app deploy, and marked continue-on-error so it can
   # NEVER gate the core app's ship path. The feature is dark until the

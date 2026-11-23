@@ -32,6 +32,16 @@ setup("Verify the server serves this checkout", async ({ request }) => {
   ).toBe(checkoutRoot);
 });
 
+setup("Verify a production build sends the CSP", async ({ request }) => {
+  const response = await request.get(env.TEST_APP_URL);
+  const html = await response.text();
+  setup.skip(html.includes("/@vite/client"), "The dev server has no policy");
+  expect(
+    response.headers()["content-security-policy"],
+    "The production build sends no Content-Security-Policy header, so the suite's CSP checks would pass vacuously. Check that the build wrote it into dist/_headers.",
+  ).toBeDefined();
+});
+
 setup("Verify DISPLAY_AUTH_FLOWS is enabled", async ({ page }) => {
   await page.goto(env.TEST_APP_URL);
   const flag = await page.evaluate(

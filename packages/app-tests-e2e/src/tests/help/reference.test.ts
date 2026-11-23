@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "@/fixtures/users";
 
 test("Has expected headers and links", async ({ page }) => {
   await page.goto("/app/help/reference");
