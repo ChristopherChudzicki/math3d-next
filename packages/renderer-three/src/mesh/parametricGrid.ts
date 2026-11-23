@@ -162,8 +162,9 @@ export const writeIndex = (cols: number, rows: number, out: Uint32Array) => {
 
 /**
  * A test of whether the samples at two indices are the same point, to a
- * millionth of the grid's extent. Two samples undefined alike count as the same, so a row
- * a surface of revolution leaves undefined doesn't open its seam.
+ * millionth of the largest coordinate's magnitude. Two samples undefined
+ * alike count as the same, so a row a surface of revolution leaves undefined
+ * doesn't open its seam.
  */
 const samePoint = ({ points }: ParametricGrid) => {
   let extent = 0;

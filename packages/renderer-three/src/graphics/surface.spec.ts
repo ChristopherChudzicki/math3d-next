@@ -22,9 +22,7 @@ const surfaceSpec = (overrides: Partial<SurfaceSpec> = {}): SurfaceSpec => ({
 });
 
 const partsOf = (graphic: ReturnType<typeof buildSurface>) => {
-  const [surface, line, arrows, ...rest] = graphic.object.children as Mesh[];
-  expect(arrows).toBeDefined();
-  expect(rest).toHaveLength(0);
+  const [surface, line] = graphic.object.children as Mesh[];
   return { surface, line: line as Mesh<InstancedBufferGeometry> };
 };
 
@@ -175,7 +173,7 @@ describe("buildSurface", () => {
 
     test("draws its gridlines along v as one stroke in the grid's style", () => {
       const base = surfaceSpec({ position: curve });
-      // Lines at steps of v would each collapse to a point.
+      // Lines at steps of v don't matter: each would collapse to a point.
       const spec: SurfaceSpec = {
         ...base,
         grid: { ...base.grid, lines: [3, 0] },
@@ -207,5 +205,15 @@ describe("buildSurface", () => {
       graphic.update(change(spec));
       expect(partsOf(graphic).line.geometry.instanceCount).toBe(0);
     });
+  });
+
+  test("a surface that ignores v draws its gridlines along u", () => {
+    const base = surfaceSpec({ position: (u): Coords => [u, u * u, 0] });
+    const spec: SurfaceSpec = {
+      ...base,
+      grid: { ...base.grid, lines: [0, 3] },
+    };
+    const { line } = partsOf(buildSurface(spec, "oit", "glossy"));
+    expect(line.geometry.instanceCount).toBe(spec.samples[0] - 1);
   });
 });

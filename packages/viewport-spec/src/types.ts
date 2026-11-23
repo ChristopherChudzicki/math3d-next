@@ -93,7 +93,7 @@ export type SurfaceSpec = Common & {
   };
   shaded: boolean;
   grid: {
-    /** Gridlines along each parameter: 0 for none, else at least 2. */
+    /** Gridlines at steps of each parameter: 0 for none, else at least 2. */
     lines: [number, number];
     width: number;
     /**

@@ -16,7 +16,8 @@ import { Stroke } from "../stroke/Stroke";
 import type { Transparency } from "../shader/material";
 import type { Graphic } from "./builders";
 
-// Added to the surface's zBias, so the curve wins over a surface it lies on.
+// Added to the surface's zBias, so the curve wins over another surface it
+// lies on.
 // MathBox's gridlines take 5 outright.
 const GRIDLINE_Z_BIAS = 5;
 
@@ -60,8 +61,8 @@ export const buildSurface = (
       writeParameters(grid, out.parameter);
     });
     const { lines, width, color } = next.grid;
-    // `lines[k]` counts lines at steps of parameter k; ignoring k, all trace
-    // the curve.
+    // `lines[k]` counts lines at steps of parameter k; if the surface ignores
+    // k, they all trace the curve.
     const traced = degenerate && lines[degenerate.ignored] > 0 && width > 0;
     curve.set(traced ? [degenerate.path] : [], {
       width,
