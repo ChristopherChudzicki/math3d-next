@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
@@ -8,6 +8,9 @@ import { isApiFailure, usePatchScene, useUserMe } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
 import { settleDraftAfterSave } from "@/store/scene/drafts/storage";
+import { sceneDisplayName } from "@/store/scene/sceneTitle";
+import { useBanners } from "@/ui/Banners/BannerContext";
+import { TextButton } from "@/ui/TextLink";
 import * as select from "@/store/scene/state/selectors";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { dismissToast } from "@/ui/Toast/toasts";
@@ -62,6 +65,8 @@ type Dialog =
   | { kind: "publish"; mode: PublishMode; existingUrl?: string }
   | { kind: "link"; url: string; unsaved: boolean };
 
+const SAVED_SINCE_BANNER = "draft-saved-since";
+
 const sleep = (ms: number) =>
   new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -104,6 +109,36 @@ const SceneActions: React.FC = () => {
     const timeout = setTimeout(() => setFlash(null), FLASH_TIMEOUT);
     return () => clearTimeout(timeout);
   }, [flash]);
+
+  // An opened draft whose scene the author saved again since the draft was
+  // taken: Save would replace that newer version.
+  const savedSince = useAppSelector((state) => state.scene.savedSince);
+  const sceneTitle = useAppSelector(select.title);
+  const warnSavedSince = savedSince && author !== null && me?.id === author;
+  const { show, dismiss } = useBanners();
+  // Read when the banner shows, so renaming the draft doesn't re-show it.
+  const titleAtOpen = useRef(sceneTitle);
+  titleAtOpen.current = sceneTitle;
+  const openCopy = useRef(() => {});
+  openCopy.current = () => setDialog({ kind: "publish", mode: "copy" });
+  useEffect(() => {
+    if (!warnSavedSince) return undefined;
+    show({
+      id: SAVED_SINCE_BANNER,
+      severity: "warning",
+      ariaLabel: "Dismiss notice about the newer save",
+      content: (
+        <>
+          <em>{sceneDisplayName(titleAtOpen.current) ?? "This scene"}</em> was
+          saved after these changes were made. Saving will replace that version.{" "}
+          <TextButton onClick={() => openCopy.current()}>
+            Save a copy
+          </TextButton>
+        </>
+      ),
+    });
+    return () => dismiss(SAVED_SINCE_BANNER);
+  }, [warnSavedSince, sceneLoad, show, dismiss]);
 
   const { primary, menu } = getActions({
     userId: me?.id ?? null,

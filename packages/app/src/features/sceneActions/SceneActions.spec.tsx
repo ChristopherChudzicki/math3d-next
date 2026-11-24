@@ -1,4 +1,12 @@
-import { afterAll, beforeAll, expect, onTestFinished, test, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  describe,
+  expect,
+  onTestFinished,
+  test,
+  vi,
+} from "vitest";
 import { delay, http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { makeItem, seedDb, urls } from "@math3d/mock-api";
@@ -371,4 +379,65 @@ test("no scene action is offered while auth is still loading", async () => {
 
   await screen.findByRole("heading", { level: 1 });
   expect(screen.queryByTestId("scene-action")).toBeNull();
+});
+
+describe("an opened draft whose scene was saved since", () => {
+  const SAVED_SINCE = /was saved after these changes were made/;
+  const openAsDraft = (
+    store: ReturnType<typeof renderTestApp>["store"],
+    scene: ReturnType<typeof seedDb.withSceneFromItems>,
+  ) =>
+    act(() => {
+      store.dispatch(
+        actions.setScene({
+          key: scene.key,
+          author: scene.author ?? null,
+          items: scene.items,
+          order: scene.itemOrder,
+          title: scene.title ?? "",
+          isLegacy: false,
+          dirty: true,
+          savedSince: true,
+        }),
+      );
+    });
+
+  test("warns its author, and Save a copy saves it as a new scene", async () => {
+    const { scene, store } = renderOwnedScene();
+    await primary();
+    openAsDraft(store, scene);
+
+    const banner = await screen.findByText(SAVED_SINCE);
+    await user.click(
+      within(banner).getByRole("button", { name: "Save a copy" }),
+    );
+
+    await screen.findByRole("dialog", { name: "Scene saved!" });
+    expect(store.getState().scene.key).not.toBe(scene.key);
+    expect(screen.queryByText(SAVED_SINCE)).toBeNull();
+  });
+
+  test("goes away once the author saves over the newer version", async () => {
+    const { scene, store } = renderOwnedScene();
+    await primary();
+    openAsDraft(store, scene);
+    await screen.findByText(SAVED_SINCE);
+
+    await user.click(await primary());
+
+    await waitFor(() => expect(screen.queryByText(SAVED_SINCE)).toBeNull());
+  });
+
+  test("doesn't warn anyone else, whose Save makes a copy anyway", async () => {
+    const author = seedDb.withUser();
+    const scene = seedDb.withSceneFromItems([], { author: author.id });
+    const { store } = renderTestApp(`/${scene.key}`, {
+      isAuthenticated: true,
+    });
+    await primary();
+    openAsDraft(store, scene);
+
+    expect(await primary()).toHaveTextContent(/^Save a copy$/);
+    expect(screen.queryByText(SAVED_SINCE)).toBeNull();
+  });
 });
