@@ -42,6 +42,7 @@ const getInitialState = (): SceneState => ({
   title: "",
   draftId: nanoid(),
   baseline: "",
+  saveCount: 0,
   modifiedDate: null,
   savedSince: false,
 });
@@ -86,8 +87,6 @@ type SetScenePayload = {
   author: SceneState["author"];
   key: SceneState["key"];
   modifiedDate?: SceneState["modifiedDate"];
-  /** Continues a session's draft; omitted, the load starts a new session. */
-  draftId?: string;
   /** An opened draft is unsaved work from the start. */
   dirty?: boolean;
   savedSince?: boolean;
@@ -115,7 +114,7 @@ const slice = createSlice({
     setScene: {
       // The draft id is minted here, not in the reducer, to keep it pure.
       prepare: (payload: SetScenePayload) => ({
-        payload: { ...payload, draftId: payload.draftId ?? nanoid() },
+        payload: { ...payload, draftId: nanoid() },
         meta: { clean: true },
       }),
       reducer: (
@@ -301,6 +300,7 @@ const slice = createSlice({
       if (isLegacy !== undefined) state.isLegacy = isLegacy;
       if (state.revision === revision) state.dirty = false;
       state.baseline = sceneFingerprint(action.payload.snapshot);
+      state.saveCount += 1;
       state.modifiedDate = action.payload.modifiedDate;
       state.savedSince = false;
     }),
@@ -327,6 +327,6 @@ const reducer: Reducer<SceneState, UnknownMaybeCleanAction> = (
 
 const sceneSlice = { ...slice, reducer };
 
-export type { SceneState, SetScenePayload };
+export type { SceneState };
 export default sceneSlice;
 export { actions, reducer };

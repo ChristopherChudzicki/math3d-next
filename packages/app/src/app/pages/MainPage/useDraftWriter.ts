@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { debounce } from "lodash-es";
 import { useAppStore } from "@/store/hooks";
 import type { SceneState } from "@/store/scene/state/interfaces";
 import { sceneFingerprint } from "@/store/scene/drafts/fingerprint";
@@ -42,16 +43,8 @@ const useDraftWriter = () => {
   const store = useAppStore();
   useEffect(() => {
     let prev = store.getState().scene;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const cancel = () => {
-      if (timer !== null) clearTimeout(timer);
-      timer = null;
-    };
-    const flush = () => {
-      if (timer === null) return;
-      cancel();
-      writeFor(store.getState().scene);
-    };
+    // Each call holds its scene, so a pending write keeps its session's id.
+    const write = debounce(writeFor, DEBOUNCE_MS);
 
     const unsubscribe = store.subscribe(() => {
       const next = store.getState().scene;
@@ -59,31 +52,20 @@ const useDraftWriter = () => {
       const before = prev;
       prev = next;
       if (next.loadCount !== before.loadCount) {
-        // Another scene replaced this session's; record it under its own id.
-        if (timer !== null) {
-          cancel();
-          writeFor(before);
-        }
-        return;
-      }
-      if (next.baseline !== before.baseline) {
-        // A save: the draft is done unless edits arrived while it was sent.
-        cancel();
+        write.flush();
+      } else if (next.saveCount !== before.saveCount) {
+        // The draft is done unless edits arrived while the save was sent.
+        write.cancel();
         if (sceneFingerprint(contentOf(next)) === next.baseline) {
           removeDraft(next.draftId);
         } else {
           writeFor(next);
         }
-        return;
-      }
-      if (next.revision !== before.revision) {
-        cancel();
-        timer = setTimeout(() => {
-          timer = null;
-          writeFor(store.getState().scene);
-        }, DEBOUNCE_MS);
+      } else if (next.revision !== before.revision) {
+        write(next);
       }
     });
+    const flush = () => write.flush();
     const onVisibilityChange = () => {
       if (document.visibilityState === "hidden") flush();
     };

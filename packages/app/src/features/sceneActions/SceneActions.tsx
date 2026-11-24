@@ -4,7 +4,7 @@ import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
 import { Icon } from "@iconify/react/offline";
 import chevronDown from "@iconify-icons/lucide/chevron-down";
-import { isApiFailure, usePatchScene, useUserMe } from "@math3d/api";
+import { isApiFailure, usePatchScene, useScene, useUserMe } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
 import { settleDraftAfterSave } from "@/store/scene/drafts/storage";
@@ -110,15 +110,16 @@ const SceneActions: React.FC = () => {
     return () => clearTimeout(timeout);
   }, [flash]);
 
-  // An opened draft whose scene the author saved again since the draft was
-  // taken: Save would replace that newer version.
+  // An opened draft whose scene the author saved again after the version the
+  // draft edits: Save would replace that newer version.
   const savedSince = useAppSelector((state) => state.scene.savedSince);
-  const sceneTitle = useAppSelector(select.title);
   const warnSavedSince = savedSince && author !== null && me?.id === author;
+  // Opening the draft fetched it, so this reads the cache.
+  const { data: savedScene } = useScene(key ?? undefined, {
+    enabled: warnSavedSince,
+  });
+  const savedTitle = sceneDisplayName(savedScene?.title ?? "");
   const { show, dismiss } = useBanners();
-  // Read when the banner shows, so renaming the draft doesn't re-show it.
-  const titleAtOpen = useRef(sceneTitle);
-  titleAtOpen.current = sceneTitle;
   const openCopy = useRef(() => {});
   openCopy.current = () => setDialog({ kind: "publish", mode: "copy" });
   useEffect(() => {
@@ -129,8 +130,8 @@ const SceneActions: React.FC = () => {
       ariaLabel: "Dismiss notice about the newer save",
       content: (
         <>
-          <em>{sceneDisplayName(titleAtOpen.current) ?? "This scene"}</em> was
-          saved after these changes were made. Saving will replace that version.{" "}
+          {savedTitle ? <em>{savedTitle}</em> : "This scene"} was saved after
+          these changes were made. Saving will replace that version.{" "}
           <TextButton onClick={() => openCopy.current()}>
             Save a copy
           </TextButton>
@@ -138,7 +139,7 @@ const SceneActions: React.FC = () => {
       ),
     });
     return () => dismiss(SAVED_SINCE_BANNER);
-  }, [warnSavedSince, sceneLoad, show, dismiss]);
+  }, [warnSavedSince, sceneLoad, savedTitle, show, dismiss]);
 
   const { primary, menu } = getActions({
     userId: me?.id ?? null,

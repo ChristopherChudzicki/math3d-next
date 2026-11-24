@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { Drawer } from "@/ui/Drawer";
 import { Tabs } from "@/ui/Tabs";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
@@ -48,6 +48,19 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
     if (listType !== rawList) open("scenes", { list: listType });
   }, [open, rawList, listType]);
 
+  // A switch made outside the tab list (My Scenes' "Unsaved" link) would
+  // lose focus with the panel it came from, so focus goes to the new tab.
+  const tabList = useRef<HTMLDivElement>(null);
+  const shownList = useRef(listType);
+  useLayoutEffect(() => {
+    if (shownList.current === listType) return;
+    shownList.current = listType;
+    if (tabList.current?.contains(document.activeElement)) return;
+    tabList.current
+      ?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
+      ?.focus();
+  }, [listType]);
+
   return (
     <>
       <Tabs.Root
@@ -58,7 +71,7 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
         <Drawer.Header>
           <div className={styles.titleRow}>
             <Drawer.Title>Scenes</Drawer.Title>
-            <Tabs.List aria-label="Scenes">
+            <Tabs.List aria-label="Scenes" ref={tabList}>
               {showMyScenes && (
                 <Tabs.Tab value={ListType.Me}>My Scenes</Tabs.Tab>
               )}
@@ -72,6 +85,7 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
         {/*
          * Base UI makes panels tab stops, which APG reserves for panels
          * whose content isn't focusable; these start with a field or a card.
+         * `UnsavedScenes` renders its own panel, for its empty state.
          */}
         <Tabs.Panel value={ListType.Me} className={styles.panel} tabIndex={-1}>
           <MyScenes />
@@ -83,14 +97,7 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
         >
           <ExamplesListing />
         </Tabs.Panel>
-        {/* Empty, this panel has nothing to focus, so it's the tab stop. */}
-        <Tabs.Panel
-          value={ListType.Unsaved}
-          className={styles.panel}
-          tabIndex={unsavedCount > 0 ? -1 : 0}
-        >
-          <UnsavedScenes />
-        </Tabs.Panel>
+        <UnsavedScenes className={styles.panel} />
       </Tabs.Root>
       {children}
     </>

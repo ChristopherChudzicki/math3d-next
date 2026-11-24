@@ -6,7 +6,7 @@ vi.mock("@/config/displayAuthFlows", () => ({
   DISPLAY_AUTH_FLOWS: false,
 }));
 
-test("My Scenes tab is hidden for unauthenticated users when DISPLAY_AUTH_FLOWS is false", async () => {
+test("My Scenes tab is hidden for unauthenticated users when DISPLAY_AUTH_FLOWS is false, but Unsaved is not", async () => {
   const scene = seedDb.withSceneFromItems([]);
   renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
   const tablist = await screen.findByRole("tablist", { name: "Scenes" });
@@ -14,6 +14,7 @@ test("My Scenes tab is hidden for unauthenticated users when DISPLAY_AUTH_FLOWS 
   expect(
     within(tablist).getByRole("tab", { name: "Examples", selected: true }),
   ).toBeTruthy();
+  expect(within(tablist).getByRole("tab", { name: "Unsaved" })).toBeTruthy();
 });
 
 test("My Scenes tab is shown for authenticated users even when DISPLAY_AUTH_FLOWS is false", async () => {

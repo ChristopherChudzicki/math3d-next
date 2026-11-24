@@ -40,8 +40,8 @@ const sortKeys = (value: unknown): unknown => {
 };
 
 /**
- * A stable string for comparing scenes, ignoring camera position, slider
- * values and folder collapse. Equal strings mean nothing worth a draft changed.
+ * A stable string for comparing scenes, ignoring the order of `items` and what
+ * `maskProperties` drops. Equal strings mean nothing worth a draft changed.
  */
 const sceneFingerprint = ({ title, items, itemOrder }: SceneContent): string =>
   JSON.stringify(

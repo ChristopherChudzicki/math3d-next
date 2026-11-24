@@ -17,10 +17,7 @@ type ScenePatchSchema = Schemas["ScenePatchSchema"];
 
 const detailKey = (key?: string) => ["scenes", "detail", String(key)];
 
-/**
- * The scene-detail query, for reading the cache `useScene` fills outside a
- * component (`queryClient.fetchQuery`).
- */
+/** `useScene`'s query, for use outside a component (e.g. `queryClient.fetchQuery`). */
 const sceneQueryOptions = (key?: string) =>
   queryOptions({
     queryKey: detailKey(key),

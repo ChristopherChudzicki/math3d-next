@@ -98,9 +98,10 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
     const { items, itemOrder } = select.sceneInfo(state);
     const snapshot = { title: newTitle, items, itemOrder };
     const result = await createScene.mutateAsync(snapshot);
-    // The user moved on to another scene while this was in flight.
+    // The user moved on to another scene while this was in flight. The draft
+    // holds the session's own title, not the new one.
     if (store.getState().scene.loadCount !== loadCount) {
-      settleDraftAfterSave(draftId, snapshot);
+      settleDraftAfterSave(draftId, { ...snapshot, title: state.scene.title });
       return;
     }
     dispatch(

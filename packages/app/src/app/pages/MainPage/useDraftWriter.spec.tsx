@@ -73,6 +73,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   vi.useRealTimers();
+  vi.restoreAllMocks();
   localStorage.clear();
 });
 
@@ -127,7 +128,7 @@ test("an edit is written once the debounce settles, and later edits update the s
   );
 });
 
-test("undoing an edit by hand keeps the draft", () => {
+test("undoing an edit by hand keeps the draft, until a save", () => {
   const store = storeWithScene(loadScene());
   mountWriter(store);
   const original = store.getState().scene.items[POINT].properties;
@@ -137,8 +138,44 @@ test("undoing an edit by hand keeps the draft", () => {
   invariant("coords" in original);
   editExpression(store, original.coords);
   advance();
+  const { revision, loadCount, draftId } = store.getState().scene;
+  expect(readDraft(draftId)).not.toBeNull();
 
-  expect(readDraft(store.getState().scene.draftId)).not.toBeNull();
+  markSavedNow(store, select.sceneInfo(store.getState()), {
+    revision,
+    loadCount,
+  });
+  expect(readDraft(draftId)).toBeNull();
+});
+
+test("saving an opened draft with no further edit removes it", () => {
+  const store = storeWithScene(loadScene());
+  mountWriter(store);
+  const source = loadScene();
+  act(() => {
+    store.dispatch(
+      actions.setScene({
+        ...source,
+        order: source.itemOrder,
+        dirty: true,
+      }),
+    );
+  });
+  const { revision, loadCount, draftId } = store.getState().scene;
+  const content = select.sceneInfo(store.getState());
+  writeDraft({
+    id: draftId,
+    ...content,
+    key: source.key,
+    author: source.author,
+    baseModifiedDate: null,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  });
+
+  markSavedNow(store, content, { revision, loadCount });
+
+  expect(readDraft(draftId)).toBeNull();
 });
 
 test("loading another scene mid-debounce records the edit under the old session's id", () => {
@@ -157,42 +194,6 @@ test("loading another scene mid-debounce records the edit under the old session'
   expect(newId).not.toBe(oldId);
   expect(readDraft(oldId)).not.toBeNull();
   expect(readDraft(newId)).toBeNull();
-});
-
-test("opening a draft mid-debounce leaves the opened draft's record alone", () => {
-  const store = storeWithScene(loadScene());
-  mountWriter(store);
-  const { draftId: oldId } = store.getState().scene;
-  const source = loadScene();
-  const opened = {
-    id: "opened",
-    title: "Opened",
-    items: source.items,
-    itemOrder: source.itemOrder,
-    key: null,
-    author: null,
-    baseModifiedDate: null,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-  };
-  writeDraft(opened);
-
-  editExpression(store, "[1,1,1]");
-  act(() => {
-    store.dispatch(
-      actions.setScene({
-        ...opened,
-        order: opened.itemOrder,
-        isLegacy: false,
-        draftId: opened.id,
-        dirty: true,
-      }),
-    );
-  });
-  advance();
-
-  expect(readDraft(oldId)).not.toBeNull();
-  expect(readDraft("opened")?.updatedAt).toBe(opened.updatedAt);
 });
 
 test("a save with no edits during it removes the draft", () => {
@@ -235,7 +236,16 @@ test("hiding the tab writes a pending edit at once", () => {
   });
 
   expect(readDraft(store.getState().scene.draftId)).not.toBeNull();
-  vi.restoreAllMocks();
+});
+
+test("unmounting the editor writes a pending edit at once", () => {
+  const store = storeWithScene(loadScene());
+  const view = mountWriter(store);
+  editExpression(store, "[1,1,1]");
+
+  view.unmount();
+
+  expect(readDraft(store.getState().scene.draftId)).not.toBeNull();
 });
 
 test("a store restored after sign-in continues the same draft", () => {

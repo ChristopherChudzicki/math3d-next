@@ -1,7 +1,9 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { nanoid } from "@reduxjs/toolkit";
 import userEvent from "@testing-library/user-event";
-import { makeItem, seedDb } from "@math3d/mock-api";
+import { http, HttpResponse } from "msw";
+import { server } from "@math3d/mock-api/node";
+import { makeItem, seedDb, urls } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import {
   act,
@@ -51,6 +53,18 @@ const rowNames = () =>
   within(screen.getByRole("list"))
     .getAllByRole("button", { name: /^(?!Delete)/ })
     .map((button) => button.textContent);
+
+/** Holds scene GETs until the returned `release` is called. */
+const holdSceneFetch = () => {
+  const gate = Promise.withResolvers<void>();
+  // Returning nothing falls through to the mock API's handler.
+  server.use(
+    http.get(urls.scenes.detail, async () => {
+      await gate.promise;
+    }),
+  );
+  return gate.resolve;
+};
 
 afterEach(() => {
   vi.useRealTimers();
@@ -209,6 +223,69 @@ test("a draft whose scene was deleted opens as a new scene", async () => {
   });
 });
 
+test("a draft whose scene can't be checked opens at its scene's URL", async () => {
+  server.use(http.get(urls.scenes.detail, () => HttpResponse.error()));
+  const scene = seedDb.withSceneFromItems([]);
+  const draft = draftOf(scene);
+  writeDraft(draft);
+  const { store, location } = await openUnsaved();
+
+  await user.click(
+    await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
+  );
+
+  await waitFor(() => expect(location.current.pathname).toBe(`/${scene.key}`));
+  expect(store.getState().scene).toMatchObject({
+    key: scene.key,
+    savedSince: false,
+  });
+});
+
+test("a draft says it's opening while its scene is checked, and opens once however often it's clicked", async () => {
+  const release = holdSceneFetch();
+  const scene = seedDb.withSceneFromItems([]);
+  const draft = draftOf(scene);
+  writeDraft(draft);
+  const { location } = await openUnsaved();
+  const row = await screen.findByRole("button", {
+    name: `Changes to ${draft.title}`,
+  });
+
+  await user.click(row);
+  await user.click(row);
+
+  expect(row).toHaveAccessibleDescription("Opening…");
+  release();
+  await waitFor(() => expect(location.current.pathname).toBe(`/${scene.key}`));
+  expect(listDrafts()).toHaveLength(1);
+});
+
+test("closing the list while a draft's scene is checked leaves the editor as it was", async () => {
+  const release = holdSceneFetch();
+  const draft = draftOf(seedDb.withSceneFromItems([]));
+  writeDraft(draft);
+  const { store, location, dialog } = await openUnsaved();
+  const before = store.getState().scene.draftId;
+
+  await user.click(
+    await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
+  );
+  await user.keyboard("{Escape}");
+  await waitFor(() => expect(dialog).not.toBeInTheDocument());
+  release();
+  // Long enough for the held response to reach the opener.
+  await act(
+    () =>
+      new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      }),
+  );
+
+  expect(store.getState().scene.draftId).toBe(before);
+  expect(location.current.pathname).toBe("/");
+  expect(readDraft(draft.id)).not.toBeNull();
+});
+
 test("a draft that can't be loaded is removed, and the editor keeps its scene", async () => {
   const draft = newSceneDraft();
   writeDraft({
@@ -242,12 +319,17 @@ test("deleting a row offers Undo, which brings the draft back", async () => {
 
   expect(readDraft(draft.id)).toBeNull();
   expect(within(dialog).getByRole("status")).toHaveTextContent(
-    `Deleted ${draft.title}`,
+    `Deleted unsaved scene ${draft.title}`,
   );
   const undo = screen.getByRole("button", {
-    name: `Undo deleting ${draft.title}`,
+    name: `Undo deleting unsaved scene ${draft.title}`,
   });
   expect(undo).toHaveFocus();
+  // Undo is focusable, so the panel isn't a tab stop.
+  expect(within(dialog).getByRole("tabpanel")).toHaveAttribute(
+    "tabindex",
+    "-1",
+  );
 
   await user.click(undo);
 

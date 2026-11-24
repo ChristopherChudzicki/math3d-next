@@ -1,14 +1,13 @@
-import { useRef } from "react";
-import { nanoid } from "@reduxjs/toolkit";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { isApiError, sceneQueryOptions } from "@math3d/api";
 import { useAppDispatch } from "@/store/hooks";
 import sceneSlice from "@/store/scene/state/scene.slice";
-import { isRestorableDraft } from "@/store/scene/drafts/restorable";
 import { removeDraft, writeDraft } from "@/store/scene/drafts/storage";
 import type { DraftRecord } from "@/store/scene/drafts/storage";
 import { showToast } from "@/ui/Toast/toasts";
+import { isRestorableDraft } from "./restorable";
 
 const UNOPENABLE_TOAST =
   "This unsaved work couldn’t be opened, so it was removed.";
@@ -22,7 +21,15 @@ const useOpenDraft = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [openingId, setOpeningId] = useState<string | null>(null);
   const opening = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const discard = (record: DraftRecord) => {
     removeDraft(record.id);
@@ -64,12 +71,13 @@ const useOpenDraft = () => {
     const base = record.key
       ? await checkBase(record.key, record.baseModifiedDate)
       : { exists: false, savedSince: false };
+    // The user closed the list while the fetch ran.
+    if (!mounted.current) return;
     // A draft of a deleted scene opens as a new scene, so Save creates one.
     const key = base.exists ? record.key : null;
     const author = key ? record.author : null;
     const baseModifiedDate = key ? record.baseModifiedDate : null;
 
-    const draftId = nanoid();
     const load = sceneSlice.actions.setScene({
       items: record.items,
       order: record.itemOrder,
@@ -78,33 +86,43 @@ const useOpenDraft = () => {
       author,
       isLegacy: false,
       modifiedDate: baseModifiedDate,
-      draftId,
       dirty: true,
       savedSince: base.savedSince,
     });
     try {
-      sceneSlice.reducer(undefined, load);
+      // A reducer that throws leaves the store as it was.
+      dispatch(load);
     } catch {
       discard(record);
       return;
     }
-
-    writeDraft({ ...record, id: draftId, key, author, baseModifiedDate });
+    // Removed first, so the copy reuses its slot and its bytes.
     removeDraft(record.id);
-    dispatch(load);
+    writeDraft({
+      ...record,
+      id: load.payload.draftId,
+      key,
+      author,
+      baseModifiedDate,
+    });
     navigate(`/${key ?? ""}`);
   };
 
-  return async (record: DraftRecord) => {
-    // A second click while the first fetches would fork the draft twice.
+  const openDraft = async (record: DraftRecord) => {
+    // A second click while the first fetches would open it again, leaving two
+    // copies.
     if (opening.current) return;
     opening.current = true;
+    setOpeningId(record.id);
     try {
       await open(record);
     } finally {
       opening.current = false;
+      if (mounted.current) setOpeningId(null);
     }
   };
+
+  return { openDraft, openingId };
 };
 
 export default useOpenDraft;

@@ -23,6 +23,7 @@ import {
   within,
 } from "@/test_util";
 import { actions } from "@/store/scene/state/scene.slice";
+import { readDraft, writeDraft } from "@/store/scene/drafts/storage";
 
 beforeAll(() => {
   Object.assign(window.navigator, {
@@ -160,6 +161,9 @@ test("an edit made while saving survives the save and stays unsaved", async () =
     title: `${scene.title} saved later`,
   });
   expect(patches).toHaveLength(1);
+  expect(readDraft(store.getState().scene.draftId)?.title).toBe(
+    `${scene.title} saved later`,
+  );
 });
 
 test("a failed save frees the button and leaves the edit unsaved", async () => {
@@ -394,7 +398,7 @@ describe("an opened draft whose scene was saved since", () => {
           author: scene.author ?? null,
           items: scene.items,
           order: scene.itemOrder,
-          title: scene.title ?? "",
+          title: "Renamed in the draft",
           isLegacy: false,
           dirty: true,
           savedSince: true,
@@ -408,6 +412,7 @@ describe("an opened draft whose scene was saved since", () => {
     openAsDraft(store, scene);
 
     const banner = await screen.findByText(SAVED_SINCE);
+    expect(banner).toHaveTextContent(`${scene.title} was saved after`);
     await user.click(
       within(banner).getByRole("button", { name: "Save a copy" }),
     );
@@ -417,15 +422,28 @@ describe("an opened draft whose scene was saved since", () => {
     expect(screen.queryByText(SAVED_SINCE)).toBeNull();
   });
 
-  test("goes away once the author saves over the newer version", async () => {
+  test("goes away once the author saves over the newer version, as does the draft", async () => {
     const { scene, store } = renderOwnedScene();
     await primary();
     openAsDraft(store, scene);
     await screen.findByText(SAVED_SINCE);
+    const { draftId, title, items, order } = store.getState().scene;
+    writeDraft({
+      id: draftId,
+      title,
+      items: Object.values(items),
+      itemOrder: order,
+      key: scene.key,
+      author: scene.author ?? null,
+      baseModifiedDate: scene.modifiedDate,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
 
     await user.click(await primary());
 
     await waitFor(() => expect(screen.queryByText(SAVED_SINCE)).toBeNull());
+    expect(readDraft(draftId)).toBeNull();
   });
 
   test("doesn't warn anyone else, whose Save makes a copy anyway", async () => {

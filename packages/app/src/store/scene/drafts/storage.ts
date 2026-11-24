@@ -2,17 +2,16 @@ import type { MathItem } from "@math3d/mathitem-configs";
 import { sceneFingerprint } from "./fingerprint";
 import type { SceneContent } from "./fingerprint";
 
-/**
- * Unsaved scenes, one `localStorage` entry per editing session. Storage can
- * be blocked or full; every access fails silently, since losing a draft beats
- * breaking the editor.
- */
+// Unsaved scenes, one `localStorage` entry per editing session. Storage can
+// be blocked or full; every access fails silently, since losing a draft beats
+// breaking the editor.
+
 type DraftRecord = {
   id: string;
   title: string;
   items: MathItem[];
   itemOrder: Record<string, string[]>;
-  /** The saved scene the draft started from; null for a new scene. */
+  /** The saved scene the draft edits; null for a new scene. */
   key: string | null;
   author: number | null;
   /** The saved scene's `modifiedDate` as of the draft's last write. */
@@ -36,8 +35,11 @@ const parse = (raw: string | null): DraftRecord | null => {
     const record = JSON.parse(raw) as DraftRecord;
     if (
       typeof record?.id !== "string" ||
+      typeof record.title !== "string" ||
       typeof record.updatedAt !== "number" ||
-      !Array.isArray(record.items)
+      !Array.isArray(record.items) ||
+      typeof record.itemOrder !== "object" ||
+      record.itemOrder === null
     ) {
       return null;
     }
@@ -76,12 +78,14 @@ const removeKey = (key: string) => {
   try {
     localStorage.removeItem(key);
   } catch {
-    // See the module comment.
+    // Ignored, as is every storage failure here.
   }
 };
 
 const readDraft = (id: string): DraftRecord | null =>
   parse(readRaw(storageKey(id)));
+
+const byNewest = (a: DraftRecord, b: DraftRecord) => b.updatedAt - a.updatedAt;
 
 /** Unexpired drafts, newest first. Reads only, so it's safe during render. */
 const listDrafts = (now = Date.now()): DraftRecord[] =>
@@ -89,19 +93,23 @@ const listDrafts = (now = Date.now()): DraftRecord[] =>
     .map((key) => parse(readRaw(key)))
     .filter((record): record is DraftRecord => !!record)
     .filter((record) => !isExpired(record, now))
-    .sort((a, b) => b.updatedAt - a.updatedAt);
+    .sort(byNewest);
 
-/** Removes expired and unreadable drafts. */
-const pruneDrafts = (now = Date.now()) => {
+/** Removes expired and unreadable drafts; returns the rest, newest first. */
+const pruneDrafts = (now = Date.now()): DraftRecord[] => {
+  const kept: DraftRecord[] = [];
   let removed = false;
   draftKeys().forEach((key) => {
     const record = parse(readRaw(key));
     if (!record || isExpired(record, now)) {
       removeKey(key);
       removed = true;
+    } else {
+      kept.push(record);
     }
   });
   if (removed) notify();
+  return kept.sort(byNewest);
 };
 
 const removeDraft = (id: string) => {
@@ -109,31 +117,26 @@ const removeDraft = (id: string) => {
   notify();
 };
 
-const evictOldest = (keep: string, now: number): boolean => {
-  const oldest = listDrafts(now)
-    .filter((record) => record.id !== keep)
-    .at(-1);
-  if (!oldest) return false;
-  removeKey(storageKey(oldest.id));
-  return true;
-};
-
 const writeDraft = (record: DraftRecord, now = Date.now()) => {
-  pruneDrafts(now);
-  const isNew = readDraft(record.id) === null;
-  if (isNew && listDrafts(now).length >= MAX_DRAFTS) {
-    evictOldest(record.id, now);
-  }
+  const drafts = pruneDrafts(now);
+  const others = drafts.filter((draft) => draft.id !== record.id);
+  const isNew = others.length === drafts.length;
+  const evictOldest = () => {
+    const oldest = others.pop();
+    if (oldest) removeKey(storageKey(oldest.id));
+    return !!oldest;
+  };
+  if (isNew && others.length >= MAX_DRAFTS) evictOldest();
   const raw = JSON.stringify(record);
   try {
     localStorage.setItem(storageKey(record.id), raw);
   } catch {
     // Most likely a full quota: make room once, then give up.
-    if (evictOldest(record.id, now)) {
+    if (evictOldest()) {
       try {
         localStorage.setItem(storageKey(record.id), raw);
       } catch {
-        // See the module comment.
+        // Ignored, as is every storage failure here.
       }
     }
   }
@@ -141,9 +144,8 @@ const writeDraft = (record: DraftRecord, now = Date.now()) => {
 };
 
 /**
- * Called when a save lands after its tab moved to another scene: that
- * session's draft was already written, and is removed if it holds exactly
- * what was saved.
+ * For a save that lands after its tab loaded another scene: removes that
+ * session's draft if it still matches what was sent.
  */
 const settleDraftAfterSave = (id: string, snapshot: SceneContent) => {
   const record = readDraft(id);

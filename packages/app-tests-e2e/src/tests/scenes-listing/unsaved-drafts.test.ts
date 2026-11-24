@@ -14,7 +14,7 @@ const draftCount = (page: Page) =>
         .length,
   );
 
-// The open button's name starts with the title; its delete button's doesn't.
+// Anchored so it matches the open button ("Changes to …"), not "Delete unsaved changes to …".
 const draftName = (title: string) => new RegExp(`^Changes to ${title}`);
 
 const openUnsavedTab = async (page: Page) => {

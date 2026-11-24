@@ -2,8 +2,8 @@ import { expect, test } from "vitest";
 import { makeItem } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import type { MathItem } from "@math3d/mathitem-configs";
+import type { DraftRecord } from "@/store/scene/drafts/storage";
 import { isRestorableDraft } from "./restorable";
-import type { DraftRecord } from "./storage";
 
 const folder = makeItem(MIT.Folder);
 const point = makeItem(MIT.Point);

@@ -172,12 +172,11 @@ describe("draft session", () => {
     expect(second.draftId).not.toBe(first.draftId);
   });
 
-  test("an opened draft keeps its id, and starts dirty and flagged", () => {
+  test("an opened draft starts dirty, with savedSince and its modifiedDate", () => {
     const state = reducer(
       undefined,
       actions.setScene({
         ...setSceneFrom(seedDb.withSceneFromItems([])).payload,
-        draftId: "draft-1",
         dirty: true,
         savedSince: true,
         modifiedDate: MODIFIED,
@@ -185,7 +184,6 @@ describe("draft session", () => {
     );
 
     expect(state).toMatchObject({
-      draftId: "draft-1",
       dirty: true,
       savedSince: true,
       modifiedDate: MODIFIED,

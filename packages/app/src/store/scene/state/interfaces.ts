@@ -47,9 +47,11 @@ interface SceneState {
   draftId: string;
   /** `sceneFingerprint` of the scene as last loaded or saved. */
   baseline: string;
+  /** Saves this session; a save can leave `baseline` as it was. */
+  saveCount: number;
   /** The loaded or saved scene's `modifiedDate`; null for an unsaved scene. */
   modifiedDate: string | null;
-  /** This session opened a draft whose scene was saved after the draft was taken. */
+  /** This session opened a draft whose scene was saved after the version the draft edits. */
   savedSince: boolean;
 }
 

@@ -384,4 +384,5 @@ test("signed out, the panel offers sign-in and points to Unsaved", async () => {
   await waitFor(() =>
     expect(location.current.search).toBe("?overlay=scenes&list=unsaved"),
   );
+  expect(screen.getByRole("tab", { name: "Unsaved" })).toHaveFocus();
 });

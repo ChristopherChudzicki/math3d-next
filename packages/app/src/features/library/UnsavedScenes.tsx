@@ -10,16 +10,17 @@ import { Icon } from "@iconify/react/offline";
 import trash2 from "@iconify-icons/lucide/trash-2";
 import { MathItemType } from "@math3d/mathitem-configs";
 import { Drawer } from "@/ui/Drawer";
+import { Tabs } from "@/ui/Tabs";
 import IconButton from "@/ui/IconButton";
 import { TextButton } from "@/ui/TextLink";
 import { u } from "@/util/styles";
 import { useAppSelector } from "@/store/hooks";
-import useDrafts from "@/store/scene/drafts/useDrafts";
 import { writeDraft, removeDraft } from "@/store/scene/drafts/storage";
 import type { DraftRecord } from "@/store/scene/drafts/storage";
 import { MAIN_FOLDER } from "@/store/scene/state/util";
+import useDrafts from "./useDrafts";
 import useOpenDraft from "./useOpenDraft";
-import { cardTitle } from "./constants";
+import { ListType, cardTitle } from "./constants";
 import listStyles from "./ScenesList.module.css";
 import styles from "./UnsavedScenes.module.css";
 
@@ -38,7 +39,7 @@ const dateFormat = new Intl.DateTimeFormat(locale, {
   day: "numeric",
 });
 
-/** "3:42 pm": ICU separates "PM" with a narrow no-break space. */
+/** "3:42 pm": lowercase, with a plain space (ICU puts a narrow no-break space before "PM"). */
 const formatTime = (date: Date) =>
   timeFormat
     .formatToParts(date)
@@ -62,18 +63,17 @@ const formatWhen = (ms: number, now = new Date()) => {
   return dateFormat.format(date);
 };
 
-/** Items under `main` that aren't folders. */
+/** Items under `main` that aren't folders; folders hold no folders. */
 const objectCount = ({ items, itemOrder }: DraftRecord) => {
-  const types = new Map(items.map((item) => [item.id, item.type]));
-  const seen = new Set<string>();
-  const count = (folderId: string): number =>
-    (itemOrder[folderId] ?? []).reduce((n, id) => {
-      if (types.get(id) !== MathItemType.Folder) return n + 1;
-      if (seen.has(id)) return n;
-      seen.add(id);
-      return n + count(id);
-    }, 0);
-  const n = count(MAIN_FOLDER);
+  const folders = new Set(
+    items
+      .filter((item) => item.type === MathItemType.Folder)
+      .map((item) => item.id),
+  );
+  const n = itemOrder[MAIN_FOLDER].reduce(
+    (sum, id) => sum + (folders.has(id) ? itemOrder[id]?.length ?? 0 : 1),
+    0,
+  );
   return n === 1 ? "1 object" : `${n} objects`;
 };
 
@@ -82,10 +82,11 @@ const rowTitle = (record: DraftRecord) =>
     ? `Changes to ${cardTitle(record.title)}`
     : cardTitle(record.title);
 
-const deleteLabel = (record: DraftRecord) =>
+/** The row's name inside a sentence: "Deleted unsaved changes to Torus". */
+const unsavedName = (record: DraftRecord) =>
   record.key
-    ? `Delete unsaved changes to ${cardTitle(record.title)}`
-    : `Delete unsaved scene ${cardTitle(record.title)}`;
+    ? `unsaved changes to ${cardTitle(record.title)}`
+    : `unsaved scene ${cardTitle(record.title)}`;
 
 /** This browser's drafts, newest first, except the editor's own session. */
 const useOtherDrafts = (): DraftRecord[] => {
@@ -94,21 +95,46 @@ const useOtherDrafts = (): DraftRecord[] => {
   return drafts.filter((draft) => draft.id !== currentId);
 };
 
-const UnsavedScenes: React.FC = () => {
+const DeletedRow: React.FC<{
+  record: DraftRecord;
+  undoId: string;
+  onUndo: () => void;
+  onExpire: () => void;
+}> = ({ record, undoId, onUndo, onExpire }) => {
+  const expire = useRef(onExpire);
+  expire.current = onExpire;
+  useEffect(() => {
+    const timer = setTimeout(() => expire.current(), UNDO_MS);
+    return () => clearTimeout(timer);
+  }, []);
+  return (
+    <li className={classNames(styles.row, styles.deleted)}>
+      <p className={styles.deletedText}>
+        Deleted ·{" "}
+        <TextButton
+          id={undoId}
+          className={styles.undo}
+          aria-label={`Undo deleting ${unsavedName(record)}`}
+          onClick={onUndo}
+        >
+          Undo
+        </TextButton>
+      </p>
+    </li>
+  );
+};
+
+/** The Unsaved tab's panel. */
+const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
   const drafts = useOtherDrafts();
-  const openDraft = useOpenDraft();
+  const { openDraft, openingId } = useOpenDraft();
   const idPrefix = useId();
   const openId = (id: string) => `${idPrefix}-open-${id}`;
   const metaId = (id: string) => `${idPrefix}-meta-${id}`;
   const undoId = (id: string) => `${idPrefix}-undo-${id}`;
 
-  /** Deleted drafts still offering Undo, by id; each has its own timer. */
+  /** Deleted drafts still offering Undo, by id. */
   const [deleted, setDeleted] = useState<Record<string, DraftRecord>>({});
-  const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
-  useEffect(() => {
-    const pending = timers.current;
-    return () => pending.forEach((timer) => clearTimeout(timer));
-  }, []);
 
   // Keyed per message, so a repeated message is still announced.
   const [status, setStatus] = useState({ text: "", id: 0 });
@@ -123,12 +149,9 @@ const UnsavedScenes: React.FC = () => {
     target?.()?.focus();
   });
 
-  const listRef = useRef<HTMLUListElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  const forget = (id: string) => {
-    setDeleted(({ [id]: _, ...rest }) => rest);
-    timers.current.delete(id);
-  };
+  const forget = (id: string) => setDeleted(({ [id]: _, ...rest }) => rest);
 
   const expire = (record: DraftRecord) => {
     const undo = document.getElementById(undoId(record.id));
@@ -136,10 +159,9 @@ const UnsavedScenes: React.FC = () => {
       const row = undo.closest("li");
       const neighbor = (row?.nextElementSibling ??
         row?.previousElementSibling) as HTMLElement | null;
-      // With no rows left, the list becomes the empty state.
-      const panel = listRef.current?.closest<HTMLElement>('[role="tabpanel"]');
+      // With no rows left, the panel holds only the empty state.
       focusNext.current = () =>
-        neighbor?.querySelector<HTMLElement>("button") ?? panel ?? null;
+        neighbor?.querySelector<HTMLElement>("button") ?? panelRef.current;
     }
     forget(record.id);
   };
@@ -147,16 +169,11 @@ const UnsavedScenes: React.FC = () => {
   const remove = (record: DraftRecord) => {
     removeDraft(record.id);
     setDeleted((prev) => ({ ...prev, [record.id]: record }));
-    timers.current.set(
-      record.id,
-      setTimeout(() => expire(record), UNDO_MS),
-    );
     focusNext.current = () => document.getElementById(undoId(record.id));
-    announce(`Deleted ${rowTitle(record)}`);
+    announce(`Deleted ${unsavedName(record)}`);
   };
 
   const undo = (record: DraftRecord) => {
-    clearTimeout(timers.current.get(record.id));
     writeDraft(record);
     forget(record.id);
     focusNext.current = () => document.getElementById(openId(record.id));
@@ -169,75 +186,86 @@ const UnsavedScenes: React.FC = () => {
   const now = new Date();
 
   return (
-    <Drawer.Body>
-      {rows.length === 0 ? (
-        <div className={listStyles.message}>
-          <p className={listStyles.hint}>
-            Scenes you edit but don’t save appear here for 7 days.
-          </p>
-        </div>
-      ) : (
-        <>
-          <p className={classNames(listStyles.hint, styles.intro)}>
-            Unsaved work from this browser, kept for 7 days.
-          </p>
-          <ul role="list" className={styles.list} ref={listRef}>
-            {rows.map((record) =>
-              deleted[record.id] ? (
-                <li
-                  key={record.id}
-                  className={classNames(styles.row, styles.deleted)}
-                >
-                  <p className={styles.deletedText}>
-                    Deleted ·{" "}
-                    <TextButton
-                      id={undoId(record.id)}
-                      className={styles.undo}
-                      aria-label={`Undo deleting ${rowTitle(record)}`}
-                      onClick={() => undo(record)}
-                    >
-                      Undo
-                    </TextButton>
-                  </p>
-                </li>
-              ) : (
-                <li key={record.id} className={styles.row}>
-                  <div className={styles.text}>
-                    <button
-                      type="button"
-                      id={openId(record.id)}
-                      className={styles.open}
+    // Base UI makes panels tab stops, which APG reserves for panels whose
+    // content isn't focusable: here, only the empty state.
+    <Tabs.Panel
+      value={ListType.Unsaved}
+      className={className}
+      tabIndex={rows.length > 0 ? -1 : 0}
+      ref={panelRef}
+    >
+      <Drawer.Body>
+        {rows.length === 0 ? (
+          <div className={listStyles.message}>
+            <p className={listStyles.hint}>
+              Scenes you edit but don’t save appear here for 7 days.
+            </p>
+          </div>
+        ) : (
+          <>
+            <p className={classNames(listStyles.hint, styles.intro)}>
+              Unsaved work from this browser, kept for 7 days.
+            </p>
+            <ul role="list" className={styles.list}>
+              {rows.map((record) =>
+                deleted[record.id] ? (
+                  <DeletedRow
+                    key={record.id}
+                    record={record}
+                    undoId={undoId(record.id)}
+                    onUndo={() => undo(record)}
+                    onExpire={() => expire(record)}
+                  />
+                ) : (
+                  <li key={record.id} className={styles.row}>
+                    <div className={styles.text}>
+                      <button
+                        type="button"
+                        id={openId(record.id)}
+                        className={styles.open}
+                        aria-describedby={metaId(record.id)}
+                        aria-busy={openingId === record.id}
+                        onClick={() => openDraft(record)}
+                      >
+                        {rowTitle(record)}
+                      </button>
+                      <p id={metaId(record.id)} className={styles.meta}>
+                        {openingId === record.id ? (
+                          "Opening…"
+                        ) : (
+                          <>
+                            <time
+                              dateTime={new Date(
+                                record.updatedAt,
+                              ).toISOString()}
+                            >
+                              {formatWhen(record.updatedAt, now)}
+                            </time>
+                            {" · "}
+                            {objectCount(record)}
+                          </>
+                        )}
+                      </p>
+                    </div>
+                    <IconButton
+                      className={styles.delete}
+                      label={`Delete ${unsavedName(record)}`}
                       aria-describedby={metaId(record.id)}
-                      onClick={() => openDraft(record)}
+                      onClick={() => remove(record)}
                     >
-                      {rowTitle(record)}
-                    </button>
-                    <p id={metaId(record.id)} className={styles.meta}>
-                      <time dateTime={new Date(record.updatedAt).toISOString()}>
-                        {formatWhen(record.updatedAt, now)}
-                      </time>
-                      {" · "}
-                      {objectCount(record)}
-                    </p>
-                  </div>
-                  <IconButton
-                    className={styles.delete}
-                    label={deleteLabel(record)}
-                    aria-describedby={metaId(record.id)}
-                    onClick={() => remove(record)}
-                  >
-                    <Icon icon={trash2} aria-hidden="true" />
-                  </IconButton>
-                </li>
-              ),
-            )}
-          </ul>
-        </>
-      )}
-      <div role="status" aria-live="polite" className={u.visuallyHidden}>
-        <span key={status.id}>{status.text}</span>
-      </div>
-    </Drawer.Body>
+                      <Icon icon={trash2} aria-hidden="true" />
+                    </IconButton>
+                  </li>
+                ),
+              )}
+            </ul>
+          </>
+        )}
+        <div role="status" aria-live="polite" className={u.visuallyHidden}>
+          <span key={status.id}>{status.text}</span>
+        </div>
+      </Drawer.Body>
+    </Tabs.Panel>
   );
 };
 

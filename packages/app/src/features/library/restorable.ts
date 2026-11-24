@@ -1,6 +1,6 @@
 import { mathItemConfigs, MathItemType } from "@math3d/mathitem-configs";
 import { MAIN_FOLDER, SETTINGS_FOLDER } from "@/store/scene/state/util";
-import type { DraftRecord } from "./storage";
+import type { DraftRecord } from "@/store/scene/drafts/storage";
 
 const sameKeys = (a: object, b: object) => {
   const aKeys = Object.keys(a).sort();
@@ -10,11 +10,7 @@ const sameKeys = (a: object, b: object) => {
   );
 };
 
-/**
- * Whether a stored draft still has the shape `setScene` expects. Drafts are
- * not migrated when item configs change, so an old one can fail this.
- */
-const isRestorableDraft = (record: DraftRecord): boolean => {
+const hasSceneShape = (record: DraftRecord): boolean => {
   const items = new Map(record.items.map((item) => [item.id, item]));
   const itemsOk = record.items.every((item) => {
     const config = mathItemConfigs[item.type as MathItemType];
@@ -36,6 +32,18 @@ const isRestorableDraft = (record: DraftRecord): boolean => {
     }
     return Array.isArray(childIds) && childIds.every((id) => items.has(id));
   });
+};
+
+/**
+ * Whether a stored draft still has the shape `setScene` expects. Drafts are
+ * not migrated when item configs change, so an old one can fail this.
+ */
+const isRestorableDraft = (record: DraftRecord): boolean => {
+  try {
+    return hasSceneShape(record);
+  } catch {
+    return false;
+  }
 };
 
 export { isRestorableDraft };
