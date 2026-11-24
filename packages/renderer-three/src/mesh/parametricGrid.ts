@@ -13,13 +13,28 @@ const parameter = (index: number, count: number) => index / (count - 1);
 
 export const sampleGrid = (
   [cols, rows]: [number, number],
-  position: (u: number, v: number) => Coords,
+  position: SurfaceSpec["position"],
+  positions?: SurfaceSpec["positions"],
 ): ParametricGrid => {
-  const points: Coords[] = new Array(cols * rows);
+  const us = new Float64Array(cols * rows);
+  const vs = new Float64Array(cols * rows);
   for (let j = 0; j < rows; j += 1) {
     const v = parameter(j, rows);
     for (let i = 0; i < cols; i += 1) {
-      points[j * cols + i] = position(parameter(i, cols), v);
+      us[j * cols + i] = parameter(i, cols);
+      vs[j * cols + i] = v;
+    }
+  }
+  const columns = positions?.(us, vs);
+  const points: Coords[] = new Array(cols * rows);
+  if (columns) {
+    const [xs, ys, zs] = columns;
+    for (let k = 0; k < points.length; k += 1) {
+      points[k] = [xs[k], ys[k], zs[k]];
+    }
+  } else {
+    for (let k = 0; k < points.length; k += 1) {
+      points[k] = position(us[k], vs[k]);
     }
   }
   return { cols, rows, points };

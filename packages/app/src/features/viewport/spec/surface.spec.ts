@@ -69,6 +69,72 @@ test("an explicit surface maps (U, V) onto its domain and colors by the raw x, y
   expect(spec.grid.color.slice(0, 3)).toEqual([0.5, 0.5, 0.5]);
 });
 
+/** The samples of a grid over [0, 1]² where `positions` and `position` differ. */
+const positionMismatches = (spec: SurfaceSpec, cols = 4, rows = 3) => {
+  const samples = Array.from({ length: cols * rows }, (_, k) => [
+    (k % cols) / (cols - 1),
+    Math.floor(k / cols) / (rows - 1),
+  ]);
+  const columns = spec.positions?.(
+    Float64Array.from(samples, ([U]) => U),
+    Float64Array.from(samples, ([, V]) => V),
+  );
+  invariant(columns, "No positions, or it declined.");
+  return samples.flatMap(([U, V], k) => {
+    const expected = spec.position(U, V);
+    const actual = columns.map((column) => column[k]);
+    return expected.every((x, c) => Object.is(actual[c], x))
+      ? []
+      : [{ U, V, actual, expected }];
+  });
+};
+
+test("positions gives position's points where one range depends on the other parameter", () => {
+  const scene = new SceneBuilder();
+  scene.folder().explicitSurface(
+    {
+      domain: {
+        type: "array",
+        items: [
+          {
+            type: "function-assignment",
+            name: "_f",
+            params: ["y"],
+            rhs: "[0, 2]",
+          },
+          {
+            type: "function-assignment",
+            name: "_f",
+            params: ["x"],
+            rhs: "[0, x]",
+          },
+        ],
+      },
+    },
+    "s",
+  );
+  const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
+  expect(positionMismatches(spec)).toEqual([]);
+});
+
+test("a surface whose function has no batched form has no positions", () => {
+  const scene = new SceneBuilder();
+  scene.folder().explicitSurface(
+    {
+      expr: {
+        type: "function-assignment",
+        name: "_f",
+        params: ["x", "y"],
+        rhs: "\\left[x,y\\right]\\cdot\\left[x,y\\right]",
+      },
+    },
+    "s",
+  );
+  const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
+  expect(spec.position(0.5, 0.5)).toHaveLength(3);
+  expect(spec.positions).toBeUndefined();
+});
+
 test("colorAt colors the point it is given, not the position at its parameters", () => {
   const scene = new SceneBuilder();
   scene.folder().explicitSurface(

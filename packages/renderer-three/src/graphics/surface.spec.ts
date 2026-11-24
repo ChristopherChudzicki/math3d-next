@@ -152,6 +152,21 @@ describe("buildSurface", () => {
     expect(attributeOf(surface, "color").slice(0, 4)).toEqual(rgba);
   });
 
+  test("samples through `positions` when the spec has it", () => {
+    const position = plane();
+    const positions: SurfaceSpec["positions"] = (us, vs) => [us, vs, vs];
+    const batched = buildSurface(
+      surfaceSpec({ position, positions }),
+      "oit",
+      "glossy",
+    );
+    expect(position).not.toHaveBeenCalled();
+    const perSample = buildSurface(surfaceSpec({ position }), "oit", "glossy");
+    expect(attributeOf(meshOf(batched), "position")).toEqual(
+      attributeOf(meshOf(perSample), "position"),
+    );
+  });
+
   test.each<[string, (spec: SurfaceSpec) => SurfaceSpec]>([
     [
       "position",

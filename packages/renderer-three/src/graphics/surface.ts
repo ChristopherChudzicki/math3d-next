@@ -21,8 +21,8 @@ import type { Graphic } from "./builders";
 // lie on. MathBox's gridlines take 5 outright.
 const GRIDLINE_Z_BIAS = 5;
 
-const sample = ({ samples, position }: SurfaceSpec) => {
-  const grid = sampleGrid(samples, position);
+const sample = ({ samples, position, positions }: SurfaceSpec) => {
+  const grid = sampleGrid(samples, position, positions);
   return { grid, closed: closedAxes(grid), noArea: hasNoArea(grid) };
 };
 

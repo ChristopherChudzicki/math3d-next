@@ -1,6 +1,6 @@
 import { describe, expect, onTestFinished, test, vi } from "vitest";
-import { batchOf } from "./registry";
-import { define, mismatches, runForm } from "./testForms";
+import { batchOf, vectorBatchOf } from "./registry";
+import { define, mismatches, runForm, vectorMismatches } from "./testForms";
 import type { Fn } from "./testForms";
 
 /** Every point of a grid with `axis` on each of `params` axes, first axis fastest. */
@@ -48,6 +48,12 @@ describe("columns that repeat give the numbers the function gives", () => {
         scope,
       ),
     );
+  });
+
+  test("in each component of a vector", () => {
+    const scope = { c: define("c(t) = [sin(t), t, 1]") };
+    const f = define("f(u, v) = u * [cos(v), sin(v), 0] + c(u)", scope);
+    expect(vectorMismatches(f, grid(AXIS, 2))).toEqual([]);
   });
 
   test("when the last tile and the last run are cut short", () => {
@@ -107,6 +113,21 @@ describe("how often a subexpression of one parameter runs", () => {
   test("when it is the whole function", () => {
     const g = counted();
     runForm(define("f(x, y) = g(x)", { g }), grid(AXIS_4, 2));
+    expect(g).toHaveBeenCalledTimes(4);
+  });
+
+  test("in a component of a vector", () => {
+    const g = counted();
+    const [xs, ys] = grid(AXIS_4, 2).map((column) => Float64Array.from(column));
+    vectorBatchOf(define("f(x, y) = [g(x), y, 0]", { g }))!.run(16, xs, ys);
+    expect(g).toHaveBeenCalledTimes(4);
+  });
+
+  test("in an argument of a user function", () => {
+    const g = counted();
+    const h = define("h(a) = g(a)", { g });
+    const p = define("p(a, b) = a + b");
+    runForm(define("f(x, y) = p(h(x), y)", { h, p }), grid(AXIS_4, 2));
     expect(g).toHaveBeenCalledTimes(4);
   });
 

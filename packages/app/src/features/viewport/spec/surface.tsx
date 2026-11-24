@@ -17,6 +17,11 @@ import {
   explicitSurface,
 } from "@/features/viewport/shared/surfaceDomain";
 import {
+  explicitPositions,
+  parametricPositions,
+  polarPositions,
+} from "@/features/viewport/shared/surfacePositions";
+import {
   explicitColorFunc,
   gridlineColor,
 } from "@/features/viewport/shared/surfaceColor";
@@ -71,6 +76,13 @@ const toParametric = (
   }
 };
 
+/** Each surface type's `positions`, when its expression has a batched form. */
+const POSITIONS = {
+  [MIT.ExplicitSurface]: explicitPositions,
+  [MIT.ExplicitSurfacePolar]: polarPositions,
+  [MIT.ParametricSurface]: parametricPositions,
+};
+
 const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
   const scope = useMathScope();
   const visible = useFinalVisibility(scope, item);
@@ -98,11 +110,11 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
     if (!func || !domain) return null;
     const uv = domainMap(domain);
     const position: XYZ = (U, V) => func(...uv(U, V));
-    return { uv, position };
+    return { uv, position, positions: POSITIONS[item.type](expr, uv) };
   }, [item.type, expr, domain]);
   const spec = useMemo<GraphicSpec | null>(() => {
     if (!visible || !parametric) return null;
-    const { uv, position } = parametric;
+    const { uv, position, positions } = parametric;
 
     const gradient = isGradientName(color) ? gradients[color] : null;
     const base = baseStyle({ opacity, zBias, zIndex }, color);
@@ -140,6 +152,7 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
       kind: "surface",
       samples: [sampleCount(samples1, 64), sampleCount(samples2, 64)],
       position,
+      positions,
       colorAt,
       mapColor,
       shaded: shaded ?? true,
