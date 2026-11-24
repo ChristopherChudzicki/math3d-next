@@ -123,6 +123,14 @@ describe("how often a subexpression of one parameter runs", () => {
     expect(g).toHaveBeenCalledTimes(4);
   });
 
+  test("in an argument of a user function", () => {
+    const g = counted();
+    const h = define("h(a) = g(a)", { g });
+    const p = define("p(a, b) = a + b");
+    runForm(define("f(x, y) = p(h(x), y)", { h, p }), grid(AXIS_4, 2));
+    expect(g).toHaveBeenCalledTimes(4);
+  });
+
   test("when it is a function with a loop of its own", () => {
     const sin = vi.spyOn(Math, "sin");
     onTestFinished(() => sin.mockRestore());
