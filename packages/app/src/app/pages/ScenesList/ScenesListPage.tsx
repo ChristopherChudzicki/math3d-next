@@ -8,6 +8,9 @@ import type { OverlayProps } from "@/services/overlays/useOverlay";
 import { useUrlLayerSearchParams } from "@/services/overlays/UrlLayer";
 import ExamplesListing from "@/features/library/ExamplesListing";
 import MyScenes from "@/features/library/MyScenes";
+import UnsavedScenes, {
+  useOtherDrafts,
+} from "@/features/library/UnsavedScenes";
 import { ListType, OPEN_SCENES_BUTTON_ID } from "@/features/library/constants";
 import styles from "./ScenesListPage.module.css";
 
@@ -39,6 +42,7 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
     DISPLAY_AUTH_FLOWS || isAuthenticated === "authenticated";
   const rawList = search.get("list") ?? ListType.Examples;
   const listType = normalizeListType(rawList, showMyScenes);
+  const unsavedCount = useOtherDrafts().length;
 
   useEffect(() => {
     if (listType !== rawList) open("scenes", { list: listType });
@@ -59,6 +63,9 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
                 <Tabs.Tab value={ListType.Me}>My Scenes</Tabs.Tab>
               )}
               <Tabs.Tab value={ListType.Examples}>Examples</Tabs.Tab>
+              <Tabs.Tab value={ListType.Unsaved}>
+                {unsavedCount > 0 ? `Unsaved (${unsavedCount})` : "Unsaved"}
+              </Tabs.Tab>
             </Tabs.List>
           </div>
         </Drawer.Header>
@@ -75,6 +82,14 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
           tabIndex={-1}
         >
           <ExamplesListing />
+        </Tabs.Panel>
+        {/* Empty, this panel has nothing to focus, so it's the tab stop. */}
+        <Tabs.Panel
+          value={ListType.Unsaved}
+          className={styles.panel}
+          tabIndex={unsavedCount > 0 ? -1 : 0}
+        >
+          <UnsavedScenes />
         </Tabs.Panel>
       </Tabs.Root>
       {children}

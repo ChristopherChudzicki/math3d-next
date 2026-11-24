@@ -72,7 +72,7 @@ test("with no examples, the tab says so", async () => {
   expect(await screen.findByText("No examples yet.")).toBeVisible();
 });
 
-test("signed in, My Scenes is the first tab", async () => {
+test("signed in, the tabs are My Scenes, Examples, then Unsaved", async () => {
   const scene = seedDb.withSceneFromItems([]);
   renderTestApp(`/${scene.key}?overlay=scenes&list=examples`, {
     isAuthenticated: true,
@@ -81,6 +81,7 @@ test("signed in, My Scenes is the first tab", async () => {
   expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
     "My Scenes",
     "Examples",
+    "Unsaved",
   ]);
 });
 

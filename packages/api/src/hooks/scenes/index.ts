@@ -1,5 +1,6 @@
 import {
   keepPreviousData,
+  queryOptions,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -16,14 +17,12 @@ type ScenePatchSchema = Schemas["ScenePatchSchema"];
 
 const detailKey = (key?: string) => ["scenes", "detail", String(key)];
 
-const useScene = (
-  key?: string,
-  opts: {
-    enabled?: boolean;
-    staleTime?: number;
-  } = {},
-) => {
-  return useQuery({
+/**
+ * The scene-detail query, for reading the cache `useScene` fills outside a
+ * component (`queryClient.fetchQuery`).
+ */
+const sceneQueryOptions = (key?: string) =>
+  queryOptions({
     queryKey: detailKey(key),
     queryFn: () => {
       invariant(key, "When useScene is enabled, key is required");
@@ -35,9 +34,15 @@ const useScene = (
     // same body, so this cache survives a change of signed-in user. The key
     // comes from the URL, so a 404 is a bad link.
     meta: { sameForAllUsers: true, expectedErrors: [404] },
-    ...opts,
   });
-};
+
+const useScene = (
+  key?: string,
+  opts: {
+    enabled?: boolean;
+    staleTime?: number;
+  } = {},
+) => useQuery({ ...sceneQueryOptions(key), ...opts });
 
 const meListKey = () => ["scenes", "me"];
 
@@ -165,6 +170,7 @@ export {
   useExampleScenes,
   useCreateScene,
   useScene,
+  sceneQueryOptions,
   usePatchScene,
   useDestroyScene,
 };
