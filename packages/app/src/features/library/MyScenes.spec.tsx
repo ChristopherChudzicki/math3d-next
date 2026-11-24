@@ -368,3 +368,20 @@ test("an untitled scene's card reads Untitled", async () => {
     await screen.findByRole("link", { name: "Untitled" }),
   ).toBeInTheDocument();
 });
+
+test("signed out, the panel offers sign-in and points to Unsaved", async () => {
+  const { location } = renderTestApp("/?overlay=scenes&list=me");
+
+  expect(
+    await screen.findByText(/^Sign in to keep scenes in your account\./),
+  ).toHaveTextContent(
+    "Sign in to keep scenes in your account. Unsaved work from this browser is under Unsaved.",
+  );
+  expect(screen.getByRole("button", { name: "Sign in" })).toBeVisible();
+
+  await user.click(screen.getByRole("button", { name: "Unsaved" }));
+
+  await waitFor(() =>
+    expect(location.current.search).toBe("?overlay=scenes&list=unsaved"),
+  );
+});

@@ -32,7 +32,13 @@ test.each([
     trigger: "Open Menu",
     otherTrigger: "Open User Menu",
     headerSignIn: true,
-    items: ["Sign in", "Examples", "Function Reference", "Contact"],
+    items: [
+      "Sign in",
+      "My Scenes",
+      "Examples",
+      "Function Reference",
+      "Contact",
+    ],
   },
 ])(
   "the header offers the items for its auth status (authenticated=$isAuthenticated)",
@@ -72,7 +78,7 @@ test("while auth is loading, the menu doesn't offer Sign in", async () => {
     within(menu)
       .getAllByRole("menuitem")
       .map((el) => el.textContent),
-  ).toEqual(["Examples", "Function Reference", "Contact"]);
+  ).toEqual(["My Scenes", "Examples", "Function Reference", "Contact"]);
 });
 
 test("Login button opens the sign-in dialog", async () => {
