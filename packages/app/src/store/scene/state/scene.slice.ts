@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, nanoid, PayloadAction } from "@reduxjs/toolkit";
 import type { CaseReducer } from "@reduxjs/toolkit";
 import type { Reducer, UnknownAction } from "redux";
 import {
@@ -16,6 +16,8 @@ import jsonPatch from "fast-json-patch";
 
 import invariant from "tiny-invariant";
 import { assertNotNil } from "@/util/predicates";
+import { sceneFingerprint } from "@/store/scene/drafts/fingerprint";
+import type { SceneContent } from "@/store/scene/drafts/fingerprint";
 import type { SceneState } from "./interfaces";
 import {
   hasCalculatedVisibility,
@@ -38,6 +40,10 @@ const getInitialState = (): SceneState => ({
   activeTabId: MAIN_FOLDER,
   order: {},
   title: "",
+  draftId: nanoid(),
+  baseline: "",
+  modifiedDate: null,
+  savedSince: false,
 });
 
 const getInsertionFolder = (
@@ -72,6 +78,21 @@ const insertAtIndex = <T>(array: T[], item: T, index: number) => {
   array.splice(insertionIndex, 0, item);
 };
 
+type SetScenePayload = {
+  items: MathItem[];
+  order: SceneState["order"];
+  title: SceneState["title"];
+  isLegacy: SceneState["isLegacy"];
+  author: SceneState["author"];
+  key: SceneState["key"];
+  modifiedDate?: SceneState["modifiedDate"];
+  /** Continues a session's draft; omitted, the load starts a new session. */
+  draftId?: string;
+  /** An opened draft is unsaved work from the start. */
+  dirty?: boolean;
+  savedSince?: boolean;
+};
+
 type SceneCaseReducer<P> = CaseReducer<SceneState, PayloadAction<P>>;
 const withClean =
   (defaultClean: boolean = true) =>
@@ -91,36 +112,50 @@ const slice = createSlice({
   name: "scene",
   initialState: getInitialState,
   reducers: {
-    setScene: withClean(true)<{
-      items: MathItem[];
-      order: SceneState["order"];
-      title: SceneState["title"];
-      isLegacy: SceneState["isLegacy"];
-      author: SceneState["author"];
-      key: SceneState["key"];
-    }>((state, action) => {
-      const { items, order, title, author, key, isLegacy } = action.payload;
-      state.title = title;
-      state.items = keyBy(items, (item) => item.id);
-      state.order = order;
-      state.activeItemId = undefined;
-      state.activeTabId = MAIN_FOLDER;
-      state.author = author;
-      state.key = key;
-      state.loaded = true;
-      state.loadCount += 1;
-      state.dirty = false;
-      state.isLegacy = isLegacy;
+    setScene: {
+      // The draft id is minted here, not in the reducer, to keep it pure.
+      prepare: (payload: SetScenePayload) => ({
+        payload: { ...payload, draftId: payload.draftId ?? nanoid() },
+        meta: { clean: true },
+      }),
+      reducer: (
+        state,
+        action: PayloadAction<
+          SetScenePayload & { draftId: string },
+          string,
+          { clean: boolean }
+        >,
+      ) => {
+        const { items, order, title, author, key, isLegacy } = action.payload;
+        state.title = title;
+        state.items = keyBy(items, (item) => item.id);
+        state.order = order;
+        state.activeItemId = undefined;
+        state.activeTabId = MAIN_FOLDER;
+        state.author = author;
+        state.key = key;
+        state.loaded = true;
+        state.loadCount += 1;
+        state.dirty = action.payload.dirty ?? false;
+        state.isLegacy = isLegacy;
+        state.draftId = action.payload.draftId;
+        state.baseline = sceneFingerprint({ title, items, itemOrder: order });
+        state.modifiedDate = action.payload.modifiedDate ?? null;
+        state.savedSince = action.payload.savedSince ?? false;
 
-      invariant(state.order[MAIN_FOLDER], "Main folder should exist.");
-      invariant(state.order[SETTINGS_FOLDER], "Settings folder should exist.");
+        invariant(state.order[MAIN_FOLDER], "Main folder should exist.");
+        invariant(
+          state.order[SETTINGS_FOLDER],
+          "Settings folder should exist.",
+        );
 
-      const ids = items
-        .map((item) => +item.id)
-        .filter((id) => !Number.isNaN(id));
-      const maxId = Math.max(...ids);
-      state.nextItemId = maxId > 0 ? maxId + 1 : 1;
-    }),
+        const ids = items
+          .map((item) => +item.id)
+          .filter((id) => !Number.isNaN(id));
+        const maxId = Math.max(...ids);
+        state.nextItemId = maxId > 0 ? maxId + 1 : 1;
+      },
+    },
     addNewItem: (state, action: PayloadAction<{ type: MathItemType }>) => {
       const id = `${state.nextItemId}`;
       state.nextItemId += 1;
@@ -251,6 +286,9 @@ const slice = createSlice({
       isLegacy?: boolean;
       revision: number;
       loadCount: number;
+      /** The content that was sent. */
+      snapshot: SceneContent;
+      modifiedDate: string;
     }>((state, action) => {
       const { key, author, title, isLegacy, revision, loadCount } =
         action.payload;
@@ -262,6 +300,9 @@ const slice = createSlice({
       if (title !== undefined) state.title = title;
       if (isLegacy !== undefined) state.isLegacy = isLegacy;
       if (state.revision === revision) state.dirty = false;
+      state.baseline = sceneFingerprint(action.payload.snapshot);
+      state.modifiedDate = action.payload.modifiedDate;
+      state.savedSince = false;
     }),
   },
 });
@@ -286,6 +327,6 @@ const reducer: Reducer<SceneState, UnknownMaybeCleanAction> = (
 
 const sceneSlice = { ...slice, reducer };
 
-export type { SceneState };
+export type { SceneState, SetScenePayload };
 export default sceneSlice;
 export { actions, reducer };

@@ -8,6 +8,7 @@ import { act, renameScene, renderTestApp, screen, waitFor } from "@/test_util";
 import { createQueryClient } from "@/services/react-query/react-query";
 import { getStore } from "@/store/store";
 import sceneSlice from "@/store/scene/state/scene.slice";
+import * as select from "@/store/scene/state/selectors";
 import {
   SIGN_IN_DRAFT_KEY,
   saveSignInDraft,
@@ -134,6 +135,8 @@ test("marking the open scene saved under a new key does not reload the route's s
         author: null,
         revision: store.getState().scene.revision,
         loadCount: store.getState().scene.loadCount,
+        snapshot: select.sceneInfo(store.getState()),
+        modifiedDate: "2026-11-20T12:00:00.000Z",
       }),
     );
   });
@@ -175,6 +178,8 @@ test("a route whose GET fails while the store holds its scene never shows the ca
         author: null,
         revision,
         loadCount,
+        snapshot: select.sceneInfo(store.getState()),
+        modifiedDate: "2026-11-20T12:00:00.000Z",
       }),
     );
   });
@@ -208,4 +213,13 @@ test("a paused fetch in a background tab while online isn't offline", async () =
   } finally {
     focusManager.setFocused(undefined);
   }
+});
+
+test("loading a scene records its modifiedDate", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const { store } = renderTestApp(`/${scene.key}`);
+
+  await waitFor(() =>
+    expect(store.getState().scene.modifiedDate).toBe(scene.modifiedDate),
+  );
 });

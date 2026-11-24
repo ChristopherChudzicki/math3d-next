@@ -7,6 +7,7 @@ import chevronDown from "@iconify-icons/lucide/chevron-down";
 import { isApiFailure, usePatchScene, useUserMe } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
+import { settleDraftAfterSave } from "@/store/scene/drafts/storage";
 import * as select from "@/store/scene/state/selectors";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { dismissToast } from "@/ui/Toast/toasts";
@@ -129,16 +130,30 @@ const SceneActions: React.FC = () => {
   const save = async () => {
     invariant(key, "Only a saved scene is saved in place.");
     const state = store.getState();
-    const { revision, loadCount } = state.scene;
+    const { revision, loadCount, draftId } = state.scene;
     const { title, items, itemOrder } = select.sceneInfo(state);
+    const snapshot = { title, items, itemOrder };
     setSaving(true);
     try {
       const [patched] = await Promise.allSettled([
-        patchScene.mutateAsync({ key, patch: { title, items, itemOrder } }),
+        patchScene.mutateAsync({ key, patch: snapshot }),
         sleep(MIN_SAVING_DELAY),
       ]);
       if (patched.status === "rejected") throw patched.reason;
-      dispatch(actions.markSaved({ key, author, revision, loadCount }));
+      if (store.getState().scene.loadCount === loadCount) {
+        dispatch(
+          actions.markSaved({
+            key,
+            author,
+            revision,
+            loadCount,
+            snapshot,
+            modifiedDate: patched.value.modifiedDate,
+          }),
+        );
+      } else {
+        settleDraftAfterSave(draftId, snapshot);
+      }
       setFlash({ text: "Saved!" });
     } catch (err) {
       // The scene stays dirty, so Save stays available to retry. The mutation

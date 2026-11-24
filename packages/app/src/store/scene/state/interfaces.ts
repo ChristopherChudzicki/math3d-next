@@ -40,6 +40,17 @@ interface SceneState {
   activeTabId: string;
   title: string;
   isLegacy: boolean;
+  /**
+   * This session's draft id: one page load's work on one scene. A draft
+   * exists once a record with this id is in storage (`drafts/storage.ts`).
+   */
+  draftId: string;
+  /** `sceneFingerprint` of the scene as last loaded or saved. */
+  baseline: string;
+  /** The loaded or saved scene's `modifiedDate`; null for an unsaved scene. */
+  modifiedDate: string | null;
+  /** This session opened a draft whose scene was saved after the draft was taken. */
+  savedSince: boolean;
 }
 
 interface Subtree {
