@@ -39,6 +39,7 @@ test("Header and usermenu links", async ({ page }) => {
   await app.userMenu().opener().click();
   await expect(app.userMenu().items()).toHaveText([
     "Sign in",
+    "My Scenes",
     "Examples",
     "Function Reference",
     "Contact",
