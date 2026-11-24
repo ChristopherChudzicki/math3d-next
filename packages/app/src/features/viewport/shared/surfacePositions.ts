@@ -17,10 +17,11 @@ const overDomain =
     points: (as: Float64Array, bs: Float64Array) => Columns | undefined,
   ): Positions =>
   (us, vs) => {
-    const as = new Float64Array(us.length);
-    const bs = new Float64Array(us.length);
+    const count = us.length;
+    const as = new Float64Array(count);
+    const bs = new Float64Array(count);
     try {
-      for (let k = 0; k < us.length; k += 1) {
+      for (let k = 0; k < count; k += 1) {
         [as[k], bs[k]] = uv(us[k], vs[k]);
       }
     } catch {
