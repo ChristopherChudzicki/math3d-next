@@ -11,7 +11,8 @@ import type {
   VectorBatchForm,
 } from "./types";
 
-type Entry = { compiled: Compiled; form: BatchForm | VectorBatchForm };
+type Forms = { number?: BatchForm; vector?: VectorBatchForm };
+type Entry = Forms & { compiled: Compiled };
 
 const entries = new WeakMap<object, Entry>();
 
@@ -35,33 +36,21 @@ const owned = (
   return result;
 };
 
-const toForm = (compiled: Compiled): BatchForm | VectorBatchForm => {
+const toForms = ({ params, vector, components }: Compiled): Forms => {
   const pool = createPool();
-  const { params } = compiled;
-  if ("components" in compiled) {
-    const { components } = compiled;
-    const run = (count: number, ...args: Column[]) => {
-      try {
-        pool.reset(count);
-        return components.map((component) =>
-          owned(component(count, args, pool), count, args, pool),
-        );
-      } catch {
-        return undefined;
-      }
-    };
-    return { params, size: components.length, run };
-  }
-  const { evaluate } = compiled;
   const run = (count: number, ...args: Column[]) => {
     try {
       pool.reset(count);
-      return owned(evaluate(count, args, pool), count, args, pool);
+      return components.map((component) =>
+        owned(component(count, args, pool), count, args, pool),
+      );
     } catch {
       return undefined;
     }
   };
-  return { params, run };
+  return vector
+    ? { vector: { params, size: components.length, run } }
+    : { number: { params, run: (...args) => run(...args)?.[0] } };
 };
 
 /**
@@ -77,20 +66,16 @@ export const registerBatch = (
   if (!math.isFunctionAssignmentNode(node)) return;
   try {
     const compiled = compile(node, scope, (value) => entryOf(value)?.compiled);
-    entries.set(f, { compiled, form: toForm(compiled) });
+    entries.set(f, { compiled, ...toForms(compiled) });
   } catch {
     // No batched form: samplers use `f` itself.
   }
 };
 
 /** `f`'s batched form, when `f` returns a number. */
-export const batchOf = (f: unknown): BatchForm | undefined => {
-  const form = entryOf(f)?.form;
-  return form && !("size" in form) ? form : undefined;
-};
+export const batchOf = (f: unknown): BatchForm | undefined =>
+  entryOf(f)?.number;
 
 /** `f`'s batched form, when `f` returns a vector. */
-export const vectorBatchOf = (f: unknown): VectorBatchForm | undefined => {
-  const form = entryOf(f)?.form;
-  return form && "size" in form ? form : undefined;
-};
+export const vectorBatchOf = (f: unknown): VectorBatchForm | undefined =>
+  entryOf(f)?.vector;

@@ -41,17 +41,14 @@ const number = (part: Part): NumberPart => {
   return part;
 };
 
-const constant = (value: number): NumberPart => ({ constant: true, value });
-
 /** A value known when compiling: a number, or a flat vector of numbers. */
-const constantOf = (value: unknown): Part => {
-  if (typeof value === "number") return constant(value);
-  if (
-    Array.isArray(value) &&
-    value.length > 0 &&
-    value.every((entry) => typeof entry === "number")
-  ) {
-    return { components: value.map((entry: number) => constant(entry)) };
+const constant = (value: unknown): Part => {
+  if (typeof value === "number") return { constant: true, value };
+  if (Array.isArray(value) && value.length > 0) {
+    // `Array.from` visits a hole, which `map` would skip.
+    return {
+      components: Array.from(value, (entry) => number(constant(entry))),
+    };
   }
   throw new Unsupported();
 };
@@ -91,10 +88,10 @@ type VectorShapes = {
   vectorVector?: true;
 };
 /**
- * The operand shapes for which an operator works entry by entry on vectors,
- * each entry as the same operator on numbers. They are the shapes
- * `fastCompile` computes that way; mathjs treats every other as something
- * else (vector × vector is a dot product).
+ * The operand shapes for which an operator works entry by entry, each entry
+ * as the same operator on numbers. As `fastCompile`'s `VECTOR_SHAPES`: mathjs
+ * takes vector × vector as a dot product and divides by a vector's matrix
+ * inverse.
  */
 const VECTOR_SHAPES = new Map<unknown, VectorShapes>([
   [
@@ -163,18 +160,12 @@ export const compile = (
     };
   };
 
-  /** How a call runs over its operands, and whether that is arithmetic alone. */
-  type Kernel = { evaluate: Evaluate; arithmetic: boolean };
-
-  const kernelOf = (fn: Fn, operands: NumberPart[]): Kernel => {
+  /** How `fn` runs over `operands`, and whether that is arithmetic alone. */
+  const kernelOf = (
+    fn: Fn,
+    operands: NumberPart[],
+  ): { evaluate: Evaluate; arithmetic: boolean } => {
     const evaluates = operands.map(toEvaluate);
-    const inner = compiledOf(fn);
-    if (inner && "evaluate" in inner && inner.params === operands.length) {
-      return {
-        arithmetic: false,
-        evaluate: applying(inner.evaluate, evaluates),
-      };
-    }
     if (operands.length === 1) {
       const arithmetic = KERNELS_1.get(fn);
       const kernel = arithmetic ?? MATH_KERNELS_1.get(fn);
@@ -207,41 +198,16 @@ export const compile = (
         };
       }
     }
-    const kernel = kernels.generic(fn, operands.length);
     return {
       arithmetic: false,
-      evaluate: (count, args, pool) =>
-        kernel(
-          count,
-          evaluates.map((operand) => operand(count, args, pool)),
-          pool,
-        ),
+      evaluate: applying(kernels.generic(fn, operands.length), evaluates),
     };
   };
 
-  /** The value `kernel` computes from `operands`, at least one of which varies. */
-  const combine = (
-    operands: NumberPart[],
-    kernel: (operands: NumberPart[]) => Kernel,
-  ): NumberPart => {
-    const varying = operands.filter((operand) => !operand.constant);
-    const reads = varying.every((operand) => operand.reads === varying[0].reads)
-      ? varying[0].reads
-      : SEVERAL;
-    // An operand that reads one parameter where the call reads several is a
-    // maximal subexpression of one parameter.
-    const { evaluate, arithmetic } = kernel(
-      reads === SEVERAL ? operands.map(reuseRepeats) : operands,
-    );
-    return {
-      constant: false,
-      evaluate,
-      reads,
-      calls: !arithmetic || varying.some((operand) => operand.calls),
-    };
-  };
-
-  /** `fn` of numbers: a number, or a vector when `fn` returns one. */
+  /**
+   * `fn` of numbers: a vector when it folds to one or `fn` has a vector form,
+   * else a number, declining where `fn` gives anything else.
+   */
   const numberCall = (fn: Fn, operands: NumberPart[]): Part => {
     if (operands.every((operand) => operand.constant)) {
       let value: unknown;
@@ -250,20 +216,35 @@ export const compile = (
       } catch {
         throw new Unsupported();
       }
-      return constantOf(value);
+      return constant(value);
     }
+    const varying = operands.filter((operand) => !operand.constant);
+    const reads = varying.every((operand) => operand.reads === varying[0].reads)
+      ? varying[0].reads
+      : SEVERAL;
+    // An operand that reads one parameter where the call reads several is a
+    // maximal subexpression of one parameter.
+    const reused = reads === SEVERAL ? operands.map(reuseRepeats) : operands;
     const inner = compiledOf(fn);
-    if (inner && "components" in inner && inner.params === operands.length) {
-      return {
-        components: inner.components.map((component) =>
-          combine(operands, (parts) => ({
-            arithmetic: false,
-            evaluate: applying(component, parts.map(toEvaluate)),
-          })),
-        ),
-      };
+    if (inner && inner.params === operands.length) {
+      const evaluates = reused.map(toEvaluate);
+      const components = inner.components.map(
+        (component): NumberPart => ({
+          constant: false,
+          evaluate: applying(component, evaluates),
+          reads,
+          calls: true,
+        }),
+      );
+      return inner.vector ? { components } : components[0];
     }
-    return combine(operands, (parts) => kernelOf(fn, parts));
+    const { evaluate, arithmetic } = kernelOf(fn, reused);
+    return {
+      constant: false,
+      evaluate,
+      reads,
+      calls: !arithmetic || varying.some((operand) => operand.calls),
+    };
   };
 
   /** `fn` of two operands, at least one a vector, entry by entry. */
@@ -290,21 +271,17 @@ export const compile = (
     };
   };
 
-  const call = (fn: Fn, operands: Part[]): Part => {
-    const numbers = operands.filter(
-      (operand): operand is NumberPart => !isVector(operand),
-    );
-    return numbers.length < operands.length
+  const call = (fn: Fn, operands: Part[]): Part =>
+    operands.some(isVector)
       ? entrywise(fn, operands)
-      : numberCall(fn, numbers);
-  };
+      : numberCall(fn, operands.map(number));
 
   const build = (expr: mjs.MathNode): Part => {
-    if (math.isConstantNode(expr)) return constantOf(expr.value);
+    if (math.isConstantNode(expr)) return constant(expr.value);
     if (math.isParenthesisNode(expr)) return build(expr.content);
     if (math.isSymbolNode(expr)) {
       const index = params.indexOf(expr.name);
-      if (index < 0) return constantOf(lookup(expr.name));
+      if (index < 0) return constant(lookup(expr.name));
       return {
         constant: false,
         evaluate: (_count, args) => args[index],
@@ -334,14 +311,15 @@ export const compile = (
   };
 
   const body = build(node.expr);
-  if (isVector(body)) {
-    // Every `oncePerRepeat` comes before the first `inspecting`.
-    const components = body.components.map(reuseRepeats).map(toEvaluate);
-    return {
-      params: params.length,
-      components: components.map(repeats.inspecting),
-    };
-  }
-  const evaluate = toEvaluate(reuseRepeats(body));
-  return { params: params.length, evaluate: repeats.inspecting(evaluate) };
+  const vector = isVector(body);
+  // As `createRepeats` requires, every `oncePerRepeat` precedes the first
+  // `inspecting`.
+  const components = (vector ? body.components : [body])
+    .map(reuseRepeats)
+    .map(toEvaluate);
+  return {
+    params: params.length,
+    vector,
+    components: components.map(repeats.inspecting),
+  };
 };

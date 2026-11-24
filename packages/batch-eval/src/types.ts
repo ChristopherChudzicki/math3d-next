@@ -14,10 +14,15 @@ export class Decline extends Error {}
 /** A subexpression over a function's argument columns. */
 export type Evaluate = (count: number, args: Column[], pool: Pool) => Column;
 
-/** A function of numbers that returns a number, or one number per component. */
-export type Compiled =
-  | { params: number; evaluate: Evaluate }
-  | { params: number; components: Evaluate[] };
+/**
+ * A function of `params` numbers: one `Evaluate` per component of the vector
+ * it returns, or one alone when it returns a number.
+ */
+export type Compiled = {
+  params: number;
+  vector: boolean;
+  components: Evaluate[];
+};
 
 /** The batched form of a function of `params` numbers that returns a number. */
 export type BatchForm = {
