@@ -30,6 +30,7 @@ import LegacyDialog from "./components/LegacyDialog";
 import LegacyBanner from "./components/LegacyBanner";
 import RendererPill from "./components/RendererPill";
 import SceneUnavailable from "./components/SceneUnavailable";
+import useDraftWriter from "./useDraftWriter";
 
 type UseSearchEnumOptions<T extends string = string> = {
   name: string;
@@ -90,6 +91,7 @@ const VIEWPORTS: Record<Renderer, React.FC<{ className?: string }>> = {
 const MainPage: React.FC = () => {
   const { sceneKey } = useParams();
   const sceneLoad = useSceneLoader(sceneKey);
+  useDraftWriter();
   const unavailable =
     sceneLoad.status !== "ready" && sceneLoad.status !== "loading"
       ? sceneLoad.status
