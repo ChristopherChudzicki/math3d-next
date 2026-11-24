@@ -19,6 +19,10 @@
     100vh - var(--tabListHeight) - var(--header-height) -
       var(--banner-height, 0px)
   );
+  height: calc(
+    100dvh - var(--tabListHeight) - var(--header-height) -
+      var(--banner-height, 0px)
+  );
 }
 
 .tabListExtra {
