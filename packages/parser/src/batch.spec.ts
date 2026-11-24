@@ -85,7 +85,7 @@ describe("a batched form agrees with the function the app holds", () => {
   );
 
   test.each(batching.filter((c) => c.declines))(
-    "declines where the value isn't a number: $title: $expr",
+    "declines where a value isn't a real number: $title: $expr",
     ({ expr, scope, point, batches }) => {
       const f = define(expr, scope);
       expect(formOf(f, batches)).toBeDefined();
@@ -129,10 +129,18 @@ describe("a batched form agrees with the function the app holds", () => {
     expect(batchOf(g)).toBeUndefined();
     expectMatches(define("h(x) = g(x) + 1", { g }));
   });
+
   test("a call to a vector function, with varying and with constant arguments", () => {
     const c = define("c(t) = [sin(t), t, 1]");
     expectMatches(define("f(u, v) = u * [cos(v), sin(v), 0] + c(u)", { c }));
     expectMatches(define("f(u, v) = c(2) + u * [v, 1, 0]", { c }));
+  });
+
+  test("a call to a vector function with the wrong number of arguments declines", () => {
+    const c = define("c(t) = [t, 1, 0]");
+    const f = define("f(u, v) = c(u, v) + [1, 0, 0]", { c });
+    expect(() => f(1, 2)).toThrow();
+    expect(runForm(f, [[1], [2]])).toBeUndefined();
   });
 
   test("a vector passed to a function of one number has no form", () => {

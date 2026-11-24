@@ -1,5 +1,5 @@
 import { describe, expect, onTestFinished, test, vi } from "vitest";
-import { batchOf } from "./registry";
+import { batchOf, vectorBatchOf } from "./registry";
 import { define, mismatches, runForm, vectorMismatches } from "./testForms";
 import type { Fn } from "./testForms";
 
@@ -113,6 +113,13 @@ describe("how often a subexpression of one parameter runs", () => {
   test("when it is the whole function", () => {
     const g = counted();
     runForm(define("f(x, y) = g(x)", { g }), grid(AXIS_4, 2));
+    expect(g).toHaveBeenCalledTimes(4);
+  });
+
+  test("in a component of a vector", () => {
+    const g = counted();
+    const [xs, ys] = grid(AXIS_4, 2).map((column) => Float64Array.from(column));
+    vectorBatchOf(define("f(x, y) = [g(x), y, 0]", { g }))!.run(16, xs, ys);
     expect(g).toHaveBeenCalledTimes(4);
   });
 

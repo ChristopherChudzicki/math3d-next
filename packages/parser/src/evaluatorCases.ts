@@ -7,7 +7,7 @@ type FunctionCase = {
   scope?: Record<string, unknown>;
   /** Whether fastCompile evaluates it without handing it to mathjs. */
   fast: boolean;
-  /** Whether it gets a batched form: of a number, or `"vector"`. */
+  /** `true` for a number form, `"vector"` for a vector form, `false` for none. */
   batches: boolean | "vector";
   /** Whether the batched form declines at `point`. */
   declines?: true;
@@ -96,6 +96,13 @@ export const functionCases: FunctionCase[] = [
     batches: "vector",
   },
   {
+    title: "a vector minus a number",
+    expr: "f(u, v) = [u, v, 1] - v",
+    point: [0.5, -2],
+    fast: true,
+    batches: "vector",
+  },
+  {
     title: "a vector with a complex component",
     expr: "f(u) = [u, u^0.5, 0]",
     point: [-4],
@@ -104,6 +111,7 @@ export const functionCases: FunctionCase[] = [
     declines: true,
   },
   {
+    // A limit, not a goal: the function gives a value.
     title: "vectors of different sizes",
     expr: "f(u, v) = [u] + [u, v, 0]",
     point: [0.5, -2],
@@ -111,6 +119,7 @@ export const functionCases: FunctionCase[] = [
     batches: false,
   },
   {
+    // A limit, not a goal: the function gives a value.
     title: "a vector times a vector",
     expr: "f(u, v) = [u, v, 0] * [v, u, 1]",
     point: [0.5, -2],
@@ -118,6 +127,7 @@ export const functionCases: FunctionCase[] = [
     batches: false,
   },
   {
+    // mathjs throws.
     title: "a number over a vector",
     expr: "f(u, v) = 2 / [u, v, 1]",
     point: [0.5, -2],
@@ -125,6 +135,7 @@ export const functionCases: FunctionCase[] = [
     batches: false,
   },
   {
+    // mathjs throws.
     title: "a vector over a vector",
     expr: "f(u, v) = [u, v, 1] / [u, v, 1]",
     point: [0.5, -2],
@@ -132,6 +143,7 @@ export const functionCases: FunctionCase[] = [
     batches: false,
   },
   {
+    // mathjs throws.
     title: "a power of a vector",
     expr: "f(u, v) = [u, v, 0]^2",
     point: [0.5, -2],
@@ -139,7 +151,8 @@ export const functionCases: FunctionCase[] = [
     batches: false,
   },
   {
-    // mathjs leaves a zero entry's sign alone, unlike a number's.
+    // A limit, not a goal: mathjs leaves a zero entry's sign alone, so the
+    // number kernel on each entry doesn't match.
     title: "a negated vector",
     expr: "f(u, v) = -[u, v, 0]",
     point: [0.5, -2],
@@ -147,6 +160,7 @@ export const functionCases: FunctionCase[] = [
     batches: false,
   },
   {
+    // mathjs throws.
     title: "a function of a vector",
     expr: "f(u, v) = sin([u, v, 0])",
     point: [0.5, -2],
@@ -154,6 +168,7 @@ export const functionCases: FunctionCase[] = [
     batches: false,
   },
   {
+    // A limit, not a goal: the function gives a value.
     title: "a matrix written out",
     expr: "f(u, v) = [[u, v], [v, u]]",
     point: [0.5, -2],
@@ -161,6 +176,7 @@ export const functionCases: FunctionCase[] = [
     batches: false,
   },
   {
+    // A limit, not a goal: the function gives a value.
     title: "an empty scope vector",
     expr: "f(u) = u + e",
     point: [0.5],
@@ -169,6 +185,7 @@ export const functionCases: FunctionCase[] = [
     batches: false,
   },
   {
+    // A limit, not a goal: the function gives a value.
     title: "a scope matrix",
     expr: "f(u) = u + m",
     point: [0.5],

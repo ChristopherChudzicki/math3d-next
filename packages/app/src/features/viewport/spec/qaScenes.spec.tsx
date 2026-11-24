@@ -99,13 +99,13 @@ test("in the seed scenes, a surface's `positions` agree with its `position`", ()
   ]);
   const us = Float64Array.from(samples, ([U]) => U);
   const vs = Float64Array.from(samples, ([, V]) => V);
-  const compared = {
-    [MathItemType.ExplicitSurface]: 0,
-    [MathItemType.ExplicitSurfacePolar]: 0,
-    [MathItemType.ParametricSurface]: 0,
+  const counts = {
+    [MathItemType.ExplicitSurface]: { compared: 0, total: 0 },
+    [MathItemType.ExplicitSurfacePolar]: { compared: 0, total: 0 },
+    [MathItemType.ParametricSurface]: { compared: 0, total: 0 },
   };
-  const isSurface = (item: MathItem): item is MathItem<keyof typeof compared> =>
-    item.type in compared;
+  const isSurface = (item: MathItem): item is MathItem<keyof typeof counts> =>
+    item.type in counts;
   const mismatches: unknown[] = [];
   [...qaScenes, ...seedScenes("examples")].forEach((scene) => {
     const surfaces = scene.items.filter(isSurface);
@@ -117,10 +117,11 @@ test("in the seed scenes, a surface's `positions` agree with its `position`", ()
     surfaces.forEach(({ id, type }) => {
       const spec = specs[id];
       if (spec?.kind !== "surface") return;
+      counts[type].total += 1;
       // Declining is always allowed: the renderer then calls `position`.
       const columns = spec.positions?.(us, vs);
       if (!columns) return;
-      compared[type] += 1;
+      counts[type].compared += 1;
       samples.forEach(([U, V], k) => {
         const expected = spec.position(U, V);
         const actual = columns.map((column) => column[k]);
@@ -131,5 +132,8 @@ test("in the seed scenes, a surface's `positions` agree with its `position`", ()
     });
   });
   expect(mismatches).toEqual([]);
-  Object.values(compared).forEach((count) => expect(count).toBeGreaterThan(0));
+  // A surface that declines, or has no `positions`, isn't compared.
+  Object.values(counts).forEach(({ compared, total }) =>
+    expect(compared / total).toBeGreaterThanOrEqual(0.8),
+  );
 });

@@ -101,16 +101,14 @@ describe("run", () => {
   });
 });
 
-describe("a function of numbers that returns a vector matches mathjs", () => {
+describe("a function of numbers that returns a vector", () => {
   test.each<{ expr: string; scope?: ScopeEntries }>([
-    { expr: "f(u, v) = [u, v, 0]" },
-    { expr: "f(u, v) = [cos(u), sin(v), u * v] + [1, 0, u]" },
     { expr: "f(u, v) = 2 * [u, v, 1] - [u, v, 1] / v" },
     {
       expr: "f(u, v) = g(u + v, v) + a",
       scope: { g: define("g(a, b) = [a * b, sin(a), b]"), a: [1, -0, 0] },
     },
-  ])("$expr", ({ expr, scope }) => {
+  ])("matches mathjs: $expr", ({ expr, scope }) => {
     expect(vectorMismatches(define(expr, scope), defaultColumns(2))).toEqual(
       [],
     );

@@ -13,6 +13,6 @@ test("declines when the domain's range function throws", () => {
       throw new Error("No range.");
     },
   );
-  expect(positions?.(Float64Array.of(0), Float64Array.of(0))).toBeUndefined();
   expect(positions).toBeDefined();
+  expect(positions?.(Float64Array.of(0), Float64Array.of(0))).toBeUndefined();
 });
