@@ -27,10 +27,15 @@ export const sampleGrid = (
   }
   const columns = positions?.(us, vs);
   const points: Coords[] = new Array(cols * rows);
-  for (let k = 0; k < points.length; k += 1) {
-    points[k] = columns
-      ? [columns[0][k], columns[1][k], columns[2][k]]
-      : position(us[k], vs[k]);
+  if (columns) {
+    const [xs, ys, zs] = columns;
+    for (let k = 0; k < points.length; k += 1) {
+      points[k] = [xs[k], ys[k], zs[k]];
+    }
+  } else {
+    for (let k = 0; k < points.length; k += 1) {
+      points[k] = position(us[k], vs[k]);
+    }
   }
   return { cols, rows, points };
 };

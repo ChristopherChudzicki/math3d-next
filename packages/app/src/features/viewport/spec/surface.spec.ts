@@ -117,6 +117,14 @@ test("positions gives position's points where one range depends on the other par
   expect(positionMismatches(spec)).toEqual([]);
 });
 
+test("positions gives position's points when the number of samples changes", () => {
+  const scene = new SceneBuilder();
+  scene.folder().explicitSurfacePolar({}, "s");
+  const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
+  expect(positionMismatches(spec)).toEqual([]);
+  expect(positionMismatches(spec, 6, 5)).toEqual([]);
+});
+
 test("a surface whose function has no batched form has no positions", () => {
   const scene = new SceneBuilder();
   scene.folder().explicitSurface(
