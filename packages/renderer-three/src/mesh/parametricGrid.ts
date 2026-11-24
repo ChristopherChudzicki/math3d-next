@@ -11,12 +11,11 @@ export type ParametricGrid = { cols: number; rows: number; points: Coords[] };
 
 const parameter = (index: number, count: number) => index / (count - 1);
 
-/** The grid's points from `positions`, or `undefined` if it declines. */
-const batchedPoints = (
-  cols: number,
-  rows: number,
-  positions: NonNullable<SurfaceSpec["positions"]>,
-): Coords[] | undefined => {
+export const sampleGrid = (
+  [cols, rows]: [number, number],
+  position: SurfaceSpec["position"],
+  positions?: SurfaceSpec["positions"],
+): ParametricGrid => {
   const us = new Float64Array(cols * rows);
   const vs = new Float64Array(cols * rows);
   for (let j = 0; j < rows; j += 1) {
@@ -26,29 +25,12 @@ const batchedPoints = (
       vs[j * cols + i] = v;
     }
   }
-  const columns = positions(us, vs);
-  if (!columns) return undefined;
-  const [xs, ys, zs] = columns;
+  const columns = positions?.(us, vs);
   const points: Coords[] = new Array(cols * rows);
   for (let k = 0; k < points.length; k += 1) {
-    points[k] = [xs[k], ys[k], zs[k]];
-  }
-  return points;
-};
-
-export const sampleGrid = (
-  [cols, rows]: [number, number],
-  position: SurfaceSpec["position"],
-  positions?: SurfaceSpec["positions"],
-): ParametricGrid => {
-  const batched = positions && batchedPoints(cols, rows, positions);
-  if (batched) return { cols, rows, points: batched };
-  const points: Coords[] = new Array(cols * rows);
-  for (let j = 0; j < rows; j += 1) {
-    const v = parameter(j, rows);
-    for (let i = 0; i < cols; i += 1) {
-      points[j * cols + i] = position(parameter(i, cols), v);
-    }
+    points[k] = columns
+      ? [columns[0][k], columns[1][k], columns[2][k]]
+      : position(us[k], vs[k]);
   }
   return { cols, rows, points };
 };

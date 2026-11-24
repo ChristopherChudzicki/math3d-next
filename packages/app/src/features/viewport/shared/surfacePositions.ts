@@ -11,32 +11,23 @@ type UV = (U: number, V: number) => [number, number];
  * `positions` from `points`, which gets the surface function's two argument
  * columns. A throw from `uv` declines; `position` then meets the same throw.
  */
-const overDomain = (
-  uv: UV,
-  points: (
-    count: number,
-    as: Float64Array,
-    bs: Float64Array,
-  ) => Columns | undefined,
-): Positions => {
-  let as = new Float64Array(0);
-  let bs = new Float64Array(0);
-  return (us, vs) => {
-    const count = us.length;
-    if (as.length !== count) {
-      as = new Float64Array(count);
-      bs = new Float64Array(count);
-    }
+const overDomain =
+  (
+    uv: UV,
+    points: (as: Float64Array, bs: Float64Array) => Columns | undefined,
+  ): Positions =>
+  (us, vs) => {
+    const as = new Float64Array(us.length);
+    const bs = new Float64Array(us.length);
     try {
-      for (let k = 0; k < count; k += 1) {
+      for (let k = 0; k < us.length; k += 1) {
         [as[k], bs[k]] = uv(us[k], vs[k]);
       }
     } catch {
       return undefined;
     }
-    return points(count, as, bs);
+    return points(as, bs);
   };
-};
 
 /** `positions` of `(u, v) ↦ expr(u, v)`, when `expr` has a batched form. */
 export const parametricPositions = (
@@ -45,8 +36,7 @@ export const parametricPositions = (
 ): Positions | undefined => {
   const values = vectorValues(expr, 2, 3);
   return (
-    values &&
-    overDomain(uv, (_count, us, vs) => values(us, vs) as Columns | undefined)
+    values && overDomain(uv, (us, vs) => values(us, vs) as Columns | undefined)
   );
 };
 
@@ -57,8 +47,8 @@ export const explicitPositions = (
 ): Positions | undefined => {
   const form = batchOf(expr);
   if (!form || form.params !== 2) return undefined;
-  return overDomain(uv, (count, xs, ys) => {
-    const zs = form.run(count, xs, ys);
+  return overDomain(uv, (xs, ys) => {
+    const zs = form.run(xs.length, xs, ys);
     return zs && [xs, ys, zs];
   });
 };
@@ -70,19 +60,14 @@ export const polarPositions = (
 ): Positions | undefined => {
   const form = batchOf(expr);
   if (!form || form.params !== 2) return undefined;
-  let xs = new Float64Array(0);
-  let ys = new Float64Array(0);
-  return overDomain(uv, (count, rs, qs) => {
-    const zs = form.run(count, rs, qs);
-    if (!zs) return undefined;
-    if (xs.length !== count) {
-      xs = new Float64Array(count);
-      ys = new Float64Array(count);
-    }
-    for (let k = 0; k < count; k += 1) {
-      xs[k] = rs[k] * Math.cos(qs[k]);
-      ys[k] = rs[k] * Math.sin(qs[k]);
-    }
-    return [xs, ys, zs];
+  return overDomain(uv, (rs, qs) => {
+    const zs = form.run(rs.length, rs, qs);
+    return (
+      zs && [
+        rs.map((r, k) => r * Math.cos(qs[k])),
+        rs.map((r, k) => r * Math.sin(qs[k])),
+        zs,
+      ]
+    );
   });
 };

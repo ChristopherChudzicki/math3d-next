@@ -71,8 +71,9 @@ export type SurfaceSpec = Common & {
   position: (u: number, v: number) => Coords;
   /**
    * `position` at many points: entry `k` of the three arrays is
-   * `position(us[k], vs[k])`. Returns `undefined` to decline, and the renderer
-   * then calls `position`. The result is overwritten by the next call.
+   * `position(us[k], vs[k])`; `us` and `vs` are only read. Returns `undefined`
+   * to decline, and the renderer then calls `position`. Later calls, this
+   * spec's or another's, may reuse the arrays: copy what you keep.
    */
   positions?: (
     us: Float64Array,

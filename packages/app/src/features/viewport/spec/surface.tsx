@@ -77,19 +77,10 @@ const toParametric = (
 };
 
 /** Each surface type's `positions`, when its expression has a batched form. */
-const toPositions = (
-  type: SurfaceItem,
-  expr: unknown,
-  uv: (U: number, V: number) => [number, number],
-) => {
-  switch (type) {
-    case MIT.ExplicitSurface:
-      return explicitPositions(expr, uv);
-    case MIT.ExplicitSurfacePolar:
-      return polarPositions(expr, uv);
-    default:
-      return parametricPositions(expr, uv);
-  }
+const POSITIONS = {
+  [MIT.ExplicitSurface]: explicitPositions,
+  [MIT.ExplicitSurfacePolar]: polarPositions,
+  [MIT.ParametricSurface]: parametricPositions,
 };
 
 const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
@@ -119,7 +110,7 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
     if (!func || !domain) return null;
     const uv = domainMap(domain);
     const position: XYZ = (U, V) => func(...uv(U, V));
-    return { uv, position, positions: toPositions(item.type, expr, uv) };
+    return { uv, position, positions: POSITIONS[item.type](expr, uv) };
   }, [item.type, expr, domain]);
   const spec = useMemo<GraphicSpec | null>(() => {
     if (!visible || !parametric) return null;
