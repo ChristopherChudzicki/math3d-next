@@ -215,6 +215,22 @@ test("opening a draft loads it as unsaved work at its scene's URL, under a new i
   expect(copy.updatedAt).toBeGreaterThan(draft.updatedAt);
 });
 
+test("opening a draft keeps controls=0", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const draft = draftOf(scene);
+  writeDraft(draft);
+  const { location } = renderTestApp(
+    "/?controls=0&overlay=scenes&list=unsaved",
+  );
+
+  await user.click(
+    await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
+  );
+
+  await waitFor(() => expect(location.current.pathname).toBe(`/${scene.key}`));
+  expect(location.current.search).toBe("?controls=0");
+});
+
 test("a draft of a legacy scene opens as legacy", async () => {
   const scene = seedDb.withSceneFromItems([], { isLegacy: true });
   const draft = draftOf(scene);

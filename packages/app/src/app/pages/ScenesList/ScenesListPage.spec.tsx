@@ -111,6 +111,28 @@ test("choosing an example opens it, keeping the drawer open with focus on the ca
   expect(card).toHaveAttribute("aria-current", "page");
 });
 
+test.each([
+  {
+    from: "controls=0&renderer=mathbox&utm_source=feed",
+    carried: "&controls=0",
+  },
+  { from: "controls=1", carried: "" },
+])(
+  "a card's link keeps only controls=0 from ?$from",
+  async ({ from, carried }) => {
+    const scene = seedDb.withSceneFromItems([]);
+    const example = seedDb.withExampleScene();
+    renderTestApp(`/${scene.key}?${from}&overlay=scenes&list=examples`);
+
+    expect(
+      await screen.findByRole("link", { name: example.title }),
+    ).toHaveAttribute(
+      "href",
+      `/${example.key}?overlay=scenes&list=examples${carried}`,
+    );
+  },
+);
+
 test("an unknown ?list= value self-corrects to list=examples", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const { location } = renderTestApp(
@@ -182,6 +204,16 @@ describe("where the drawer covers the scene", () => {
       await screen.findByRole("dialog", { name: "Scenes" }),
     ).toBeInTheDocument();
     expect(location.current.pathname).toBe(`/${scene.key}`);
+  });
+
+  test("a card's link keeps controls=0", async () => {
+    const scene = seedDb.withSceneFromItems([]);
+    const example = seedDb.withExampleScene();
+    renderTestApp(`/${scene.key}?controls=0&overlay=scenes&list=examples`);
+
+    expect(
+      await screen.findByRole("link", { name: example.title }),
+    ).toHaveAttribute("href", `/${example.key}?controls=0`);
   });
 
   test("choosing the open scene closes the drawer, popping its entry", async () => {

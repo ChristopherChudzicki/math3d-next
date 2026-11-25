@@ -7,6 +7,7 @@ import sceneSlice from "@/store/scene/state/scene.slice";
 import { removeDraft, writeDraft } from "@/store/scene/drafts/storage";
 import type { DraftRecord } from "@/store/scene/drafts/storage";
 import { showToast } from "@/ui/Toast/toasts";
+import { scenePath, useCarriedParams } from "./useSceneLinks";
 
 const UNOPENABLE_TOAST =
   "This unsaved work couldn’t be opened, so it was removed.";
@@ -19,6 +20,7 @@ const UNOPENABLE_TOAST =
 const useOpenDraft = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const carried = useCarriedParams();
   const queryClient = useQueryClient();
   const [openingId, setOpeningId] = useState<string | null>(null);
   const opening = useRef(false);
@@ -107,7 +109,7 @@ const useOpenDraft = () => {
       baseModifiedDate,
       updatedAt: Date.now(),
     });
-    navigate(`/${key ?? ""}`);
+    navigate(scenePath(key ?? "", carried));
   };
 
   const openDraft = async (record: DraftRecord) => {
