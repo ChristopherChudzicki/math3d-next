@@ -1,9 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
 import { Icon } from "@iconify/react/offline";
 import chevronDown from "@iconify-icons/lucide/chevron-down";
+import checkIcon from "@iconify-icons/lucide/check";
+import copyIcon from "@iconify-icons/lucide/copy";
+import linkIcon from "@iconify-icons/lucide/link";
+import saveIcon from "@iconify-icons/lucide/save";
+import shareIcon from "@iconify-icons/lucide/share-2";
 import { isApiFailure, usePatchScene, useScene, useUserMe } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
@@ -18,6 +23,9 @@ import Button from "@/ui/Button";
 import ButtonGroup from "@/ui/ButtonGroup";
 import IconButton from "@/ui/IconButton";
 import { Menu } from "@/ui/Menu";
+import { Spinner } from "@/ui/LoadingSpinner";
+import { useMediaQuery } from "@/util/hooks";
+import { PHONE_QUERY } from "@/config/breakpoints";
 import PublishDialog, { sceneUrl } from "./PublishDialog";
 import type { PublishMode } from "./PublishDialog";
 import LinkDialog from "./LinkDialog";
@@ -37,17 +45,31 @@ const LABELS: Record<Primary, string> = {
   "save-copy": "Save a copy",
 };
 
-// Every label the button can show for one kind of scene. Save and Copy link
-// share a set: saving a scene you own turns Save into Copy link mid-"Saved!".
-const OWN_SCENE = ["Save", "Saving...", "Saved!", "Copy link", "Copied!"];
-const RESERVED: Record<Primary, string[]> = {
-  share: ["Share"],
-  "save-new": ["Save"],
-  save: OWN_SCENE,
-  "copy-link": OWN_SCENE,
-  "save-copy": ["Save a copy", "Copied!"],
+const MENU_LABELS: Record<MenuAction, string> = {
+  duplicate: "Duplicate",
+  "copy-link": "Copy link",
 };
 
+// On a phone the primary shows as an icon instead of its label.
+const ICONS: Record<Primary, typeof saveIcon> = {
+  share: shareIcon,
+  "save-new": saveIcon,
+  save: saveIcon,
+  "copy-link": linkIcon,
+  "save-copy": saveIcon,
+};
+
+const MENU_ICONS: Record<MenuAction, typeof saveIcon> = {
+  duplicate: copyIcon,
+  "copy-link": linkIcon,
+};
+
+// One order in every state, so Copy link doesn't move once a Save turns it
+// from a secondary action into the primary.
+const PHONE_MENU_ORDER: MenuAction[] = ["copy-link", "duplicate"];
+
+// Fits the longest label, "Save a copy", so a label swap never shifts layout.
+const PRIMARY_WIDTH = "7.5rem";
 const MIN_SAVING_DELAY = 500;
 const FLASH_TIMEOUT = 2000;
 
@@ -81,12 +103,117 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
+type PhoneSceneActionProps = {
+  primary: Primary;
+  menu: MenuAction[];
+  label: string;
+  enabled: boolean;
+  saving: boolean;
+  flashing: boolean;
+  onPrimary: () => void;
+  onMenuAction: (action: MenuAction) => void;
+};
+
+/**
+ * The scene action on a phone: an icon button when there is one action, or
+ * one menu button listing them all, primary first, when there are several.
+ */
+const PhoneSceneAction: React.FC<PhoneSceneActionProps> = ({
+  primary,
+  menu,
+  label,
+  enabled,
+  saving,
+  flashing,
+  onPrimary,
+  onMenuAction,
+}) => {
+  const icon = saving ? (
+    <Spinner size="1em" />
+  ) : (
+    <Icon icon={flashing ? checkIcon : ICONS[primary]} aria-hidden="true" />
+  );
+  if (menu.length === 0) {
+    return (
+      <IconButton
+        data-testid="scene-action"
+        variant="outline"
+        tone="primary"
+        label={label}
+        loading={!enabled}
+        onClick={onPrimary}
+      >
+        {icon}
+      </IconButton>
+    );
+  }
+  return (
+    <Menu.Root>
+      <Menu.Trigger
+        render={
+          <IconButton
+            data-testid="scene-action"
+            variant="outline"
+            tone="primary"
+            label="Scene actions"
+          >
+            {icon}
+            <Icon
+              icon={chevronDown}
+              aria-hidden="true"
+              className={styles.caret}
+            />
+          </IconButton>
+        }
+      />
+      {/* The items' icons explain the button's. */}
+      <Menu.Popup>
+        <Menu.Item
+          icon={<Icon icon={ICONS[primary]} />}
+          disabled={saving}
+          onClick={onPrimary}
+        >
+          {LABELS[primary]}
+        </Menu.Item>
+        {PHONE_MENU_ORDER.filter((action) => menu.includes(action)).map(
+          (action) => (
+            <Menu.Item
+              key={action}
+              icon={<Icon icon={MENU_ICONS[action]} />}
+              disabled={saving}
+              onClick={() => onMenuAction(action)}
+            >
+              {MENU_LABELS[action]}
+            </Menu.Item>
+          ),
+        )}
+      </Menu.Popup>
+    </Menu.Root>
+  );
+};
+
 /**
  * The header's scene action: one button whose label says what it will do
  * (Share, Save, Copy link, Save a copy), plus a menu of secondary actions.
  */
 const SceneActions: React.FC = () => {
   const authStatus = useAuthStatus();
+  const isPhone = useMediaQuery(PHONE_QUERY);
+  // The phone and desktop controls are different elements, so crossing the
+  // breakpoint (a rotation, a zoom) would drop keyboard focus to the page.
+  const controlRef = useRef<HTMLSpanElement>(null);
+  const refocus = useRef(false);
+  const [shownPhone, setShownPhone] = useState(isPhone);
+  if (shownPhone !== isPhone) {
+    refocus.current =
+      controlRef.current?.contains(document.activeElement) ?? false;
+    setShownPhone(isPhone);
+  }
+  useLayoutEffect(() => {
+    if (!refocus.current) return;
+    refocus.current = false;
+    controlRef.current?.querySelector("button")?.focus();
+  }, [isPhone]);
   const { data: me } = useUserMe();
   const store = useAppStore();
   const dispatch = useAppDispatch();
@@ -159,8 +286,6 @@ const SceneActions: React.FC = () => {
   });
 
   const label = (saving && "Saving...") || flash?.text || LABELS[primary];
-  const reserved = new Set(RESERVED[primary]);
-  reserved.delete(label);
   const enabled = !saving && !flash && (primary !== "save-new" || dirty);
 
   const copyLink = async () => {
@@ -211,6 +336,14 @@ const SceneActions: React.FC = () => {
     }
   };
 
+  const runMenuAction = (action: MenuAction) => {
+    if (action === "duplicate") {
+      setDialog({ kind: "publish", mode: "copy" });
+    } else {
+      copyLink();
+    }
+  };
+
   const handlePrimary = () => {
     if (primary === "share") {
       setDialog(
@@ -231,75 +364,81 @@ const SceneActions: React.FC = () => {
 
   const closeDialog = () => setDialog(null);
 
+  // Wait for auth, which picks the action, and for the route's scene, whose
+  // key and author it acts on. The dialogs stay mounted regardless: after a
+  // publish, the store's key can reach a render before the route does.
+  let control: React.ReactNode;
+  if (authStatus === "loading" || !loaded || key !== routeKey) {
+    control = (
+      <span
+        className={styles.placeholder}
+        style={{ width: isPhone ? "2.25rem" : PRIMARY_WIDTH }}
+        aria-hidden
+      />
+    );
+  } else if (isPhone) {
+    control = (
+      <PhoneSceneAction
+        primary={primary}
+        menu={menu}
+        label={label}
+        enabled={enabled}
+        saving={saving}
+        flashing={flash !== null}
+        onPrimary={handlePrimary}
+        onMenuAction={runMenuAction}
+      />
+    );
+  } else {
+    control = (
+      <ButtonGroup aria-label="Scene actions">
+        <Button
+          data-testid="scene-action"
+          tone="primary"
+          // Not `disabled`: a disabled button drops keyboard focus to the page
+          // after every Save or Copy link.
+          loading={!enabled}
+          onClick={handlePrimary}
+          style={{ width: PRIMARY_WIDTH }}
+        >
+          {label}
+        </Button>
+        {menu.length > 0 ? (
+          <Menu.Root>
+            <Menu.Trigger
+              disabled={saving}
+              render={
+                <IconButton
+                  variant="outline"
+                  tone="primary"
+                  label="More scene actions"
+                >
+                  <Icon icon={chevronDown} aria-hidden="true" />
+                </IconButton>
+              }
+            />
+            <Menu.Popup>
+              {menu.map((action) => (
+                <Menu.Item key={action} onClick={() => runMenuAction(action)}>
+                  {MENU_LABELS[action]}
+                </Menu.Item>
+              ))}
+            </Menu.Popup>
+          </Menu.Root>
+        ) : null}
+      </ButtonGroup>
+    );
+  }
+
   return (
     <>
       <span role="status" className={styles.status}>
-        {saving ? "Saving..." : flash?.text}
+        {/* On desktop the button's own text says "Saving...". */}
+        {saving && isPhone ? "Saving..." : flash?.text}
       </span>
-      {/* Wait for auth, which picks the action, and for the route's scene, whose
-          key and author it acts on. The dialogs stay mounted regardless: after
-          a publish, the store's key can reach a render before the route does. */}
-      {authStatus === "loading" || !loaded || key !== routeKey ? (
-        <span className={styles.placeholder} aria-hidden />
-      ) : (
-        <ButtonGroup aria-label="Scene actions">
-          <Button
-            data-testid="scene-action"
-            tone="primary"
-            // Not `disabled`: a disabled button drops keyboard focus to the page
-            // after every Save or Copy link.
-            loading={!enabled}
-            onClick={handlePrimary}
-            className={styles.primary}
-          >
-            <span className={styles.labels}>
-              <span>{label}</span>
-              {[...reserved].map((text) => (
-                <span
-                  key={text}
-                  className={styles.reserve}
-                  data-label={text}
-                  aria-hidden
-                />
-              ))}
-            </span>
-          </Button>
-          {menu.length > 0 ? (
-            <Menu.Root>
-              <Menu.Trigger
-                disabled={saving}
-                render={
-                  <IconButton
-                    variant="outline"
-                    tone="primary"
-                    label="More scene actions"
-                  >
-                    <Icon icon={chevronDown} aria-hidden="true" />
-                  </IconButton>
-                }
-              />
-              <Menu.Popup>
-                {menu.includes("duplicate") ? (
-                  <Menu.Item
-                    onClick={() => setDialog({ kind: "publish", mode: "copy" })}
-                  >
-                    Duplicate
-                  </Menu.Item>
-                ) : null}
-                {menu.includes("copy-link") ? (
-                  <Menu.Item
-                    onClick={() => {
-                      copyLink();
-                    }}
-                  >
-                    Copy link
-                  </Menu.Item>
-                ) : null}
-              </Menu.Popup>
-            </Menu.Root>
-          ) : null}
-        </ButtonGroup>
-      )}
+      <span ref={controlRef} className={styles.control}>
+        {control}
+      </span>
       {dialog?.kind === "publish" ? (
         <PublishDialog
           mode={dialog.mode}

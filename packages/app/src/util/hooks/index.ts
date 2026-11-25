@@ -3,6 +3,7 @@ import useToggle from "./useToggle";
 import useCollapsible from "./useCollapsible";
 import useElementResize from "./useElementResize";
 import useKeptFailure from "./useKeptFailure";
+import useMediaQuery from "./useMediaQuery";
 
 export {
   useShadowStylesheet,
@@ -10,4 +11,5 @@ export {
   useCollapsible,
   useElementResize,
   useKeptFailure,
+  useMediaQuery,
 };

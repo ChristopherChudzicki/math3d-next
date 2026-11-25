@@ -83,14 +83,6 @@ html {
   color: var(--color-text-primary);
 }
 
-/* Header.module.css gives the title its own row under the same query. */
-@media (max-width: 600px) and (min-height: 480px) {
-  body,
-  html {
-    --header-height: 86px;
-  }
-}
-
 #root {
   height: 100vh;
   height: 100dvh;

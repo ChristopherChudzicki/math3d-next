@@ -1,8 +1,7 @@
 declare const styles: {
-  readonly "labels": string;
+  readonly "caret": string;
+  readonly "control": string;
   readonly "placeholder": string;
-  readonly "primary": string;
-  readonly "reserve": string;
   readonly "status": string;
 };
 export = styles;
