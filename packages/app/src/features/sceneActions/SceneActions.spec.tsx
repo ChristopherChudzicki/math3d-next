@@ -504,6 +504,23 @@ describe("an opened draft whose scene was saved since", () => {
   });
 });
 
+test("a dialog opened from the menu returns focus to the menu button", async () => {
+  const { scene } = renderOwnedScene();
+  await renameScene(`${scene.title} edited`);
+  await user.click(
+    await screen.findByRole("button", { name: "More scene actions" }),
+  );
+  await user.click(await screen.findByRole("menuitem", { name: "Copy link" }));
+  const dialog = await screen.findByRole("dialog", { name: "Copy link" });
+  await user.click(within(dialog).getByRole("button", { name: "Close" }));
+
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "More scene actions" }),
+    ).toHaveFocus(),
+  );
+});
+
 describe("on a phone", () => {
   // jsdom has no matchMedia, so useMediaQuery reads false; stub one that
   // matches PHONE_QUERY.
@@ -672,7 +689,7 @@ describe("on a phone", () => {
     expect(rename).toHaveFocus();
   });
 
-  test("a dialog closed after crossing the breakpoint returns focus to the new control", async () => {
+  test("a dialog closed after crossing the breakpoint and back returns focus to the new menu button", async () => {
     const { scene } = renderOwnedScene();
     await renameScene(`${scene.title} edited`);
     await openMenu();
@@ -682,9 +699,13 @@ describe("on a phone", () => {
     const dialog = await screen.findByRole("dialog", { name: "Copy link" });
 
     setPhone(false);
+    setPhone(true);
     await user.click(within(dialog).getByRole("button", { name: "Close" }));
 
-    await waitFor(async () => expect(await primary()).toHaveFocus());
-    expect(await primary()).toHaveTextContent(/^Save$/);
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Scene actions" }),
+      ).toHaveFocus(),
+    );
   });
 });

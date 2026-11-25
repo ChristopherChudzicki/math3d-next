@@ -79,6 +79,9 @@ const getActions = ({
     : { primary: "copy-link", menu: ["duplicate"] };
 };
 
+/** Which part of the scene action a dialog was opened from. */
+type OpenedFrom = "button" | "menu";
+
 type Dialog =
   | { kind: "publish"; mode: PublishMode; existingUrl?: string }
   | { kind: "link"; url: string; unsaved: boolean };
@@ -97,7 +100,7 @@ type PhoneSceneActionProps = {
   enabled: boolean;
   saving: boolean;
   flashing: boolean;
-  onAction: (action: Action) => void;
+  onAction: (action: Action, from: OpenedFrom) => void;
   popupRef: React.Ref<HTMLDivElement>;
 };
 
@@ -131,7 +134,7 @@ const PhoneSceneAction: React.FC<PhoneSceneActionProps> = ({
         tone="primary"
         label={label}
         loading={!enabled}
-        onClick={() => onAction(primary)}
+        onClick={() => onAction(primary, "button")}
       >
         {icon}
       </IconButton>
@@ -164,7 +167,7 @@ const PhoneSceneAction: React.FC<PhoneSceneActionProps> = ({
             key={action}
             icon={<Icon icon={ACTIONS[action].icon} />}
             disabled={saving}
-            onClick={() => onAction(action)}
+            onClick={() => onAction(action, "menu")}
           >
             {ACTIONS[action].label}
           </Menu.Item>
@@ -221,17 +224,24 @@ const SceneActions: React.FC = () => {
   const [opened, setOpened] = useState<{
     dialog: Dialog;
     load: number;
-    phone: boolean;
   } | null>(null);
   const dialog = opened?.load === sceneLoad ? opened.dialog : null;
   const setDialog = (next: Dialog | null) =>
-    setOpened(next && { dialog: next, load: sceneLoad, phone: isPhone });
-  // A dialog returns focus to its opener, which crossing the breakpoint
-  // replaces; null keeps Base UI's default.
-  const dialogFinalFocus = () =>
-    opened?.phone === isPhone
-      ? null
-      : controlRef.current?.querySelector("button") ?? null;
+    setOpened(next && { dialog: next, load: sceneLoad });
+  // A dialog's opener may be gone (a menu item, or a control replaced by
+  // crossing the breakpoint), so focus returns to the live control instead.
+  const openedFrom = useRef<OpenedFrom | null>(null);
+  const dialogFinalFocus = () => {
+    // null keeps Base UI's default: the opener, here the banner's link.
+    if (!openedFrom.current) return null;
+    const control = controlRef.current;
+    return (
+      (openedFrom.current === "menu" &&
+        control?.querySelector<HTMLElement>('[aria-haspopup="menu"]')) ||
+      control?.querySelector("button") ||
+      null
+    );
+  };
   const [saving, setSaving] = useState(false);
   const [flash, setFlash] = useState<{ text: string } | null>(null);
 
@@ -252,7 +262,10 @@ const SceneActions: React.FC = () => {
   const savedTitle = sceneDisplayName(savedScene?.title ?? "");
   const { show, dismiss } = useBanners();
   const openCopy = useRef(() => {});
-  openCopy.current = () => setDialog({ kind: "publish", mode: "copy" });
+  openCopy.current = () => {
+    openedFrom.current = null;
+    setDialog({ kind: "publish", mode: "copy" });
+  };
   useEffect(() => {
     if (!warnSavedSince) return undefined;
     show({
@@ -332,7 +345,8 @@ const SceneActions: React.FC = () => {
     }
   };
 
-  const run = (action: Action) => {
+  const run = (action: Action, from: OpenedFrom) => {
+    openedFrom.current = from;
     if (action === "share") {
       setDialog(
         dirty || key === null
@@ -386,7 +400,7 @@ const SceneActions: React.FC = () => {
           // Not `disabled`: a disabled button drops keyboard focus to the page
           // after every Save or Copy link.
           loading={!enabled}
-          onClick={() => run(primary)}
+          onClick={() => run(primary, "button")}
           style={{ width: PRIMARY_WIDTH }}
         >
           {label}
@@ -407,7 +421,7 @@ const SceneActions: React.FC = () => {
             />
             <Menu.Popup ref={popupRef}>
               {menu.map((action) => (
-                <Menu.Item key={action} onClick={() => run(action)}>
+                <Menu.Item key={action} onClick={() => run(action, "menu")}>
                   {ACTIONS[action].label}
                 </Menu.Item>
               ))}
