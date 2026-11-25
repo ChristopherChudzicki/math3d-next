@@ -12,3 +12,11 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+.caret {
+  font-size: 0.75em;
+}
+
+.control {
+  display: inline-flex;
+}

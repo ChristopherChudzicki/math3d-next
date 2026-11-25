@@ -52,6 +52,7 @@ type PublishDialogProps = {
   onClose: () => void;
   /** The scene is already published here: open on the link step. */
   existingUrl?: string;
+  finalFocus?: () => HTMLElement | null;
 };
 
 /**
@@ -63,6 +64,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
   mode,
   onClose,
   existingUrl,
+  finalFocus,
 }) => {
   const store = useAppStore();
   const dispatch = useAppDispatch();
@@ -217,7 +219,11 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
         if (!open && !busy) onClose();
       }}
     >
-      <Dialog.Popup size="sm" initialFocus={publishedUrl ? copyRef : titleRef}>
+      <Dialog.Popup
+        size="sm"
+        initialFocus={publishedUrl ? copyRef : titleRef}
+        finalFocus={finalFocus}
+      >
         <Dialog.Header closeDisabled={busy}>
           <Dialog.Title>
             {publishedUrl ? headings.link : headings.title}

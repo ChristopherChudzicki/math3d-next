@@ -56,3 +56,26 @@
   margin-left: 1rem;
   margin-right: 1rem;
 }
+
+/* Phones (`PHONE_QUERY` in config/breakpoints.ts): the scene title gets the
+   room "Math3d" and wide spacing would take. */
+@media (max-width: 600px) {
+  /* Without the brand's column: start, title, nav. */
+  .header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .nav-container {
+    gap: 0.5rem;
+    padding-left: 0.5rem;
+  }
+
+  .nav-container > * {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}

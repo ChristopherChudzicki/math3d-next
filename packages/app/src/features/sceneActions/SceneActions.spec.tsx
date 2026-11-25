@@ -1,6 +1,8 @@
 import {
   afterAll,
+  afterEach,
   beforeAll,
+  beforeEach,
   describe,
   expect,
   onTestFinished,
@@ -25,6 +27,7 @@ import {
 } from "@/test_util";
 import { actions } from "@/store/scene/state/scene.slice";
 import { readDraft } from "@/store/scene/drafts/storage";
+import { PHONE_QUERY } from "@/config/breakpoints";
 
 beforeAll(() => {
   Object.assign(window.navigator, {
@@ -130,7 +133,7 @@ test("an owned scene with edits saves in place", async () => {
   await renameScene(`${scene.title} edited`);
 
   expect(await primary()).toHaveTextContent(/^Save$/);
-  expect(await menuEntries()).toEqual(["Duplicate", "Copy link"]);
+  expect(await menuEntries()).toEqual(["Copy link", "Duplicate"]);
   const sawSavedSince = watchForText(SAVED_SINCE);
   await user.click(await primary());
 
@@ -498,5 +501,226 @@ describe("an opened draft whose scene was saved since", () => {
 
     expect(await primary()).toHaveTextContent(/^Save a copy$/);
     expect(screen.queryByText(SAVED_SINCE)).toBeNull();
+  });
+});
+
+test("a dialog opened from the menu returns focus to the menu button", async () => {
+  const { scene } = renderOwnedScene();
+  await renameScene(`${scene.title} edited`);
+  await user.click(
+    await screen.findByRole("button", { name: "More scene actions" }),
+  );
+  await user.click(await screen.findByRole("menuitem", { name: "Copy link" }));
+  const dialog = await screen.findByRole("dialog", { name: "Copy link" });
+  await user.click(within(dialog).getByRole("button", { name: "Close" }));
+
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "More scene actions" }),
+    ).toHaveFocus(),
+  );
+});
+
+describe("on a phone", () => {
+  // jsdom has no matchMedia, so useMediaQuery reads false; stub one that
+  // matches PHONE_QUERY.
+  let phone = true;
+  const listeners = new Set<() => void>();
+  const setPhone = (next: boolean) => {
+    phone = next;
+    act(() => listeners.forEach((listener) => listener()));
+  };
+  beforeEach(() => {
+    phone = true;
+    window.matchMedia = ((query: string) => ({
+      get matches() {
+        return phone && query === PHONE_QUERY;
+      },
+      addEventListener: (_: string, listener: () => void) =>
+        listeners.add(listener),
+      removeEventListener: (_: string, listener: () => void) =>
+        listeners.delete(listener),
+    })) as unknown as typeof window.matchMedia;
+  });
+  afterEach(() => {
+    listeners.clear();
+    // @ts-expect-error lib.dom types matchMedia as required; jsdom has none to restore
+    delete window.matchMedia;
+  });
+
+  const openMenu = async () =>
+    user.click(await screen.findByRole("button", { name: "Scene actions" }));
+
+  test("a lone action is an icon button named for it", async () => {
+    const scene = seedDb.withSceneFromItems([]);
+    renderTestApp(`/${scene.key}`);
+
+    const share = await screen.findByRole("button", { name: "Share" });
+    expect(share).toHaveTextContent(/^$/);
+    await user.click(share);
+
+    expect(
+      await screen.findByRole("dialog", { name: "Share scene" }),
+    ).toBeVisible();
+  });
+
+  test("an unsaved scene's Save icon is inert before any edit", async () => {
+    renderTestApp("/", { isAuthenticated: true });
+
+    const save = await screen.findByRole("button", { name: "Save" });
+    expect(save).toHaveTextContent(/^$/);
+    expectInert(save);
+    await tryToActivate(save);
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  test("several actions are one menu button, the primary listed first", async () => {
+    const { scene } = renderOwnedScene();
+
+    await openMenu();
+    expect(
+      (await screen.findAllByRole("menuitem")).map((el) => el.textContent),
+    ).toEqual(["Copy link", "Duplicate"]);
+    await user.keyboard("{Escape}");
+
+    await renameScene(`${scene.title} edited`);
+    await openMenu();
+    expect(
+      (await screen.findAllByRole("menuitem")).map((el) => el.textContent),
+    ).toEqual(["Save", "Copy link", "Duplicate"]);
+  });
+
+  test("the menu's items are disabled while saving", async () => {
+    const gate = Promise.withResolvers<void>();
+    // Returning nothing falls through to the mock API's PATCH handler.
+    server.use(
+      http.patch(urls.scenes.detail, async () => {
+        await gate.promise;
+      }),
+    );
+    const { scene } = renderOwnedScene();
+    await renameScene(`${scene.title} edited`);
+
+    await openMenu();
+    await user.click(await screen.findByRole("menuitem", { name: "Save" }));
+    await openMenu();
+
+    const items = await screen.findAllByRole("menuitem");
+    items.forEach((item) =>
+      expect(item).toHaveAttribute("aria-disabled", "true"),
+    );
+    gate.resolve();
+  });
+
+  test("Save from the menu saves in place and announces each step", async () => {
+    const { scene, store } = renderOwnedScene();
+    await renameScene(`${scene.title} edited`);
+
+    await openMenu();
+    await user.click(await screen.findByRole("menuitem", { name: "Save" }));
+
+    const statuses = () =>
+      screen.getAllByRole("status").map((el) => el.textContent);
+    await waitFor(() => expect(statuses()).toContain("Saving..."));
+    await waitFor(() => expect(statuses()).toContain("Saved!"), {
+      timeout: 2000,
+    });
+    expect(store.getState().scene.dirty).toBe(false);
+  });
+
+  test("closing a dialog opened from the menu returns focus to the menu button", async () => {
+    const { scene } = renderOwnedScene();
+    await renameScene(`${scene.title} edited`);
+
+    await openMenu();
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Copy link" }),
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Copy link" });
+    await user.click(within(dialog).getByRole("button", { name: "Close" }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Scene actions" }),
+      ).toHaveFocus(),
+    );
+  });
+
+  test("focus follows the control across the breakpoint", async () => {
+    renderOwnedScene();
+    const trigger = await screen.findByRole("button", {
+      name: "Scene actions",
+    });
+    act(() => trigger.focus());
+
+    setPhone(false);
+
+    expect(await primary()).toHaveTextContent(/^Copy link$/);
+    expect(await primary()).toHaveFocus();
+  });
+
+  test("focus follows the control across the breakpoint from its open menu", async () => {
+    renderOwnedScene();
+    const trigger = await screen.findByRole("button", {
+      name: "Scene actions",
+    });
+    act(() => trigger.focus());
+    await user.keyboard("{Enter}");
+    const menu = await screen.findByRole("menu");
+    await waitFor(() =>
+      expect(menu).toContainElement(document.activeElement as HTMLElement),
+    );
+
+    setPhone(false);
+
+    expect(await primary()).toHaveTextContent(/^Copy link$/);
+    await waitFor(async () => expect(await primary()).toHaveFocus());
+  });
+
+  test("a dialog opened from a lone button and closed after crossing the breakpoint returns focus to the new button", async () => {
+    setPhone(false);
+    const scene = seedDb.withSceneFromItems([]);
+    renderTestApp(`/${scene.key}`);
+    await user.click(await primary());
+    const dialog = await screen.findByRole("dialog", { name: "Share scene" });
+
+    setPhone(true);
+    await user.click(within(dialog).getByRole("button", { name: "Close" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Share" })).toHaveFocus(),
+    );
+  });
+
+  test("focus elsewhere stays put across the breakpoint", async () => {
+    renderOwnedScene();
+    await primary();
+    const rename = screen.getByRole("button", { name: "Rename scene" });
+    act(() => rename.focus());
+
+    setPhone(false);
+
+    expect(await primary()).toHaveTextContent(/^Copy link$/);
+    expect(rename).toHaveFocus();
+  });
+
+  test("a dialog closed after crossing the breakpoint and back returns focus to the new menu button", async () => {
+    const { scene } = renderOwnedScene();
+    await renameScene(`${scene.title} edited`);
+    await openMenu();
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Copy link" }),
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Copy link" });
+
+    setPhone(false);
+    setPhone(true);
+    await user.click(within(dialog).getByRole("button", { name: "Close" }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Scene actions" }),
+      ).toHaveFocus(),
+    );
   });
 });

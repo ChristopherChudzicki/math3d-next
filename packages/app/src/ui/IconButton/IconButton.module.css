@@ -1,10 +1,11 @@
 /* Two classes, so these beat Button's single-class size rules in any load order. */
 .iconButton.sm,
 .iconButton.md {
-  /* One icon is square; a second widens the button. */
+  /* One icon is square; more widen the button but keep a lone icon's inset:
+     half the square's slack, less the 1px border. */
   min-width: var(--button-size);
   gap: 0;
-  padding: 0 0.125rem;
+  padding: 0 calc((var(--button-size) - 1em) / 2 - 1px);
   /* A grid cell would otherwise stretch it wide. */
   justify-self: center;
 }
