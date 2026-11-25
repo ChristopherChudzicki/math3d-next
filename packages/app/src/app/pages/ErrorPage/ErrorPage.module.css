@@ -21,7 +21,7 @@
 .brand {
   font-weight: 900;
   font-size: 1.25rem;
-  color: var(--color-text-lighter);
+  color: var(--color-text-light);
 }
 
 .main {

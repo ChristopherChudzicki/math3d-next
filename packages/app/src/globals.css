@@ -61,8 +61,8 @@ html {
   --color-danger: rgb(198, 40, 40);
   --color-warning: rgb(237, 108, 2);
   --color-success: rgb(46, 125, 50);
-  --color-text-lighter: rgb(191, 191, 191);
-  --color-text-light: rgb(118, 118, 118);
+  /* Keeps 4.5:1 on its darkest background, a highlighted menu row (~rgb(240)). */
+  --color-text-light: rgb(108, 108, 108);
   --color-text-primary: rgb(67, 67, 67);
 
   --border-radius: 4px;
