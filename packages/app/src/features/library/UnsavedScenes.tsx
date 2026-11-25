@@ -85,7 +85,7 @@ const unsavedName = (record: DraftRecord) =>
 
 const DraftRow: React.FC<{
   record: DraftRecord;
-  /** The editor's own session; opening it again would do nothing. */
+  /** The editor's own session, which the row neither opens nor deletes. */
   current: boolean;
   opening: boolean;
   now: Date;
@@ -122,13 +122,12 @@ const DraftRow: React.FC<{
       </p>
     </div>
     {current ? (
-      // aria-current on the button already says this to screen readers.
+      // No Delete: the editor would rewrite this draft on its next edit.
+      // aria-current on the button already says "current" to screen readers.
       <span className={styles.currentBadge} aria-hidden="true">
         Current
       </span>
     ) : (
-      // The editor rewrites its own session's draft on the next edit, so
-      // deleting it wouldn't stick.
       <IconButton
         className={styles.delete}
         label={`Delete ${unsavedName(record)}`}
@@ -198,11 +197,11 @@ const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
   };
 
   const open = async (record: DraftRecord) => {
-    const id = await openDraft(record);
-    if (!id) return;
+    const copy = await openDraft(record);
+    if (!copy) return;
     // Opening re-keys the row, so focus follows it to its new id.
-    focusNext.current = () => document.getElementById(openId(id));
-    announce(`Opened ${unsavedName(record)}`);
+    focusNext.current = () => document.getElementById(openId(copy.id));
+    announce(`Opened ${unsavedName(copy)}`);
   };
 
   const undo = (record: DraftRecord) => {
@@ -231,8 +230,8 @@ const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
         {drafts !== null && rows.length === 0 && (
           <div className={listStyles.message}>
             <p className={listStyles.hint}>
-              When you leave a scene without saving, your changes are kept here,
-              in this browser, for up to 7 days.
+              Changes you don’t save are kept here, in this browser, for up to 7
+              days.
             </p>
           </div>
         )}

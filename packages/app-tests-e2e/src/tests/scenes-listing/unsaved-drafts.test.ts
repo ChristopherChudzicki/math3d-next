@@ -51,6 +51,7 @@ test("Unsaved edits survive a reload in the Unsaved tab", async ({
     await openUnsavedTab(page);
     await page.getByRole("button", { name: draftName(scene.title) }).click();
 
+    // Waits for the open to finish: Escape during it would cancel it.
     await expect(
       page.getByRole("button", { name: draftName(scene.title) }),
     ).toHaveAttribute("aria-current", "true");

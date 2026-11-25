@@ -77,7 +77,7 @@ test("rows are newest first, and this tab's own session is marked current", asyn
     "aria-current",
     "true",
   );
-  // The editor would write it again on its next edit.
+  // No Delete: the editor would rewrite its own draft on its next edit.
   expect(
     screen.queryByRole("button", { name: `Delete unsaved scene ${own.title}` }),
   ).toBeNull();
@@ -146,7 +146,7 @@ test("with no drafts, the tab explains what will appear", async () => {
 
   expect(
     await screen.findByText(
-      "When you leave a scene without saving, your changes are kept here, in this browser, for up to 7 days.",
+      "Changes you don’t save are kept here, in this browser, for up to 7 days.",
     ),
   ).toBeVisible();
   expect(screen.getByRole("tab", { name: "Unsaved" })).toBeVisible();
@@ -219,7 +219,6 @@ test("opening a draft loads it as unsaved work at its scene's URL, under a new i
   expect(copy.id).not.toBe(draft.id);
   expect(dialog).toBeVisible();
   const row = screen.getByRole("button", { name: `Changes to ${draft.title}` });
-  expect(row).toHaveAttribute("aria-current", "true");
   expect(row).toHaveFocus();
   expect(within(dialog).getByRole("status")).toHaveTextContent(
     `Opened unsaved changes to ${draft.title}`,
@@ -286,13 +285,15 @@ test("a draft whose scene was deleted opens as a new scene", async () => {
   const draft = { ...draftOf(seedDb.withSceneFromItems([])), key: "deleted" };
   writeDraft(draft);
   const { store, location } = await openUnsaved();
+  const entry = location.current.key;
 
   await user.click(
     await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
   );
 
   await waitFor(() => expect(store.getState().scene.title).toBe(draft.title));
-  expect(location.current.pathname).toBe("/");
+  // Already at "/", so no history entry is added.
+  expect(location.current.key).toBe(entry);
   expect(store.getState().scene).toMatchObject({
     key: null,
     author: null,
@@ -353,6 +354,28 @@ test("closing the list while a draft's scene is checked leaves the editor as it 
   expect(store.getState().scene.draftId).toBe(before);
   expect(location.current.pathname).toBe("/");
   expect(readDraft(draft.id)).not.toBeNull();
+});
+
+test("deleting a draft while it opens leaves it deleted, and the editor as it was", async () => {
+  const release = holdSceneFetch();
+  const draft = draftOf(seedDb.withSceneFromItems([]));
+  writeDraft(draft);
+  const { store, queryClient } = await openUnsaved();
+  const before = store.getState().scene.draftId;
+
+  await user.click(
+    await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
+  );
+  await user.click(
+    screen.getByRole("button", {
+      name: `Delete unsaved changes to ${draft.title}`,
+    }),
+  );
+  release();
+  await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+
+  expect(store.getState().scene.draftId).toBe(before);
+  expect(listDrafts()).toEqual([]);
 });
 
 test("deleting a row offers Undo, which brings the draft back", async () => {
