@@ -84,10 +84,10 @@ const unsavedName = (record: DraftRecord) =>
     : `unsaved scene ${cardTitle(record.title)}`;
 
 /** This browser's drafts, newest first, except the editor's own session. */
-const useOtherDrafts = (): DraftRecord[] => {
+const useOtherDrafts = (): DraftRecord[] | null => {
   const drafts = useDrafts();
   const currentId = useAppSelector((state) => state.scene.draftId);
-  return drafts.filter((draft) => draft.id !== currentId);
+  return drafts && drafts.filter((draft) => draft.id !== currentId);
 };
 
 /** Offers Undo until the list goes away: the drawer closes or the tab changes. */
@@ -153,7 +153,7 @@ const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
   };
 
   const rows = [
-    ...drafts.filter((draft) => !deleted[draft.id]),
+    ...(drafts ?? []).filter((draft) => !deleted[draft.id]),
     ...Object.values(deleted),
   ].sort((a, b) => b.updatedAt - a.updatedAt);
   const now = new Date();
@@ -167,14 +167,16 @@ const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
       tabIndex={rows.length > 0 ? -1 : 0}
     >
       <Drawer.Body>
-        {rows.length === 0 ? (
+        {/* Until sign-in status is known, which drafts to list isn't. */}
+        {drafts !== null && rows.length === 0 && (
           <div className={listStyles.message}>
             <p className={listStyles.hint}>
               When you leave a scene without saving, your changes are kept here,
               in this browser, for 7 days.
             </p>
           </div>
-        ) : (
+        )}
+        {rows.length > 0 && (
           <>
             <p className={classNames(listStyles.hint, styles.intro)}>
               Unsaved work from this browser, kept for 7 days.

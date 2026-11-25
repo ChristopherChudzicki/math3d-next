@@ -126,6 +126,19 @@ test("a full quota evicts the oldest of all once the owner has nothing left", ()
   expect(ids()).toEqual(["new", "older"]);
 });
 
+test("a write that still doesn't fit gives up after evicting 3 drafts", () => {
+  ["a", "b", "c", "d", "e"].forEach((id, i) =>
+    writeDraft(makeDraft(id, NOW - 1000 * (5 - i)), NOW),
+  );
+  vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+    throw new DOMException("full", "QuotaExceededError");
+  });
+
+  writeDraft(makeDraft("too-big"), NOW);
+
+  expect(ids()).toEqual(["e", "d"]);
+});
+
 test("a failed write that isn't a full quota evicts nothing", () => {
   writeDraft(makeDraft("kept"), NOW);
   vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {

@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { nanoid } from "@reduxjs/toolkit";
-import { http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { makeItem, seedDb, urls } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
@@ -145,6 +145,16 @@ test("with no drafts, the tab explains what will appear", async () => {
   expect(screen.getByRole("tab", { name: "Unsaved" })).toBeVisible();
 });
 
+test("while sign-in status is unknown, the tab lists nothing and doesn't say it's empty", async () => {
+  server.use(http.get(urls.auth.me, () => delay("infinite")));
+  writeDraft(newSceneDraft());
+  const { dialog } = await openUnsaved();
+
+  expect(within(dialog).getByRole("tab", { name: "Unsaved" })).toBeVisible();
+  expect(within(dialog).queryByRole("list")).toBeNull();
+  expect(within(dialog).queryByText(/When you leave a scene/)).toBeNull();
+});
+
 test("with drafts, the tab says where they come from", async () => {
   writeDraft(newSceneDraft());
   await openUnsaved();
@@ -217,6 +227,25 @@ test("a draft of a legacy scene opens as legacy", async () => {
 
   await waitFor(() => expect(location.current.pathname).toBe(`/${scene.key}`));
   expect(store.getState().scene.isLegacy).toBe(true);
+});
+
+test("a draft whose scene was saved since opens flagged as such", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const draft = {
+    ...draftOf(scene),
+    baseModifiedDate: new Date(
+      Date.parse(scene.modifiedDate) - 1000,
+    ).toISOString(),
+  };
+  writeDraft(draft);
+  const { store, location } = await openUnsaved();
+
+  await user.click(
+    await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
+  );
+
+  await waitFor(() => expect(location.current.pathname).toBe(`/${scene.key}`));
+  expect(store.getState().scene.savedSince).toBe(true);
 });
 
 test("a draft whose scene was deleted opens as a new scene", async () => {

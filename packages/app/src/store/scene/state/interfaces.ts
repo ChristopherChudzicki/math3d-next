@@ -57,6 +57,12 @@ interface SceneState {
    * for a new scene.
    */
   modifiedDate: string | null;
+  /**
+   * This session opened a draft whose scene was saved after the version the
+   * draft edits. Stored, not derived: this session's own save also makes the
+   * cached scene newer than `modifiedDate`, until `markSaved`.
+   */
+  savedSince: boolean;
 }
 
 interface Subtree {

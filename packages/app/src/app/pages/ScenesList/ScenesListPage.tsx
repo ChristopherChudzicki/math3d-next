@@ -42,7 +42,7 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
     DISPLAY_AUTH_FLOWS || isAuthenticated === "authenticated";
   const rawList = search.get("list") ?? ListType.Examples;
   const listType = normalizeListType(rawList, showMyScenes);
-  const unsavedCount = useOtherDrafts().length;
+  const unsavedCount = useOtherDrafts()?.length ?? 0;
 
   useEffect(() => {
     if (listType !== rawList) open("scenes", { list: listType });

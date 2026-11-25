@@ -47,6 +47,7 @@ const getInitialState = (): SceneState => ({
   baseline: "",
   saveCount: 0,
   modifiedDate: null,
+  savedSince: false,
 });
 
 const getInsertionFolder = (
@@ -91,6 +92,7 @@ type SetScenePayload = {
   modifiedDate?: SceneState["modifiedDate"];
   /** An opened draft is unsaved work from the start. */
   dirty?: boolean;
+  savedSince?: boolean;
 };
 
 /**
@@ -147,6 +149,7 @@ const slice = createSlice({
         state.draftId = action.payload.draftId;
         state.baseline = sceneFingerprint({ title, items, itemOrder: order });
         state.modifiedDate = action.payload.modifiedDate ?? null;
+        state.savedSince = action.payload.savedSince ?? false;
 
         invariant(state.order[MAIN_FOLDER], "Main folder should exist.");
         invariant(
@@ -305,6 +308,7 @@ const slice = createSlice({
       state.baseline = sceneFingerprint(action.payload.snapshot);
       state.saveCount += 1;
       state.modifiedDate = action.payload.modifiedDate;
+      state.savedSince = false;
     }),
   },
 });

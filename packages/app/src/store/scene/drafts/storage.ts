@@ -28,6 +28,8 @@ type DraftRecord = {
 const PREFIX = "math3d:draft:";
 const MAX_DRAFTS = 50;
 const MAX_DRAFTS_PER_OWNER = 30;
+/** A write that still doesn't fit gives up, rather than empty storage. */
+const MAX_QUOTA_EVICTIONS = 3;
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 const storageKey = (id: string) => `${PREFIX}${id}`;
@@ -131,8 +133,8 @@ const isQuotaError = (error: unknown) =>
 
 /**
  * Writes `record`. A new record first makes room under the caps: 30 drafts
- * per owner, then 50 in all. A full quota evicts until the write fits, the
- * owner's oldest drafts first, then the oldest of all.
+ * per owner, then 50 in all. A full quota evicts up to 3 drafts until the
+ * write fits, the owner's oldest first, then the oldest of all.
  */
 const writeDraft = (record: DraftRecord, now = Date.now()) => {
   const key = storageKey(record.id);
@@ -153,13 +155,19 @@ const writeDraft = (record: DraftRecord, now = Date.now()) => {
     while (own().length >= MAX_DRAFTS_PER_OWNER) evict(own().at(-1)!);
     while (getOthers().length >= MAX_DRAFTS) evict(getOthers().at(-1)!);
   }
-  for (;;) {
+  for (let evictions = 0; ; evictions += 1) {
     try {
       localStorage.setItem(key, raw);
       break;
     } catch (error) {
       const oldest = own().at(-1) ?? getOthers().at(-1);
-      if (!isQuotaError(error) || !oldest) break;
+      if (
+        !isQuotaError(error) ||
+        !oldest ||
+        evictions === MAX_QUOTA_EVICTIONS
+      ) {
+        break;
+      }
       evict(oldest);
     }
   }

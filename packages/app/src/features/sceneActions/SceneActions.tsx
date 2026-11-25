@@ -110,19 +110,14 @@ const SceneActions: React.FC = () => {
     return () => clearTimeout(timeout);
   }, [flash]);
 
-  // The author's scene was saved after the version being edited, so Save
-  // would replace that newer version. Opening a draft fetches the scene, so
-  // reading the cache is enough.
-  const isAuthor = author !== null && me?.id === author;
-  const { data: savedScene } = useScene(
-    isAuthor ? key ?? undefined : undefined,
-    { enabled: false },
-  );
-  const modifiedDate = useAppSelector((state) => state.scene.modifiedDate);
-  const warnSavedSince =
-    savedScene !== undefined &&
-    modifiedDate !== null &&
-    Date.parse(savedScene.modifiedDate) > Date.parse(modifiedDate);
+  // An opened draft whose scene the author saved again after the version the
+  // draft edits: Save would replace that newer version.
+  const savedSince = useAppSelector((state) => state.scene.savedSince);
+  const warnSavedSince = savedSince && author !== null && me?.id === author;
+  // Opening the draft fetched it, so this reads the cache.
+  const { data: savedScene } = useScene(key ?? undefined, {
+    enabled: warnSavedSince,
+  });
   const savedTitle = sceneDisplayName(savedScene?.title ?? "");
   const { show, dismiss } = useBanners();
   const openCopy = useRef(() => {});

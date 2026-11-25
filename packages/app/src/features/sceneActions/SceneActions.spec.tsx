@@ -54,6 +54,23 @@ const capturePatches = (key: string) => {
   return bodies;
 };
 
+const SAVED_SINCE = /was saved after these changes were made/;
+
+/** Whether text matching `pattern` appears at any moment from now on. */
+const watchForText = (pattern: RegExp) => {
+  let seen = false;
+  const observer = new MutationObserver(() => {
+    seen ||= pattern.test(document.body.textContent ?? "");
+  });
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
+  onTestFinished(() => observer.disconnect());
+  return () => seen;
+};
+
 const primary = () => screen.findByTestId("scene-action");
 // The primary button stays focusable while it can't be used, so keyboard
 // users keep their place.
@@ -114,6 +131,7 @@ test("an owned scene with edits saves in place", async () => {
 
   expect(await primary()).toHaveTextContent(/^Save$/);
   expect(await menuEntries()).toEqual(["Duplicate", "Copy link"]);
+  const sawSavedSince = watchForText(SAVED_SINCE);
   await user.click(await primary());
 
   await waitFor(
@@ -128,6 +146,8 @@ test("an owned scene with edits saves in place", async () => {
   expect(patches).toEqual([
     expect.objectContaining({ title: `${scene.title} edited` }),
   ]);
+  // The save refetches the scene, newer than the store until markSaved.
+  expect(sawSavedSince()).toBe(false);
 });
 
 test("an edit made while saving survives the save and stays unsaved", async () => {
@@ -418,7 +438,6 @@ test("no scene action is offered while auth is still loading", async () => {
 });
 
 describe("an opened draft whose scene was saved since", () => {
-  const SAVED_SINCE = /was saved after these changes were made/;
   const openAsDraft = (
     store: ReturnType<typeof renderTestApp>["store"],
     scene: ReturnType<typeof seedDb.withSceneFromItems>,
@@ -433,10 +452,7 @@ describe("an opened draft whose scene was saved since", () => {
           title: "Renamed in the draft",
           isLegacy: false,
           dirty: true,
-          // The version the draft edits, before the save the loader fetched.
-          modifiedDate: new Date(
-            Date.parse(scene.modifiedDate) - 1000,
-          ).toISOString(),
+          savedSince: true,
         }),
       );
     });
