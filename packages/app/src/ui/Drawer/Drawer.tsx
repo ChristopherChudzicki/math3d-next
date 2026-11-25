@@ -7,7 +7,7 @@ import * as styles from "./Drawer.module.css";
 type DrawerSide = "left" | "right";
 type DrawerSize = "md" | "lg";
 
-// In px, so fillsScreenQuery matches them: a media query's rem is the
+// In px, so fillsViewportQuery matches them: a media query's rem is the
 // browser's default font size, not the root's 14px.
 const WIDTHS: Record<DrawerSize, number> = {
   md: 336,
