@@ -23,24 +23,28 @@
 }
 
 .home {
-  border-radius: var(--border-radius);
   text-decoration: none;
 }
 
-/* Darker under a hover tint, where --color-text-light falls below 4.5:1. */
+/* The scenes button's hover and press tints drop --color-text-light below
+   4.5:1, and the home link has no other hover cue. */
 @media (hover: hover) {
   :hover > .wordmark {
     color: var(--color-text-primary);
   }
 }
 
-/* Empty while a scene loads or can't load: no rule then. */
-.title-slot:not(:empty) {
+:active > .wordmark {
+  color: var(--color-text-primary);
+}
+
+.title-slot {
   display: flex;
   align-items: center;
   min-width: 0;
 }
 
+/* No divider without a title, e.g. while a scene loads or when it can't. */
 .title-slot:not(:empty)::before {
   content: "";
   flex-shrink: 0;
@@ -76,10 +80,6 @@
   .home,
   .title-slot:not(:empty)::before {
     display: none;
-  }
-
-  .title-slot {
-    padding-left: 0.375rem;
   }
 
   .nav-container {

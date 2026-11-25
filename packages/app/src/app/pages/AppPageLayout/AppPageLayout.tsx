@@ -1,5 +1,5 @@
 import React from "react";
-import Header from "@/ui/Header";
+import Header, { HomeLink } from "@/ui/Header";
 import TextLink from "@/ui/TextLink";
 import styles from "./AppPageLayout.module.css";
 
@@ -13,7 +13,11 @@ const AppPageLayout: React.FC<{
   children: React.ReactNode;
 }> = ({ title, children }) => (
   <>
-    <Header title={title} nav={<TextLink to="/">Back to Math3d</TextLink>} />
+    <Header
+      brand={<HomeLink />}
+      title={title}
+      nav={<TextLink to="/">Back to Math3d</TextLink>}
+    />
     <main className={styles.main}>
       <div className={styles.card}>{children}</div>
     </main>

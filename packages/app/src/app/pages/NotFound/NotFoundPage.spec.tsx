@@ -31,3 +31,16 @@ test("the soft-404 links back to the editor", async () => {
     within(main).getByRole("link", { name: "Back to Math3d" }),
   ).toHaveAttribute("href", "/");
 });
+
+test("the header's wordmark links home for the mouse only", async () => {
+  renderTestApp("/app/does-not-exist");
+  const banner = await screen.findByRole("banner");
+  expect(
+    within(banner)
+      .getAllByRole("link")
+      .map((link) => link.textContent),
+  ).toEqual(["Back to Math3d"]);
+  const wordmark = within(banner).getByText("Math3d").closest("a");
+  expect(wordmark).toHaveAttribute("href", "/");
+  expect(wordmark).toHaveAttribute("tabindex", "-1");
+});

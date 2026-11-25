@@ -8,8 +8,8 @@ const Wordmark: React.FC = () => (
 );
 
 /**
- * A mouse shortcut home. Pages using it carry their own "Back to Math3d"
- * link, so keyboard and screen-reader users aren't handed the same link twice.
+ * A mouse-only link home, for `Header`'s `brand`. Pair it with a visible "Back
+ * to Math3d" link, which keyboard and screen-reader users get instead.
  */
 const HomeLink: React.FC = () => (
   <Anchor to="/" tabIndex={-1} aria-hidden="true" className={styles.home}>
@@ -18,17 +18,13 @@ const HomeLink: React.FC = () => (
 );
 
 type HeaderProps = {
-  /** The wordmark, or a control containing it. Defaults to a link to `/`. */
-  brand?: React.ReactNode;
+  /** The wordmark, or a control containing it, e.g. `HomeLink`. */
+  brand: React.ReactNode;
   title: React.ReactNode;
   nav: React.ReactNode;
 };
 
-const Header: React.FC<HeaderProps> = ({
-  brand = <HomeLink />,
-  title,
-  nav,
-}) => (
+const Header: React.FC<HeaderProps> = ({ brand, title, nav }) => (
   <header className={styles.header}>
     <div className={styles.brand}>{brand}</div>
     <div className={styles["title-slot"]}>{title}</div>
@@ -42,4 +38,4 @@ const HeaderTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 export default Header;
-export { HeaderTitle, Wordmark };
+export { HeaderTitle, HomeLink, Wordmark };

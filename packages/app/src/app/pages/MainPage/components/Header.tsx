@@ -145,7 +145,7 @@ const OpenScenesButton: React.FC<{ authStatus: AuthStatus }> = ({
         })
       }
     >
-      <Icon icon={folderOpen} aria-hidden="true" className={styles.folder} />
+      <Icon icon={folderOpen} aria-hidden="true" />
       <Wordmark />
     </Button>
   );

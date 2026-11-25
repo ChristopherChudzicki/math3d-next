@@ -1,4 +1,4 @@
 import Header from "./Header";
 
 export default Header;
-export { HeaderTitle, Wordmark } from "./Header";
+export { HeaderTitle, HomeLink, Wordmark } from "./Header";
