@@ -9,12 +9,7 @@ export enum ListType {
   Unsaved = "unsaved",
 }
 
-/**
- * A card's link. It keeps the drawer open on the card's tab, unless the drawer
- * covers the scene.
- */
-export const sceneHref = (key: string, list: ListType, closeDrawer: boolean) =>
-  closeDrawer ? `/${key}` : `/${key}?overlay=scenes&list=${list}`;
+export const SCENES_DRAWER_SIZE = "lg";
 
 /** A scene card's title. */
 export const cardTitle = (title?: string | null) =>

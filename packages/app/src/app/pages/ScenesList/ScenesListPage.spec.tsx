@@ -155,7 +155,8 @@ test("switching tabs replaces history; Back leaves the dialog entirely", async (
 });
 
 describe("where the drawer covers the scene", () => {
-  // The scenes drawer's width.
+  // The drawer's 672px width, spelled out so a wrong unit or width in
+  // fillsViewportQuery fails.
   beforeEach(() => matchMediaQueries(["(max-width: 672px)"]));
 
   test("choosing an example closes the drawer, and Back reopens it over the previous scene", async () => {

@@ -4,23 +4,18 @@ import { useExampleScenes } from "@math3d/api";
 import { Drawer } from "@/ui/Drawer";
 import LoadingSpinner from "@/ui/LoadingSpinner";
 import { useKeptFailure } from "@/util/hooks";
-import { useOverlay } from "@/services/overlays/useOverlay";
 import LoadFailed from "./LoadFailed";
 import SceneCard from "./SceneCard/SceneCard";
-import { ListType, cardTitle, sceneHref } from "./constants";
+import { ListType, cardTitle } from "./constants";
+import useSceneLinks from "./useSceneLinks";
 import styles from "./ScenesList.module.css";
 
 /** Enough for every example in one page. */
 const EXAMPLES_LIMIT = 100;
 
-type ExamplesListingProps = {
-  /** The drawer covers the scene, so opening one closes it. */
-  closeOnOpen: boolean;
-};
-
-const ExamplesListing: React.FC<ExamplesListingProps> = ({ closeOnOpen }) => {
+const ExamplesListing: React.FC = () => {
   const { sceneKey } = useParams();
-  const { close } = useOverlay();
+  const links = useSceneLinks(ListType.Examples);
   const query = useExampleScenes({ limit: EXAMPLES_LIMIT });
   const { failure, retrying, failedAttempts, retry } = useKeptFailure(query, {
     key: "examples",
@@ -41,11 +36,11 @@ const ExamplesListing: React.FC<ExamplesListingProps> = ({ closeOnOpen }) => {
           {query.data.items.map((scene) => (
             <SceneCard
               key={scene.key}
-              to={sceneHref(scene.key, ListType.Examples, closeOnOpen)}
+              to={links.href(scene.key)}
               title={cardTitle(scene.title)}
               imageUrl={scene.imageUrl}
               current={scene.key === sceneKey}
-              onCurrentClick={closeOnOpen ? close : undefined}
+              onCurrentClick={links.onCurrentClick}
             />
           ))}
         </ul>

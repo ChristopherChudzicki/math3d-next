@@ -7,8 +7,9 @@ let stubbed = false;
 
 /**
  * Makes exactly `queries` match, through a `window.matchMedia` stub (jsdom has
- * none) that is removed when the test finishes. Calling it again changes which
- * queries match and notifies listeners.
+ * none) that is removed when the test finishes. Call it before rendering:
+ * `useMediaQuery` subscribes on mount. Calling it again changes which queries
+ * match and notifies listeners.
  */
 const matchMediaQueries = (queries: string[]) => {
   matching = new Set(queries);

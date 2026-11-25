@@ -3,7 +3,6 @@ import { Drawer } from "@/ui/Drawer";
 import { Tabs } from "@/ui/Tabs";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { DISPLAY_AUTH_FLOWS } from "@/config/displayAuthFlows";
-import { useMediaQuery } from "@/util/hooks";
 import { useOverlay } from "@/services/overlays/useOverlay";
 import type { OverlayProps } from "@/services/overlays/useOverlay";
 import { useUrlLayerSearchParams } from "@/services/overlays/UrlLayer";
@@ -12,7 +11,11 @@ import MyScenes from "@/features/library/MyScenes";
 import UnsavedScenes, {
   useOtherDrafts,
 } from "@/features/library/UnsavedScenes";
-import { ListType, OPEN_SCENES_BUTTON_ID } from "@/features/library/constants";
+import {
+  ListType,
+  OPEN_SCENES_BUTTON_ID,
+  SCENES_DRAWER_SIZE,
+} from "@/features/library/constants";
 import styles from "./ScenesListPage.module.css";
 
 const normalizeListType = (
@@ -33,14 +36,9 @@ const normalizeListType = (
 const focusOpenScenesButton = () =>
   document.getElementById(OPEN_SCENES_BUTTON_ID);
 
-const DRAWER_SIZE = "lg";
-
 const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
   children,
 }) => {
-  // Beside the scene, the drawer stays open while the user clicks through
-  // scenes. Where it covers the scene, opening one closes it.
-  const closeOnOpen = useMediaQuery(Drawer.fillsScreenQuery(DRAWER_SIZE));
   const search = useUrlLayerSearchParams();
   const { open } = useOverlay();
   const isAuthenticated = useAuthStatus();
@@ -94,14 +92,14 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
          * `UnsavedScenes` renders its own panel, for its empty state.
          */}
         <Tabs.Panel value={ListType.Me} className={styles.panel} tabIndex={-1}>
-          <MyScenes closeOnOpen={closeOnOpen} />
+          <MyScenes />
         </Tabs.Panel>
         <Tabs.Panel
           value={ListType.Examples}
           className={styles.panel}
           tabIndex={-1}
         >
-          <ExamplesListing closeOnOpen={closeOnOpen} />
+          <ExamplesListing />
         </Tabs.Panel>
         <UnsavedScenes className={styles.panel} />
       </Tabs.Root>
@@ -123,7 +121,7 @@ const ScenesList: React.FC<OverlayProps> = ({ open, children }) => {
     <Drawer.Root open={open} onOpenChange={handleOpenChange}>
       <Drawer.Popup
         side="right"
-        size={DRAWER_SIZE}
+        size={SCENES_DRAWER_SIZE}
         finalFocus={focusOpenScenesButton}
       >
         <ScenesListContent>{children}</ScenesListContent>

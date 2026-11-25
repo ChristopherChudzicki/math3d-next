@@ -17,6 +17,8 @@ test("Choosing a scene keeps the drawer open beside it, and closes the drawer on
     prepareScene(scene1.json()),
     prepareScene(scene2.json()),
   ]);
+  // The drawer is 672px wide.
+  await page.setViewportSize({ width: 673, height: 900 });
   const myScenes = new AppPage(page).myScenes();
   await myScenes.goTo();
   await myScenes.assertReady();
@@ -26,7 +28,6 @@ test("Choosing a scene keeps the drawer open beside it, and closes the drawer on
   await expect(page).toHaveURL(new RegExp(`/${key1}\\?overlay=scenes`));
   await expect(drawer).toBeVisible();
 
-  // The drawer is 672px wide.
   await page.setViewportSize({ width: 672, height: 900 });
   await drawer.getByRole("link", { name: scene2.title }).click();
   await expect(page).toHaveURL(new RegExp(`/${key2}$`));

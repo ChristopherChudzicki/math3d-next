@@ -14,6 +14,9 @@ import {
 } from "@/test_util";
 
 const ME_LIST = "*/v1/me/scenes/";
+// The drawer's 672px width, spelled out so a wrong unit or width in
+// fillsViewportQuery fails.
+const PHONE = "(max-width: 672px)";
 
 /** Seeds scenes for a new user, newest first in the order given. */
 const seedScenes = (titles: string[]) => {
@@ -109,9 +112,25 @@ test("archiving hides the card, announces it, and focuses the next card", async 
   );
 });
 
+test("where the drawer covers the scene, choosing the open scene closes the drawer, popping its entry", async () => {
+  matchMediaQueries([PHONE]);
+  const { owner, scenes } = seedScenes(["Alpha"]);
+  const [{ key }] = scenes;
+  const { router, location } = renderTestApp(`/${key}`, { user: owner });
+  await user.click(await screen.findByRole("button", { name: "Open scenes" }));
+
+  await user.click(await screen.findByRole("link", { name: "Alpha" }));
+
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog", { name: "Scenes" })).toBeNull(),
+  );
+  expect(location.current.pathname).toBe(`/${key}`);
+  expect(location.current.search).toBe("");
+  expect(router.state.historyAction).toBe("POP");
+});
+
 test("where the drawer covers the scene, cards link to scenes alone, and archiving focuses the next card", async () => {
-  // The scenes drawer's width.
-  matchMediaQueries(["(max-width: 672px)"]);
+  matchMediaQueries([PHONE]);
   const { owner, scenes } = seedScenes(["Alpha", "Beta"]);
   await openMyScenes(owner);
   await screen.findByRole("link", { name: "Alpha" });

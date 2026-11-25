@@ -13,8 +13,8 @@ type SceneCardProps = {
   /** May 404 (no render yet); the placeholder stays until it loads. */
   imageUrl?: string | null;
   /**
-   * The scene already open. A plain click on its card calls `onCurrentClick`
-   * instead of following the link.
+   * The scene already open. A plain click on its card doesn't follow the link;
+   * it calls `onCurrentClick`, if given.
    */
   current?: boolean;
   onCurrentClick?: () => void;
@@ -67,8 +67,9 @@ const SceneCard: React.FC<SceneCardProps> = ({
   const metaId = useId();
   const hasMeta = modifiedDate !== undefined;
   const handleClick = (e: React.MouseEvent) => {
-    // A same-URL link replaces the entry and drops its history state, which
-    // useOverlay's close() needs.
+    // Following the link would replace this entry (same URL), dropping the
+    // history state useOverlay's close() needs, or push a second entry for
+    // the open scene.
     if (current && isPlainClick(e)) {
       e.preventDefault();
       onCurrentClick?.();

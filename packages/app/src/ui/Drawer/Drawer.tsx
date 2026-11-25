@@ -11,7 +11,7 @@ type DrawerSize = "md" | "lg";
 // browser's default font size, not the root's 14px.
 const WIDTHS: Record<DrawerSize, number> = {
   md: 336,
-  // Three 14rem cards per row, with Body's padding and a 1rem gap.
+  // 48rem at the root's 14px: room for three 14rem cards per row.
   lg: 672,
 };
 
@@ -21,7 +21,10 @@ type PopupProps = Omit<
 > & {
   /** The screen edge the drawer slides in from. */
   side?: DrawerSide;
-  /** Width: md for a form or a list, lg for browsing. */
+  /**
+   * Width, which `className` can't override: md for a form or a list, lg for
+   * browsing.
+   */
   size?: DrawerSize;
   className?: string;
 };
@@ -53,8 +56,9 @@ const Popup: React.FC<PopupProps> = ({
   </BaseDialog.Portal>
 );
 
-/** Matches while a drawer of this size fills the screen's width. */
-const fillsScreenQuery = (size: DrawerSize) => `(max-width: ${WIDTHS[size]}px)`;
+/** Matches while a drawer of this size fills the viewport's width. */
+const fillsViewportQuery = (size: DrawerSize) =>
+  `(max-width: ${WIDTHS[size]}px)`;
 
 export {
   Root,
@@ -66,5 +70,5 @@ export {
   Body,
   Actions,
 } from "@/ui/Dialog/Dialog";
-export { Popup, fillsScreenQuery };
+export { Popup, fillsViewportQuery };
 export type { DrawerSide, DrawerSize, PopupProps };

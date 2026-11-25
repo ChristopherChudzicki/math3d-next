@@ -30,7 +30,8 @@ import { dismissToast, showToast } from "@/ui/Toast/toasts";
 import DeleteSceneDialog from "./DeleteSceneDialog";
 import LoadFailed from "./LoadFailed";
 import SceneCard from "./SceneCard/SceneCard";
-import { ListType, cardTitle, sceneHref } from "./constants";
+import { ListType, cardTitle } from "./constants";
+import useSceneLinks from "./useSceneLinks";
 import styles from "./ScenesList.module.css";
 
 const SCROLL_ID = "my-scenes-scroll";
@@ -54,15 +55,9 @@ const cardLink = (href: string) =>
 const cardMenuButton = (href: string) =>
   cardLink(href)?.closest("li")?.querySelector("button") ?? null;
 
-type MyScenesProps = {
-  /** The drawer covers the scene, so opening one closes it. */
-  closeOnOpen: boolean;
-};
-
-const MyScenesList: React.FC<MyScenesProps> = ({ closeOnOpen }) => {
+const MyScenesList: React.FC = () => {
   const { sceneKey } = useParams();
-  const { close } = useOverlay();
-  const hrefOf = (key: string) => sceneHref(key, ListType.Me, closeOnOpen);
+  const links = useSceneLinks(ListType.Me);
   const navigate = useNavigate();
   const [filterText, setFilterText] = useState("");
   const [filterValue, setFilterValue] = useState("");
@@ -145,7 +140,7 @@ const MyScenesList: React.FC<MyScenesProps> = ({ closeOnOpen }) => {
     return (items[i + 1] ?? items[i - 1])?.key ?? null;
   };
   const elementFor = (key: string | null) =>
-    (key && cardLink(hrefOf(key))) || filterRef.current;
+    (key && cardLink(links.href(key))) || filterRef.current;
 
   const toggleArchived = async (scene: MiniScene) => {
     const archiving = !scene.archived;
@@ -196,7 +191,7 @@ const MyScenesList: React.FC<MyScenesProps> = ({ closeOnOpen }) => {
   const deleteDialogFinalFocus = () => {
     const { deleted, key } = deleteFocus.current;
     if (deleted) return elementFor(key);
-    return key ? cardMenuButton(hrefOf(key)) : null;
+    return key ? cardMenuButton(links.href(key)) : null;
   };
 
   const renderBody = () => {
@@ -244,13 +239,13 @@ const MyScenesList: React.FC<MyScenesProps> = ({ closeOnOpen }) => {
           {items.map((item) => (
             <SceneCard
               key={item.key}
-              to={hrefOf(item.key)}
+              to={links.href(item.key)}
               title={titleOf(item)}
               imageUrl={item.imageUrl}
               modifiedDate={item.modifiedDate}
               archived={item.archived}
               current={item.key === sceneKey}
-              onCurrentClick={closeOnOpen ? close : undefined}
+              onCurrentClick={links.onCurrentClick}
               actions={
                 <Menu.Root>
                   <Menu.Trigger
@@ -332,7 +327,7 @@ const MyScenesList: React.FC<MyScenesProps> = ({ closeOnOpen }) => {
   );
 };
 
-const MyScenes: React.FC<MyScenesProps> = ({ closeOnOpen }) => {
+const MyScenes: React.FC = () => {
   const isAuthenticated = useAuthStatus();
   const signIn = useSignInDialog();
   const { open } = useOverlay();
@@ -364,7 +359,7 @@ const MyScenes: React.FC<MyScenesProps> = ({ closeOnOpen }) => {
       </Drawer.Body>
     );
   }
-  return <MyScenesList closeOnOpen={closeOnOpen} />;
+  return <MyScenesList />;
 };
 
 export default MyScenes;
