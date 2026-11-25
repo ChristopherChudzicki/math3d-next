@@ -81,10 +81,9 @@ test("rows are newest first, and this tab's own session is marked current", asyn
   act(() => writeDraft(own));
 
   expect(rowNames()).toEqual([own.title, newer.title, older.title]);
-  expect(screen.getByRole("button", { name: own.title })).toHaveAttribute(
-    "aria-current",
-    "true",
-  );
+  const ownRow = screen.getByRole("button", { name: own.title });
+  expect(ownRow).toHaveAttribute("aria-current", "true");
+  expect(ownRow).toHaveAttribute("aria-disabled", "true");
   expect(
     screen.queryByRole("button", { name: `Delete unsaved scene ${own.title}` }),
   ).toBeNull();
@@ -266,6 +265,10 @@ test("clicking through drafts keeps their order, and the one you left stays list
 
   await user.click(await screen.findByRole("button", { name: names[0] }));
   await waitFor(() => expect(location.current.pathname).toBe(`/${saved.key}`));
+  await waitFor(() => {
+    const row = screen.getByRole("button", { name: names[0] });
+    expect(row).toHaveAttribute("aria-current", "true");
+  });
   await user.click(screen.getByRole("button", { name: names[1] }));
   await waitFor(() => expect(store.getState().scene.key).toBeNull());
 
@@ -294,6 +297,7 @@ test("a draft written by another tab while it opens opens as written", async () 
   await waitFor(() => expect(queryClient.isFetching()).toBe(0));
 
   expect(store.getState().scene.title).toBe("Edited in another tab");
+  expect(listDrafts().map((d) => d.title)).toEqual(["Edited in another tab"]);
 });
 
 test("a draft of a legacy scene opens as legacy", async () => {
