@@ -15,6 +15,9 @@
 
 .caret {
   font-size: 0.75em;
+  /* The chevron's glyph sits farther inside its box than the leading icon's
+     does; pull it in so the ink is inset equally on both sides. */
+  margin-right: -0.1em;
 }
 
 .control {
