@@ -1,6 +1,5 @@
 .header {
-  /* height: var(--header-height); */
-  height: 50px;
+  height: var(--header-height);
   background-color: var(--color-secondary-lightest);
   border-bottom: 1pt solid var(--color-secondary-light);
 
@@ -55,4 +54,48 @@
 .nav-container > * {
   margin-left: 1rem;
   margin-right: 1rem;
+}
+
+@media (max-width: 600px) {
+  .nav-container {
+    gap: 0.5rem;
+    padding-left: 0.5rem;
+  }
+
+  .nav-container > * {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* Narrow and tall, e.g. a phone held upright: the title gets a row of its
+   own. globals.css raises --header-height under the same query. Narrow and
+   short (a desktop zoomed in) keeps one row, where height is scarcer. */
+@media (max-width: 600px) and (min-height: 480px) {
+  .header {
+    grid-template-rows: 50px 1fr;
+    grid-template-areas:
+      "start brand . nav"
+      "title title title title";
+  }
+
+  .start {
+    grid-area: start;
+  }
+
+  .brand {
+    grid-area: brand;
+  }
+
+  .brand::after {
+    display: none;
+  }
+
+  .title-slot {
+    grid-area: title;
+  }
+
+  .nav-container {
+    grid-area: nav;
+  }
 }

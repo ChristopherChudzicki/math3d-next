@@ -37,8 +37,17 @@ const LABELS: Record<Primary, string> = {
   "save-copy": "Save a copy",
 };
 
-// Fits the longest label, "Save a copy", so a label swap never shifts layout.
-const PRIMARY_WIDTH = "7.5rem";
+// Every label the button can show for one kind of scene. Save and Copy link
+// share a set: saving a scene you own turns Save into Copy link mid-"Saved!".
+const OWN_SCENE = ["Save", "Saving...", "Saved!", "Copy link", "Copied!"];
+const RESERVED: Record<Primary, string[]> = {
+  share: ["Share"],
+  "save-new": ["Save"],
+  save: OWN_SCENE,
+  "copy-link": OWN_SCENE,
+  "save-copy": ["Save a copy", "Copied!"],
+};
+
 const MIN_SAVING_DELAY = 500;
 const FLASH_TIMEOUT = 2000;
 
@@ -150,6 +159,8 @@ const SceneActions: React.FC = () => {
   });
 
   const label = (saving && "Saving...") || flash?.text || LABELS[primary];
+  const reserved = new Set(RESERVED[primary]);
+  reserved.delete(label);
   const enabled = !saving && !flash && (primary !== "save-new" || dirty);
 
   const copyLink = async () => {
@@ -223,19 +234,15 @@ const SceneActions: React.FC = () => {
   return (
     <>
       <span role="status" className={styles.status}>
-        {flash?.text}
+        {saving ? "Saving..." : flash?.text}
       </span>
       {/* Wait for auth, which picks the action, and for the route's scene, whose
           key and author it acts on. The dialogs stay mounted regardless: after
           a publish, the store's key can reach a render before the route does. */}
       {authStatus === "loading" || !loaded || key !== routeKey ? (
-        <span
-          className={styles.placeholder}
-          style={{ width: PRIMARY_WIDTH }}
-          aria-hidden
-        />
+        <span className={styles.placeholder} aria-hidden />
       ) : (
-        <ButtonGroup>
+        <ButtonGroup aria-label="Scene actions">
           <Button
             data-testid="scene-action"
             tone="primary"
@@ -243,9 +250,19 @@ const SceneActions: React.FC = () => {
             // after every Save or Copy link.
             loading={!enabled}
             onClick={handlePrimary}
-            style={{ width: PRIMARY_WIDTH }}
+            className={styles.primary}
           >
-            {label}
+            <span className={styles.labels}>
+              <span>{label}</span>
+              {[...reserved].map((text) => (
+                <span
+                  key={text}
+                  className={styles.reserve}
+                  data-label={text}
+                  aria-hidden
+                />
+              ))}
+            </span>
           </Button>
           {menu.length > 0 ? (
             <Menu.Root>

@@ -1,6 +1,44 @@
+/* Fits the longest label, "Save a copy", so a label swap never shifts layout. */
+.primary,
+.placeholder {
+  width: 7.5rem;
+}
+
+/* Narrow screens size it to this state's labels instead (see .labels). */
+@media (max-width: 600px) {
+  .primary {
+    width: auto;
+  }
+
+  /* About as wide as "Share", the narrowest button. */
+  .placeholder {
+    width: 4.5rem;
+  }
+}
+
 .placeholder {
   display: inline-block;
   visibility: hidden;
+}
+
+/* The shown label and the state's other labels share one cell, so the
+   button is as wide as the widest. Reserved labels are pseudo-content: they
+   stay out of the button's text and name. */
+.labels {
+  display: grid;
+  justify-items: center;
+}
+
+.labels > * {
+  grid-area: 1 / 1;
+}
+
+.reserve {
+  visibility: hidden;
+}
+
+.reserve::before {
+  content: attr(data-label);
 }
 
 /* Visually hidden; announces the button's transient label to screen readers. */
