@@ -60,7 +60,7 @@ test("The scenes drawer animates in, and out by Escape or Back", async ({
 
   // Closing drops `?list=`, which reads as Examples; the exit must still show
   // My Scenes.
-  await page.getByRole("button", { name: "Open scenes" }).click();
+  await page.getByRole("button", { name: "Math3d, open scenes" }).click();
   await expect(drawer).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(drawer).toBeHidden();
@@ -69,7 +69,7 @@ test("The scenes drawer animates in, and out by Escape or Back", async ({
     "exit from My Scenes (inert)",
   ]);
 
-  await page.getByRole("button", { name: "Open scenes" }).click();
+  await page.getByRole("button", { name: "Math3d, open scenes" }).click();
   await expect(drawer).toBeVisible();
   await page.goBack();
   await expect(drawer).toBeHidden();

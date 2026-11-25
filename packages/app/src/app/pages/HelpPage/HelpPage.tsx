@@ -1,6 +1,6 @@
 import React from "react";
 
-import Header, { HeaderTitle } from "@/ui/Header";
+import Header, { HeaderTitle, HomeLink } from "@/ui/Header";
 import TextLink from "@/ui/TextLink";
 import ReferencePanel from "./ReferencePanel";
 import { docs } from "./docs";
@@ -12,6 +12,7 @@ const HelpPage: React.FC = () => {
   return (
     <>
       <Header
+        brand={<HomeLink />}
         title={<HeaderTitle>Function Reference</HeaderTitle>}
         nav={<TextLink to="/">Back to Math3d</TextLink>}
       />

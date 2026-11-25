@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router";
-import Header from "@/ui/Header";
+import Header, { Wordmark } from "@/ui/Header";
 
 import lightbulb from "@iconify-icons/lucide/lightbulb";
 import circleHelp from "@iconify-icons/lucide/circle-help";
@@ -23,7 +23,6 @@ import { useUserMe } from "@math3d/api";
 import sigma from "@iconify-icons/lucide/sigma";
 import { Icon } from "@iconify/react/offline";
 import folderOpen from "@iconify-icons/lucide/folder-open";
-import IconButton from "@/ui/IconButton";
 import { Menu } from "@/ui/Menu";
 import { OPEN_SCENES_BUTTON_ID } from "@/features/library/constants";
 
@@ -135,9 +134,11 @@ const OpenScenesButton: React.FC<{ authStatus: AuthStatus }> = ({
 }) => {
   const { open } = useOverlay();
   return (
-    <IconButton
+    <Button
       id={OPEN_SCENES_BUTTON_ID}
-      label="Open scenes"
+      variant="ghost"
+      aria-label="Math3d, open scenes"
+      className={styles["open-scenes"]}
       onClick={() =>
         open("scenes", {
           list: authStatus === "authenticated" ? "me" : "examples",
@@ -145,7 +146,8 @@ const OpenScenesButton: React.FC<{ authStatus: AuthStatus }> = ({
       }
     >
       <Icon icon={folderOpen} aria-hidden="true" />
-    </IconButton>
+      <Wordmark />
+    </Button>
   );
 };
 
@@ -154,7 +156,7 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
   const userQuery = useUserMe();
   return (
     <Header
-      start={<OpenScenesButton authStatus={authStatus} />}
+      brand={<OpenScenesButton authStatus={authStatus} />}
       title={props.title}
       nav={
         <>
