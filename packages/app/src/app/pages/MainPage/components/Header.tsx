@@ -67,7 +67,7 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
           Sign in
         </Menu.Item>
       )}
-      {isAuthenticated && (
+      {(isAuthenticated || DISPLAY_AUTH_FLOWS) && (
         <Menu.Item
           icon={<Icon icon={list} aria-hidden="true" />}
           onClick={() => open("scenes", { list: "me" })}

@@ -14,6 +14,7 @@ import Sidebar from "@/ui/Sidebar";
 import { useToggle } from "@/util/hooks";
 import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
 import { isRenderer } from "@/services/renderer/renderers";
+import { useUserId } from "@/services/auth/useUserId";
 import type { Renderer } from "@/services/renderer/renderers";
 import { RENDERER_PARAM, useRenderer } from "@/services/renderer/useRenderer";
 
@@ -30,6 +31,7 @@ import LegacyDialog from "./components/LegacyDialog";
 import LegacyBanner from "./components/LegacyBanner";
 import RendererPill from "./components/RendererPill";
 import SceneUnavailable from "./components/SceneUnavailable";
+import useDraftWriter from "./useDraftWriter";
 
 type UseSearchEnumOptions<T extends string = string> = {
   name: string;
@@ -90,6 +92,7 @@ const VIEWPORTS: Record<Renderer, React.FC<{ className?: string }>> = {
 const MainPage: React.FC = () => {
   const { sceneKey } = useParams();
   const sceneLoad = useSceneLoader(sceneKey);
+  useDraftWriter(useUserId());
   const unavailable =
     sceneLoad.status !== "ready" && sceneLoad.status !== "loading"
       ? sceneLoad.status

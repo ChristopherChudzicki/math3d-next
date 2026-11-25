@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
 import { Icon } from "@iconify/react/offline";
 import chevronDown from "@iconify-icons/lucide/chevron-down";
-import { isApiFailure, usePatchScene, useUserMe } from "@math3d/api";
+import { isApiFailure, usePatchScene, useScene, useUserMe } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
+import { settleDraftAfterSave } from "@/store/scene/drafts/storage";
+import { sceneDisplayName } from "@/store/scene/sceneTitle";
+import { useBanners } from "@/ui/Banners/BannerContext";
+import { TextButton } from "@/ui/TextLink";
 import * as select from "@/store/scene/state/selectors";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { dismissToast } from "@/ui/Toast/toasts";
@@ -61,6 +65,8 @@ type Dialog =
   | { kind: "publish"; mode: PublishMode; existingUrl?: string }
   | { kind: "link"; url: string; unsaved: boolean };
 
+const SAVED_SINCE_BANNER = "draft-saved-since";
+
 const sleep = (ms: number) =>
   new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -104,6 +110,38 @@ const SceneActions: React.FC = () => {
     return () => clearTimeout(timeout);
   }, [flash]);
 
+  // An opened draft whose scene the author saved again after the version the
+  // draft edits: Save would replace that newer version.
+  const savedSince = useAppSelector((state) => state.scene.savedSince);
+  const warnSavedSince = savedSince && author !== null && me?.id === author;
+  // Opening the draft fetched it, so this reads the cache.
+  const { data: savedScene } = useScene(key ?? undefined, {
+    enabled: warnSavedSince,
+  });
+  const savedTitle = sceneDisplayName(savedScene?.title ?? "");
+  const { show, dismiss } = useBanners();
+  const openCopy = useRef(() => {});
+  openCopy.current = () => setDialog({ kind: "publish", mode: "copy" });
+  useEffect(() => {
+    if (!warnSavedSince) return undefined;
+    show({
+      id: SAVED_SINCE_BANNER,
+      severity: "warning",
+      ariaLabel: "Dismiss notice about the newer save",
+      content: (
+        <>
+          {savedTitle ? <em>{savedTitle}</em> : "This scene"} was saved after
+          these changes were made. <strong>Save</strong> will overwrite that
+          newer version.{" "}
+          <TextButton onClick={() => openCopy.current()}>
+            Save a copy
+          </TextButton>
+        </>
+      ),
+    });
+    return () => dismiss(SAVED_SINCE_BANNER);
+  }, [warnSavedSince, sceneLoad, savedTitle, show, dismiss]);
+
   const { primary, menu } = getActions({
     userId: me?.id ?? null,
     key,
@@ -129,16 +167,29 @@ const SceneActions: React.FC = () => {
   const save = async () => {
     invariant(key, "Only a saved scene is saved in place.");
     const state = store.getState();
-    const { revision, loadCount } = state.scene;
+    const { revision, loadCount, draftId } = state.scene;
     const { title, items, itemOrder } = select.sceneInfo(state);
+    const snapshot = { title, items, itemOrder };
     setSaving(true);
     try {
       const [patched] = await Promise.allSettled([
-        patchScene.mutateAsync({ key, patch: { title, items, itemOrder } }),
+        patchScene.mutateAsync({ key, patch: snapshot }),
         sleep(MIN_SAVING_DELAY),
       ]);
       if (patched.status === "rejected") throw patched.reason;
-      dispatch(actions.markSaved({ key, author, revision, loadCount }));
+      if (store.getState().scene.loadCount === loadCount) {
+        dispatch(
+          actions.markSaved({
+            key,
+            author,
+            revision,
+            snapshot,
+            modifiedDate: patched.value.modifiedDate,
+          }),
+        );
+      } else {
+        settleDraftAfterSave(draftId, snapshot);
+      }
       setFlash({ text: "Saved!" });
     } catch (err) {
       // The scene stays dirty, so Save stays available to retry. The mutation

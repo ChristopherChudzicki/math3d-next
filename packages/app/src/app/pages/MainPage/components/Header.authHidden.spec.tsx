@@ -12,7 +12,7 @@ test("Sign in header button is hidden when DISPLAY_AUTH_FLOWS is false", async (
   expect(screen.queryByRole("button", { name: "Sign in" })).toBeNull();
 });
 
-test("Sign in menu item is hidden when DISPLAY_AUTH_FLOWS is false", async () => {
+test("Sign in and My Scenes menu items are hidden when DISPLAY_AUTH_FLOWS is false", async () => {
   const { queryClient } = renderTestApp("", { isAuthenticated: false });
   // While auth is pending the menu never offers Sign in, so wait it out or the
   // absence below holds whatever the flag says.
@@ -22,6 +22,7 @@ test("Sign in menu item is hidden when DISPLAY_AUTH_FLOWS is false", async () =>
   await screen.findByRole("menu");
 
   expect(screen.queryByRole("menuitem", { name: "Sign in" })).toBeNull();
+  expect(screen.queryByRole("menuitem", { name: "My Scenes" })).toBeNull();
 });
 
 test("Logged-in users still get account menu items when DISPLAY_AUTH_FLOWS is false", async () => {

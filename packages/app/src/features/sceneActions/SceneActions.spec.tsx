@@ -1,4 +1,12 @@
-import { afterAll, beforeAll, expect, onTestFinished, test, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  describe,
+  expect,
+  onTestFinished,
+  test,
+  vi,
+} from "vitest";
 import { delay, http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { makeItem, seedDb, urls } from "@math3d/mock-api";
@@ -13,8 +21,10 @@ import {
   user,
   waitFor,
   within,
+  writeSessionDraft,
 } from "@/test_util";
 import { actions } from "@/store/scene/state/scene.slice";
+import { readDraft } from "@/store/scene/drafts/storage";
 
 beforeAll(() => {
   Object.assign(window.navigator, {
@@ -42,6 +52,23 @@ const capturePatches = (key: string) => {
     server.events.removeListener("request:start", listener);
   });
   return bodies;
+};
+
+const SAVED_SINCE = /was saved after these changes were made/;
+
+/** Whether text matching `pattern` appears at any moment from now on. */
+const watchForText = (pattern: RegExp) => {
+  let seen = false;
+  const observer = new MutationObserver(() => {
+    seen ||= pattern.test(document.body.textContent ?? "");
+  });
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
+  onTestFinished(() => observer.disconnect());
+  return () => seen;
 };
 
 const primary = () => screen.findByTestId("scene-action");
@@ -104,6 +131,7 @@ test("an owned scene with edits saves in place", async () => {
 
   expect(await primary()).toHaveTextContent(/^Save$/);
   expect(await menuEntries()).toEqual(["Duplicate", "Copy link"]);
+  const sawSavedSince = watchForText(SAVED_SINCE);
   await user.click(await primary());
 
   await waitFor(
@@ -118,6 +146,8 @@ test("an owned scene with edits saves in place", async () => {
   expect(patches).toEqual([
     expect.objectContaining({ title: `${scene.title} edited` }),
   ]);
+  // The save refetches the scene, newer than the store until markSaved.
+  expect(sawSavedSince()).toBe(false);
 });
 
 test("an edit made while saving survives the save and stays unsaved", async () => {
@@ -152,6 +182,40 @@ test("an edit made while saving survives the save and stays unsaved", async () =
     title: `${scene.title} saved later`,
   });
   expect(patches).toHaveLength(1);
+  expect(readDraft(store.getState().scene.draftId)?.title).toBe(
+    `${scene.title} saved later`,
+  );
+});
+
+test("a save that lands after another scene loads removes the draft it saved", async () => {
+  const gate = Promise.withResolvers<void>();
+  server.use(
+    http.patch(urls.scenes.detail, async () => {
+      await gate.promise;
+    }),
+  );
+  const { scene, store } = renderOwnedScene();
+  await renameScene(`${scene.title} saved`);
+  const draftId = writeSessionDraft(store);
+  await user.click(await primary());
+  const other = seedDb.withSceneFromItems([]);
+  act(() => {
+    store.dispatch(
+      actions.setScene({
+        key: other.key,
+        author: null,
+        items: other.items,
+        order: other.itemOrder,
+        title: other.title ?? "",
+        isLegacy: false,
+      }),
+    );
+  });
+  expect(readDraft(draftId)).not.toBeNull();
+
+  gate.resolve();
+
+  await waitFor(() => expect(readDraft(draftId)).toBeNull());
 });
 
 test("a failed save frees the button and leaves the edit unsaved", async () => {
@@ -371,4 +435,68 @@ test("no scene action is offered while auth is still loading", async () => {
 
   await screen.findByRole("heading", { level: 1 });
   expect(screen.queryByTestId("scene-action")).toBeNull();
+});
+
+describe("an opened draft whose scene was saved since", () => {
+  const openAsDraft = (
+    store: ReturnType<typeof renderTestApp>["store"],
+    scene: ReturnType<typeof seedDb.withSceneFromItems>,
+  ) =>
+    act(() => {
+      store.dispatch(
+        actions.setScene({
+          key: scene.key,
+          author: scene.author ?? null,
+          items: scene.items,
+          order: scene.itemOrder,
+          title: "Renamed in the draft",
+          isLegacy: false,
+          dirty: true,
+          savedSince: true,
+        }),
+      );
+    });
+
+  test("warns its author, and Save a copy saves it as a new scene", async () => {
+    const { scene, store } = renderOwnedScene();
+    await primary();
+    expect(screen.queryByText(SAVED_SINCE)).toBeNull();
+    openAsDraft(store, scene);
+
+    const banner = await screen.findByText(SAVED_SINCE);
+    expect(banner).toHaveTextContent(`${scene.title} was saved after`);
+    await user.click(
+      within(banner).getByRole("button", { name: "Save a copy" }),
+    );
+
+    await screen.findByRole("dialog", { name: "Scene saved!" });
+    expect(store.getState().scene.key).not.toBe(scene.key);
+    expect(screen.queryByText(SAVED_SINCE)).toBeNull();
+  });
+
+  test("goes away once the author saves over the newer version, as does the draft", async () => {
+    const { scene, store } = renderOwnedScene();
+    await primary();
+    openAsDraft(store, scene);
+    await screen.findByText(SAVED_SINCE);
+    const draftId = writeSessionDraft(store);
+
+    await user.click(await primary());
+
+    await waitFor(() => expect(screen.queryByText(SAVED_SINCE)).toBeNull());
+    expect(readDraft(draftId)).toBeNull();
+  });
+
+  test("doesn't warn anyone else, whose Save makes a copy anyway", async () => {
+    const author = seedDb.withUser();
+    const scene = seedDb.withSceneFromItems([], { author: author.id });
+    const { store } = renderTestApp(`/${scene.key}`, {
+      isAuthenticated: true,
+    });
+    await primary();
+    openAsDraft(store, scene);
+
+    expect(await primary()).toHaveTextContent(/^Save a copy$/);
+    expect(screen.queryByText(SAVED_SINCE)).toBeNull();
+  });
 });

@@ -12,6 +12,7 @@ import renderTestApp, { waitForAppReady } from "./renderTestApp";
 import countRequests from "./countRequests";
 import expectToast from "./expectToast";
 import { storeRendererPreference } from "./renderer";
+import writeSessionDraft from "./sessionDraft";
 
 export * from "./test_util";
 export {
@@ -27,4 +28,5 @@ export {
   renderTestApp,
   storeRendererPreference,
   waitForAppReady,
+  writeSessionDraft,
 };

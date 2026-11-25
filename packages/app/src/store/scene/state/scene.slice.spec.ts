@@ -3,6 +3,19 @@ import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { makeItem, seedDb } from "@math3d/mock-api";
 import type { Scene } from "@math3d/api";
 import { actions, reducer } from "./scene.slice";
+import type { SceneState } from "./scene.slice";
+
+const MODIFIED = "2026-11-20T12:00:00.000Z";
+
+/** What a save of `state` sends, and the date its response carries. */
+const sent = (state: SceneState) => ({
+  snapshot: {
+    title: state.title,
+    items: Object.values(state.items),
+    itemOrder: state.order,
+  },
+  modifiedDate: MODIFIED,
+});
 
 const setSceneFrom = (scene: Scene) =>
   actions.setScene({
@@ -26,7 +39,7 @@ test("markSaved clears dirty when nothing changed since the save began", () => {
       key: scene.key,
       author: null,
       revision: edited.revision,
-      loadCount: edited.loadCount,
+      ...sent(edited),
     }),
   );
 
@@ -36,7 +49,7 @@ test("markSaved clears dirty when nothing changed since the save began", () => {
 test("markSaved leaves dirty set after an edit made during the save", () => {
   const scene = seedDb.withSceneFromItems([]);
   const edited = reducer(load(scene), actions.setTitle({ title: "edited" }));
-  const { revision, loadCount } = edited;
+  const { revision } = edited;
   // Already dirty: the counter must still move.
   const typedDuringSave = reducer(
     edited,
@@ -45,7 +58,12 @@ test("markSaved leaves dirty set after an edit made during the save", () => {
 
   const saved = reducer(
     typedDuringSave,
-    actions.markSaved({ key: scene.key, author: null, revision, loadCount }),
+    actions.markSaved({
+      key: scene.key,
+      author: null,
+      revision,
+      ...sent(edited),
+    }),
   );
 
   expect(saved.dirty).toBe(true);
@@ -55,7 +73,7 @@ test("clean actions, like an animating slider's, do not count as edits", () => {
   const item = makeItem(MIT.Point);
   const scene = seedDb.withSceneFromItems([item]);
   const edited = reducer(load(scene), actions.setTitle({ title: "edited" }));
-  const { revision, loadCount } = edited;
+  const { revision } = edited;
   const animated = reducer(
     edited,
     actions.setProperties(
@@ -66,7 +84,12 @@ test("clean actions, like an animating slider's, do not count as edits", () => {
 
   const saved = reducer(
     animated,
-    actions.markSaved({ key: scene.key, author: null, revision, loadCount }),
+    actions.markSaved({
+      key: scene.key,
+      author: null,
+      revision,
+      ...sent(edited),
+    }),
   );
 
   expect(saved.dirty).toBe(false);
@@ -89,7 +112,7 @@ test("markSaved adopts the published key, author, title, and legacy flag", () =>
       title: "Published",
       isLegacy: false,
       revision: legacy.revision,
-      loadCount: legacy.loadCount,
+      ...sent(legacy),
     }),
   );
 
@@ -102,31 +125,52 @@ test("markSaved adopts the published key, author, title, and legacy flag", () =>
   });
 });
 
-test("markSaved does nothing once another scene has loaded", () => {
-  const saving = seedDb.withSceneFromItems([]);
-  const opened = seedDb.withSceneFromItems([]);
-  const edited = reducer(load(saving), actions.setTitle({ title: "edited" }));
-  const { revision, loadCount } = edited;
-  const openedDuringSave = reducer(edited, setSceneFrom(opened));
-  const editedAgain = reducer(
-    openedDuringSave,
-    actions.setTitle({ title: "edited too" }),
-  );
-
-  const saved = reducer(
-    editedAgain,
-    actions.markSaved({ key: saving.key, author: 7, revision, loadCount }),
-  );
-
-  expect(saved).toBe(editedAgain);
-});
-
 test("loading a scene clears dirty", () => {
   const first = seedDb.withSceneFromItems([]);
   const second = seedDb.withSceneFromItems([]);
   const edited = reducer(load(first), actions.setTitle({ title: "edited" }));
 
   expect(reducer(edited, setSceneFrom(second)).dirty).toBe(false);
+});
+
+describe("draft session", () => {
+  test("each load starts a session with its own draft id", () => {
+    const scene = seedDb.withSceneFromItems([]);
+    const first = load(scene);
+    const second = reducer(first, setSceneFrom(scene));
+
+    expect(second.draftId).not.toBe(first.draftId);
+  });
+
+  test("markSaved records the saved version's modifiedDate", () => {
+    const edited = reducer(
+      load(seedDb.withSceneFromItems([])),
+      actions.setTitle({ title: "edited" }),
+    );
+
+    const saved = reducer(
+      edited,
+      actions.markSaved({
+        key: edited.key ?? "",
+        author: null,
+        revision: edited.revision,
+        ...sent(edited),
+      }),
+    );
+
+    expect(saved.modifiedDate).toBe(MODIFIED);
+  });
+});
+
+test("removing a folder removes its entry in the order", () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const [folderId] = scene.itemOrder.main;
+  const loaded = load(scene);
+  expect(loaded.order[folderId]).toEqual([]);
+
+  const removed = reducer(loaded, actions.remove({ id: folderId }));
+
+  expect(removed.order).not.toHaveProperty(folderId);
 });
 
 describe("calculated visibility", () => {

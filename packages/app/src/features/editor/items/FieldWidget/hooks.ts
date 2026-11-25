@@ -2,6 +2,7 @@ import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
 import { useCallback } from "react";
 import { useAppDispatch } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
+import type { Clean } from "@/store/scene/state/scene.slice";
 import { OnWidgetChange } from "./types";
 
 export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
@@ -23,7 +24,7 @@ type PatchPropertyOnChange = (
     value: unknown;
   },
   subpath: string,
-  clean?: boolean,
+  clean?: Clean,
 ) => void;
 
 export const usePatchPropertyOnChange = <T extends MIT>(item: MathItem<T>) => {

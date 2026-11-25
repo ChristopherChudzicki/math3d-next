@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { Drawer } from "@/ui/Drawer";
 import { Tabs } from "@/ui/Tabs";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
@@ -8,6 +8,9 @@ import type { OverlayProps } from "@/services/overlays/useOverlay";
 import { useUrlLayerSearchParams } from "@/services/overlays/UrlLayer";
 import ExamplesListing from "@/features/library/ExamplesListing";
 import MyScenes from "@/features/library/MyScenes";
+import UnsavedScenes, {
+  useOtherDrafts,
+} from "@/features/library/UnsavedScenes";
 import { ListType, OPEN_SCENES_BUTTON_ID } from "@/features/library/constants";
 import styles from "./ScenesListPage.module.css";
 
@@ -39,10 +42,24 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
     DISPLAY_AUTH_FLOWS || isAuthenticated === "authenticated";
   const rawList = search.get("list") ?? ListType.Examples;
   const listType = normalizeListType(rawList, showMyScenes);
+  const unsavedCount = useOtherDrafts()?.length ?? 0;
 
   useEffect(() => {
     if (listType !== rawList) open("scenes", { list: listType });
   }, [open, rawList, listType]);
+
+  // A switch made outside the tab list (My Scenes' "Unsaved" link) would
+  // lose focus with the panel it came from, so focus goes to the new tab.
+  const tabList = useRef<HTMLDivElement>(null);
+  const shownList = useRef(listType);
+  useLayoutEffect(() => {
+    if (shownList.current === listType) return;
+    shownList.current = listType;
+    if (tabList.current?.contains(document.activeElement)) return;
+    tabList.current
+      ?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
+      ?.focus();
+  }, [listType]);
 
   return (
     <>
@@ -54,17 +71,21 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
         <Drawer.Header>
           <div className={styles.titleRow}>
             <Drawer.Title>Scenes</Drawer.Title>
-            <Tabs.List aria-label="Scenes">
+            <Tabs.List aria-label="Scenes" ref={tabList}>
               {showMyScenes && (
                 <Tabs.Tab value={ListType.Me}>My Scenes</Tabs.Tab>
               )}
               <Tabs.Tab value={ListType.Examples}>Examples</Tabs.Tab>
+              <Tabs.Tab value={ListType.Unsaved}>
+                {unsavedCount > 0 ? `Unsaved (${unsavedCount})` : "Unsaved"}
+              </Tabs.Tab>
             </Tabs.List>
           </div>
         </Drawer.Header>
         {/*
          * Base UI makes panels tab stops, which APG reserves for panels
          * whose content isn't focusable; these start with a field or a card.
+         * `UnsavedScenes` renders its own panel, for its empty state.
          */}
         <Tabs.Panel value={ListType.Me} className={styles.panel} tabIndex={-1}>
           <MyScenes />
@@ -76,6 +97,7 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
         >
           <ExamplesListing />
         </Tabs.Panel>
+        <UnsavedScenes className={styles.panel} />
       </Tabs.Root>
       {children}
     </>

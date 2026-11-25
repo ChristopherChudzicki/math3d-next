@@ -18,9 +18,10 @@ const state = () => getStore().getState();
 const url = `${window.location.origin}/abc?controls=0`;
 
 test("a draft is taken once, on its own page", () => {
-  saveSignInDraft(state(), url, 1000);
+  const saved = state();
+  saveSignInDraft(saved, url, 1000);
 
-  expect(takeSignInDraft("/abc", 2000)).toEqual(state());
+  expect(takeSignInDraft("/abc", 2000)).toEqual(saved);
   expect(takeSignInDraft("/abc", 2000)).toBeUndefined();
 });
 

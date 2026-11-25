@@ -130,6 +130,7 @@ const useSceneLoader = (sceneKey?: string): SceneLoad => {
         order: scene.itemOrder,
         title: scene.title ?? "",
         isLegacy: scene.isLegacy ?? false,
+        modifiedDate: "modifiedDate" in scene ? scene.modifiedDate : null,
       }),
     );
   }, [dispatch, scene, routeKey, store]);

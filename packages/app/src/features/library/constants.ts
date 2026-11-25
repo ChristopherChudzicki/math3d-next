@@ -6,6 +6,7 @@ export const OPEN_SCENES_BUTTON_ID = "open-scenes-button";
 export enum ListType {
   Examples = "examples",
   Me = "me",
+  Unsaved = "unsaved",
 }
 
 /** A card's link: opens the scene with the drawer still open on its tab. */

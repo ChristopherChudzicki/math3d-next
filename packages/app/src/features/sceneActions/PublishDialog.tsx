@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/react";
 import { isApiFailure, useCreateScene } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
+import { settleDraftAfterSave } from "@/store/scene/drafts/storage";
 import * as select from "@/store/scene/state/selectors";
 import { useSignInDialog } from "@/services/overlays/useSignInDialog";
 import { DISPLAY_AUTH_FLOWS } from "@/config/displayAuthFlows";
@@ -93,15 +94,16 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
 
   const publish = async (newTitle: string) => {
     const state = store.getState();
-    const { revision, loadCount } = state.scene;
+    const { revision, loadCount, draftId } = state.scene;
     const { items, itemOrder } = select.sceneInfo(state);
-    const result = await createScene.mutateAsync({
-      title: newTitle,
-      items,
-      itemOrder,
-    });
-    // The user moved on to another scene while this was in flight.
-    if (store.getState().scene.loadCount !== loadCount) return;
+    const snapshot = { title: newTitle, items, itemOrder };
+    const result = await createScene.mutateAsync(snapshot);
+    // The user moved on to another scene while this was in flight. The draft
+    // holds the session's own title, not the new one.
+    if (store.getState().scene.loadCount !== loadCount) {
+      settleDraftAfterSave(draftId, { ...snapshot, title: state.scene.title });
+      return;
+    }
     dispatch(
       actions.markSaved({
         key: result.key,
@@ -109,7 +111,8 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
         title: newTitle,
         isLegacy: result.isLegacy ?? false,
         revision,
-        loadCount,
+        snapshot,
+        modifiedDate: result.modifiedDate,
       }),
     );
     navigate(`/${result.key}`);

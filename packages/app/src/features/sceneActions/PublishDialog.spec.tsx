@@ -3,6 +3,8 @@ import { http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { seedDb, urls } from "@math3d/mock-api";
 import type { Scene } from "@math3d/api";
+import { actions } from "@/store/scene/state/scene.slice";
+import { listDrafts } from "@/store/scene/drafts/storage";
 import {
   act,
   countRequests,
@@ -11,6 +13,7 @@ import {
   user,
   waitFor,
   within,
+  writeSessionDraft,
 } from "@/test_util";
 
 const renderOwnedScene = (overrides: Partial<Scene> = {}) => {
@@ -46,6 +49,21 @@ test("a titled scene publishes without asking for a title", async () => {
 
   await screen.findByRole("dialog", { name: "Scene saved!" });
   expect(store.getState().scene.title).toBe(`Copy of ${scene.title}`);
+});
+
+test("publishing an edited scene removes its draft", async () => {
+  const { store } = renderOwnedScene();
+  await screen.findByRole("button", { name: "More scene actions" });
+  act(() => {
+    store.dispatch(actions.setTitle({ title: "Edited" }));
+  });
+  writeSessionDraft(store);
+  expect(listDrafts()).toHaveLength(1);
+
+  await openDuplicate();
+
+  await screen.findByRole("dialog", { name: "Scene saved!" });
+  expect(listDrafts()).toEqual([]);
 });
 
 test("a failed publish offers the title step to retry, leaving the scene as it was", async () => {
@@ -180,7 +198,7 @@ test("loading another scene closes the dialog", async () => {
   await waitFor(() => expect(dialog).not.toBeInTheDocument());
 });
 
-test("a publish that lands after another scene loads leaves the user there", async () => {
+test("a publish that lands after another scene loads leaves the user there, and removes the draft it saved", async () => {
   const gate = Promise.withResolvers<void>();
   const landed = Promise.withResolvers<void>();
   server.use(
@@ -198,12 +216,20 @@ test("a publish that lands after another scene loads leaves the user there", asy
   const other = seedDb.withSceneFromItems([]);
   const { router, store, location } = renderOwnedScene();
 
+  await screen.findByRole("button", { name: "More scene actions" });
+  act(() => {
+    store.dispatch(actions.setTitle({ title: "Edited" }));
+  });
+
   await openDuplicate();
   await act(() => router.navigate(`/${other.key}`));
   await waitFor(() => expect(store.getState().scene.key).toBe(other.key));
+  // Loading the other scene wrote the edited session's draft.
+  expect(listDrafts()).toHaveLength(1);
   gate.resolve();
   await act(() => landed.promise);
 
   expect(location.current.pathname).toBe(`/${other.key}`);
   expect(store.getState().scene.key).toBe(other.key);
+  await waitFor(() => expect(listDrafts()).toEqual([]));
 });

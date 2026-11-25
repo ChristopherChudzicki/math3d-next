@@ -66,7 +66,7 @@ const createCalculatedVisibilityRelink = (
     if (read.changed.length > 0) {
       // The triggering action already decided whether the scene is dirty.
       api.dispatch(
-        actions.followCalculatedVisibility({ ids: read.changed }, true),
+        actions.followCalculatedVisibility({ ids: read.changed }, "derived"),
       );
     }
     return result;

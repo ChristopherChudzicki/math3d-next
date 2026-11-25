@@ -29,7 +29,7 @@ const useColorExprParams = (item: Surface) => {
   useEffect(() => {
     const params = colorExprParams(kind, expr.params, colorExpr.params);
     if (isEqual(params, colorExpr.params)) return;
-    patchProperty({ name: "colorExpr", value: params }, "params", true);
+    patchProperty({ name: "colorExpr", value: params }, "params", "derived");
   }, [kind, expr.params, colorExpr.params, patchProperty]);
 };
 

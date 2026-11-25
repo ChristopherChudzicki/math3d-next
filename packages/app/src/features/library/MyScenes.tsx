@@ -20,10 +20,12 @@ import IconButton from "@/ui/IconButton";
 import LoadingSpinner from "@/ui/LoadingSpinner";
 import { Menu } from "@/ui/Menu";
 import TextField from "@/ui/TextField";
+import { TextButton } from "@/ui/TextLink";
 import { u } from "@/util/styles";
 import { useKeptFailure } from "@/util/hooks";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { useSignInDialog } from "@/services/overlays/useSignInDialog";
+import { useOverlay } from "@/services/overlays/useOverlay";
 import { dismissToast, showToast } from "@/ui/Toast/toasts";
 import DeleteSceneDialog from "./DeleteSceneDialog";
 import LoadFailed from "./LoadFailed";
@@ -327,6 +329,7 @@ const MyScenesList: React.FC = () => {
 const MyScenes: React.FC = () => {
   const isAuthenticated = useAuthStatus();
   const signIn = useSignInDialog();
+  const { open } = useOverlay();
   if (isAuthenticated === "loading") {
     return (
       <Drawer.Body>
@@ -338,7 +341,16 @@ const MyScenes: React.FC = () => {
     return (
       <Drawer.Body>
         <div className={styles.message}>
-          <p className={styles.hint}>Sign in to see the scenes you save.</p>
+          <p className={styles.hint}>
+            Sign in to keep scenes in your account. Changes you don’t save are
+            kept in this browser for 7 days, in{" "}
+            <TextButton
+              onClick={() => open("scenes", { list: ListType.Unsaved })}
+            >
+              Unsaved
+            </TextButton>
+            .
+          </p>
           <Button tone="primary" onClick={() => signIn.open()}>
             Sign in
           </Button>
