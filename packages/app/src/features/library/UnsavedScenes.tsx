@@ -1,5 +1,6 @@
 import React, { useId, useLayoutEffect, useRef, useState } from "react";
 import classNames from "classnames";
+import { useParams } from "react-router";
 import { Icon } from "@iconify/react/offline";
 import trash2 from "@iconify-icons/lucide/trash-2";
 import { MathItemType } from "@math3d/mathitem-configs";
@@ -85,7 +86,10 @@ const unsavedName = (record: DraftRecord) =>
 
 const DraftRow: React.FC<{
   record: DraftRecord;
-  /** The editor's own session, which the row neither opens nor deletes. */
+  /**
+   * The editor's own session, which the row neither opens nor deletes: the
+   * editor would recreate its draft on the next edit.
+   */
   current: boolean;
   opening: boolean;
   now: Date;
@@ -101,6 +105,7 @@ const DraftRow: React.FC<{
         id={openId}
         className={styles.open}
         aria-current={current || undefined}
+        aria-disabled={current || undefined}
         aria-describedby={metaId}
         aria-busy={opening}
         onClick={current ? undefined : onOpen}
@@ -122,7 +127,6 @@ const DraftRow: React.FC<{
       </p>
     </div>
     {current ? (
-      // No Delete: the editor would rewrite this draft on its next edit.
       // aria-current on the button already says "current" to screen readers.
       <span className={styles.currentBadge} aria-hidden="true">
         Current
@@ -164,7 +168,12 @@ const DeletedRow: React.FC<{
 /** The Unsaved tab's panel. */
 const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
   const drafts = useDrafts();
-  const currentId = useAppSelector((state) => state.scene.draftId);
+  const { sceneKey } = useParams();
+  // Only while the editor shows the URL's scene: behind "Scene not found",
+  // the editor's session can be reopened like any other.
+  const currentId = useAppSelector(({ scene }) =>
+    scene.loaded && scene.key === (sceneKey ?? null) ? scene.draftId : null,
+  );
   const { openDraft, openingId } = useOpenDraft();
   const idPrefix = useId();
   const openId = (id: string) => `${idPrefix}-open-${id}`;

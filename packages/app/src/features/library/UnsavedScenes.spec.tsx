@@ -4,7 +4,15 @@ import { delay, http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { makeItem, seedDb, urls } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { act, renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import {
+  act,
+  expectToast,
+  renderTestApp,
+  screen,
+  user,
+  waitFor,
+  within,
+} from "@/test_util";
 import {
   listDrafts,
   readDraft,
@@ -77,11 +85,34 @@ test("rows are newest first, and this tab's own session is marked current", asyn
     "aria-current",
     "true",
   );
-  // No Delete: the editor would rewrite its own draft on its next edit.
   expect(
     screen.queryByRole("button", { name: `Delete unsaved scene ${own.title}` }),
   ).toBeNull();
   expect(screen.getByRole("tab", { name: "Unsaved (3)" })).toBeVisible();
+
+  await user.click(screen.getByRole("button", { name: own.title }));
+
+  expect(store.getState().scene.draftId).toBe(own.id);
+  expect(readDraft(own.id)).toEqual(own);
+});
+
+test("behind \"Scene not found\", the editor's session isn't current and can be reopened", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const { store, router, location } = renderTestApp(`/${scene.key}`);
+  await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
+  const own = { ...draftOf(scene), id: store.getState().scene.draftId };
+  writeDraft(own);
+
+  await act(() => router.navigate("/missing?overlay=scenes&list=unsaved"));
+  await expectToast("This scene doesn’t exist.");
+  const row = await screen.findByRole("button", {
+    name: `Changes to ${own.title}`,
+  });
+  expect(row).not.toHaveAttribute("aria-current");
+  await user.click(row);
+
+  await waitFor(() => expect(location.current.pathname).toBe(`/${scene.key}`));
+  expect(store.getState().scene.draftId).not.toBe(own.id);
 });
 
 test("a row names a new scene by its title, and a saved one as changes to it", async () => {
@@ -159,7 +190,7 @@ test("while sign-in status is unknown, the tab lists nothing and doesn't say it'
 
   expect(within(dialog).getByRole("tab", { name: "Unsaved" })).toBeVisible();
   expect(within(dialog).queryByRole("list")).toBeNull();
-  expect(within(dialog).queryByText(/When you leave a scene/)).toBeNull();
+  expect(within(dialog).queryByText(/Changes you don’t save/)).toBeNull();
 });
 
 test("with drafts, the tab says where they come from", async () => {
@@ -225,19 +256,20 @@ test("opening a draft loads it as unsaved work at its scene's URL, under a new i
   );
 });
 
-test("clicking through drafts keeps their order, and the one left is still listed", async () => {
-  const first = draftOf(seedDb.withSceneFromItems([]), Date.now() - 1000);
-  const second = draftOf(seedDb.withSceneFromItems([]), Date.now() - 2000);
-  writeDraft(first);
-  writeDraft(second);
-  const { store } = await openUnsaved();
-  const names = [`Changes to ${first.title}`, `Changes to ${second.title}`];
+test("clicking through drafts keeps their order, and the one you left stays listed, no longer current", async () => {
+  const saved = draftOf(seedDb.withSceneFromItems([]), Date.now() - 1000);
+  const untitled = newSceneDraft(Date.now() - 2000);
+  writeDraft(saved);
+  writeDraft(untitled);
+  const { store, location } = await openUnsaved();
+  const names = [`Changes to ${saved.title}`, untitled.title];
 
   await user.click(await screen.findByRole("button", { name: names[0] }));
-  await waitFor(() => expect(store.getState().scene.key).toBe(first.key));
+  await waitFor(() => expect(location.current.pathname).toBe(`/${saved.key}`));
   await user.click(screen.getByRole("button", { name: names[1] }));
-  await waitFor(() => expect(store.getState().scene.key).toBe(second.key));
+  await waitFor(() => expect(store.getState().scene.key).toBeNull());
 
+  expect(location.current.pathname).toBe("/");
   expect(rowNames()).toEqual(names);
   expect(screen.getByRole("button", { name: names[0] })).not.toHaveAttribute(
     "aria-current",
@@ -246,6 +278,22 @@ test("clicking through drafts keeps their order, and the one left is still liste
     "aria-current",
     "true",
   );
+});
+
+test("a draft written by another tab while it opens opens as written", async () => {
+  const release = holdSceneFetch();
+  const draft = draftOf(seedDb.withSceneFromItems([]));
+  writeDraft(draft);
+  const { store, queryClient } = await openUnsaved();
+
+  await user.click(
+    await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
+  );
+  act(() => writeDraft({ ...draft, title: "Edited in another tab" }));
+  release();
+  await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+
+  expect(store.getState().scene.title).toBe("Edited in another tab");
 });
 
 test("a draft of a legacy scene opens as legacy", async () => {
@@ -353,6 +401,28 @@ test("closing the list while a draft's scene is checked leaves the editor as it 
 
   expect(store.getState().scene.draftId).toBe(before);
   expect(location.current.pathname).toBe("/");
+  expect(readDraft(draft.id)).not.toBeNull();
+});
+
+test("switching tabs while a draft's scene is checked leaves the editor as it was", async () => {
+  const release = holdSceneFetch();
+  const draft = draftOf(seedDb.withSceneFromItems([]));
+  writeDraft(draft);
+  const { store, queryClient } = await openUnsaved();
+  const before = store.getState().scene.draftId;
+
+  await user.click(
+    await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
+  );
+  await user.click(screen.getByRole("tab", { name: "Examples" }));
+  release();
+  await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+
+  expect(store.getState().scene.draftId).toBe(before);
+  expect(screen.getByRole("tab", { name: "Examples" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
   expect(readDraft(draft.id)).not.toBeNull();
 });
 

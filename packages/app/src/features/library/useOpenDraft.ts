@@ -24,10 +24,11 @@ const UNOPENABLE_TOAST =
 const useOpenDraft = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  // Read after an await, so it must be the latest location.
-  const here = useLocation();
-  const location = useRef(here);
-  location.current = here;
+  // The router's location, read after an await. (The overlay layer's location
+  // freezes on close.)
+  const location = useLocation();
+  const locationRef = useRef(location);
+  locationRef.current = location;
   const queryClient = useQueryClient();
   const [openingId, setOpeningId] = useState<string | null>(null);
   const opening = useRef(false);
@@ -71,22 +72,23 @@ const useOpenDraft = () => {
 
   /** The opened copy, or null if the draft wasn't opened. */
   const open = async (record: DraftRecord): Promise<DraftRecord | null> => {
-    const from = location.current.key;
+    const from = locationRef.current.key;
     const base = record.key
       ? await checkBase(record.key, record.baseModifiedDate)
       : { exists: false, isLegacy: false, savedSince: false };
     // While the fetch ran, the user closed the list, went elsewhere, or
-    // deleted the draft.
-    if (location.current.key !== from || !readDraft(record.id)) return null;
+    // deleted the draft. Another tab may have written it, so read it again.
+    const latest = readDraft(record.id);
+    if (locationRef.current.key !== from || !latest) return null;
     // A draft of a deleted scene opens as a new scene, so Save creates one.
     const key = base.exists ? record.key : null;
     const author = key ? record.author : null;
     const baseModifiedDate = key ? record.baseModifiedDate : null;
 
     const load = sceneSlice.actions.setScene({
-      items: record.items,
-      order: record.itemOrder,
-      title: record.title,
+      items: latest.items,
+      order: latest.itemOrder,
+      title: latest.title,
       key,
       author,
       isLegacy: base.isLegacy,
@@ -106,15 +108,15 @@ const useOpenDraft = () => {
     // `updatedAt`, so rows don't reorder as the user clicks through them.
     removeDraft(record.id);
     const copy = {
-      ...record,
+      ...latest,
       id: load.payload.draftId,
       key,
       author,
       baseModifiedDate,
     };
     writeDraft(copy);
-    // A same-URL push would drop the entry's `overlayPushed` state.
-    if (location.current.pathname !== `/${key ?? ""}`) {
+    // Same path: a push would add a duplicate history entry.
+    if (locationRef.current.pathname !== `/${key ?? ""}`) {
       navigate(sceneHref(key ?? "", ListType.Unsaved));
     }
     return copy;
