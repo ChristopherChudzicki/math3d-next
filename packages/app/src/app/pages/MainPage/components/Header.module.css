@@ -3,3 +3,14 @@
     display: none;
   }
 }
+
+/* Pulls the folder icon back to where the header's padding puts it. */
+.open-scenes {
+  gap: 0.625rem;
+  margin-left: -0.5rem;
+  padding: 0 0.5rem;
+}
+
+.folder {
+  font-size: 1.5rem;
+}

@@ -18,7 +18,7 @@ const draftCount = (page: Page) =>
 const draftName = (title: string) => new RegExp(`^Changes to ${title}`);
 
 const openUnsavedTab = async (page: Page) => {
-  await page.getByRole("button", { name: "Open scenes" }).click();
+  await page.getByRole("button", { name: "Math3d, open scenes" }).click();
   await page.getByRole("tab", { name: /^Unsaved/ }).click();
 };
 

@@ -240,7 +240,7 @@ test("opening the Scenes drawer over the card doesn't toast", async () => {
   renderTestApp("/nonexistent-scene-key");
   await screen.findByRole("heading", { name: "This scene doesn’t exist." });
 
-  await user.click(screen.getByRole("button", { name: "Open scenes" }));
+  await user.click(screen.getByRole("button", { name: "Math3d, open scenes" }));
 
   await screen.findByRole("dialog", { name: "Scenes" });
   // The toast guard in setupTests fails this test if a toast was shown.

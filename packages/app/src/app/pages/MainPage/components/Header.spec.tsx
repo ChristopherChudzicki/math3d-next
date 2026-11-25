@@ -177,7 +177,9 @@ test.each([
     const { location, queryClient } = renderTestApp("", { isAuthenticated });
     await waitForAppReady(queryClient);
 
-    await user.click(screen.getByRole("button", { name: "Open scenes" }));
+    await user.click(
+      screen.getByRole("button", { name: "Math3d, open scenes" }),
+    );
 
     expect(location.current.search).toContain("overlay=scenes");
     expect(location.current.search).toContain(`list=${list}`);
@@ -219,7 +221,9 @@ test("closing the scenes dialog returns focus to the scenes button, even when a 
   await user.keyboard("{Escape}");
 
   await waitFor(() =>
-    expect(screen.getByRole("button", { name: "Open scenes" })).toHaveFocus(),
+    expect(
+      screen.getByRole("button", { name: "Math3d, open scenes" }),
+    ).toHaveFocus(),
   );
 });
 

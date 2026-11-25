@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { renderTestApp, screen } from "@/test_util";
+import { renderTestApp, screen, within } from "@/test_util";
 
 test("unmatched /app path renders soft-404", async () => {
   renderTestApp("/app/does-not-exist");
@@ -22,4 +22,12 @@ test("unmatched non-app multi-segment path renders soft-404, not a crash", async
   expect(
     await screen.findByRole("heading", { name: /not found/i }),
   ).toBeVisible();
+});
+
+test("the soft-404 links back to the editor", async () => {
+  renderTestApp("/app/does-not-exist");
+  const main = await screen.findByRole("main");
+  expect(
+    within(main).getByRole("link", { name: "Back to Math3d" }),
+  ).toHaveAttribute("href", "/");
 });

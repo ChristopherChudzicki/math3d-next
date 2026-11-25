@@ -1,44 +1,56 @@
 .header {
-  /* height: var(--header-height); */
-  height: 50px;
+  height: var(--header-height);
   background-color: var(--color-secondary-lightest);
   border-bottom: 1pt solid var(--color-secondary-light);
 
   display: grid;
-  grid-template-columns: auto min-content minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-rows: var(--header-height);
   align-items: center;
   padding-left: 1rem;
   padding-right: 1rem;
 }
 
-.start {
+.brand {
   display: flex;
   align-items: center;
 }
 
-.start:not(:empty) {
-  margin-right: 0.5rem;
-  margin-left: -0.5rem;
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
+.wordmark {
   font-weight: 900;
   font-size: 1.25rem;
   color: var(--color-text-light);
 }
 
-.brand::after {
+.home {
+  border-radius: var(--border-radius);
+  text-decoration: none;
+}
+
+/* Darker under a hover tint, where --color-text-light falls below 4.5:1. */
+@media (hover: hover) {
+  :hover > .wordmark {
+    color: var(--color-text-primary);
+  }
+}
+
+/* Empty while a scene loads or can't load: no rule then. */
+.title-slot:not(:empty) {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.title-slot:not(:empty)::before {
   content: "";
+  flex-shrink: 0;
   width: 1px;
   height: 1.25rem;
   margin: 0 0.75rem;
   background-color: var(--color-secondary-light);
 }
 
-.title-slot {
+.title-slot > * {
   min-width: 0;
 }
 
@@ -60,13 +72,14 @@
 /* Phones (`PHONE_QUERY` in config/breakpoints.ts): the scene title gets the
    room "Math3d" and wide spacing would take. */
 @media (max-width: 600px) {
-  /* Without the brand's column: start, title, nav. */
-  .header {
-    grid-template-columns: auto minmax(0, 1fr) auto;
+  .wordmark,
+  .home,
+  .title-slot:not(:empty)::before {
+    display: none;
   }
 
-  .brand {
-    display: none;
+  .title-slot {
+    padding-left: 0.375rem;
   }
 
   .nav-container {

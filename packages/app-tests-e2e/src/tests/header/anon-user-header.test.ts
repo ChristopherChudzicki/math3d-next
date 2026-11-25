@@ -23,7 +23,7 @@ test("The scenes button opens the Examples tab, listing the examples", async ({
 }) => {
   await page.goto("");
 
-  await page.getByRole("button", { name: "Open scenes" }).click();
+  await page.getByRole("button", { name: "Math3d, open scenes" }).click();
 
   const dialog = page.getByRole("dialog", { name: "Scenes" });
   await expect(
