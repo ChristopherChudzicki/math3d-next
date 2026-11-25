@@ -8,9 +8,8 @@ import type { OverlayProps } from "@/services/overlays/useOverlay";
 import { useUrlLayerSearchParams } from "@/services/overlays/UrlLayer";
 import ExamplesListing from "@/features/library/ExamplesListing";
 import MyScenes from "@/features/library/MyScenes";
-import UnsavedScenes, {
-  useOtherDrafts,
-} from "@/features/library/UnsavedScenes";
+import UnsavedScenes from "@/features/library/UnsavedScenes";
+import useDrafts from "@/features/library/useDrafts";
 import { ListType, OPEN_SCENES_BUTTON_ID } from "@/features/library/constants";
 import styles from "./ScenesListPage.module.css";
 
@@ -42,7 +41,7 @@ const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
     DISPLAY_AUTH_FLOWS || isAuthenticated === "authenticated";
   const rawList = search.get("list") ?? ListType.Examples;
   const listType = normalizeListType(rawList, showMyScenes);
-  const unsavedCount = useOtherDrafts()?.length ?? 0;
+  const unsavedCount = useDrafts()?.length ?? 0;
 
   useEffect(() => {
     if (listType !== rawList) open("scenes", { list: listType });

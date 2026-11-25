@@ -1,24 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { isApiError, sceneQueryOptions } from "@math3d/api";
 import { useAppDispatch } from "@/store/hooks";
 import sceneSlice from "@/store/scene/state/scene.slice";
 import { removeDraft, writeDraft } from "@/store/scene/drafts/storage";
 import type { DraftRecord } from "@/store/scene/drafts/storage";
 import { showToast } from "@/ui/Toast/toasts";
+import { ListType, sceneHref } from "./constants";
 
 const UNOPENABLE_TOAST =
   "This unsaved work couldn’t be opened, so it was removed.";
 
 /**
- * Opens a draft in the editor as unsaved work, under a fresh draft id, then
- * navigates to its scene's URL, which closes the overlay. A draft that can't
- * be loaded is removed, and the editor keeps what it had.
+ * Opens a draft in the editor as unsaved work, under a fresh draft id, at its
+ * scene's URL with the Unsaved tab still open. A draft that can't be loaded is
+ * removed, and the editor keeps what it had.
  */
 const useOpenDraft = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const queryClient = useQueryClient();
   const [openingId, setOpeningId] = useState<string | null>(null);
   const opening = useRef(false);
@@ -67,12 +69,13 @@ const useOpenDraft = () => {
     }
   };
 
-  const open = async (record: DraftRecord) => {
+  /** The new draft id, or null if the draft wasn't opened. */
+  const open = async (record: DraftRecord): Promise<string | null> => {
     const base = record.key
       ? await checkBase(record.key, record.baseModifiedDate)
       : { exists: false, isLegacy: false, savedSince: false };
     // The user closed the list while the fetch ran.
-    if (!mounted.current) return;
+    if (!mounted.current) return null;
     // A draft of a deleted scene opens as a new scene, so Save creates one.
     const key = base.exists ? record.key : null;
     const author = key ? record.author : null;
@@ -95,9 +98,10 @@ const useOpenDraft = () => {
       dispatch(load);
     } catch {
       discard(record);
-      return;
+      return null;
     }
-    // Removed first, so the copy reuses its slot and its bytes.
+    // Removed first, so the copy reuses its slot and its bytes. It keeps its
+    // `updatedAt`, so rows don't reorder as the user clicks through them.
     removeDraft(record.id);
     writeDraft({
       ...record,
@@ -105,19 +109,21 @@ const useOpenDraft = () => {
       key,
       author,
       baseModifiedDate,
-      updatedAt: Date.now(),
     });
-    navigate(`/${key ?? ""}`);
+    if (pathname !== `/${key ?? ""}`) {
+      navigate(sceneHref(key ?? "", ListType.Unsaved));
+    }
+    return load.payload.draftId;
   };
 
-  const openDraft = async (record: DraftRecord) => {
+  const openDraft = async (record: DraftRecord): Promise<string | null> => {
     // A second click while the first fetches would open it again, leaving two
     // copies.
-    if (opening.current) return;
+    if (opening.current) return null;
     opening.current = true;
     setOpeningId(record.id);
     try {
-      await open(record);
+      return await open(record);
     } finally {
       opening.current = false;
       if (mounted.current) setOpeningId(null);

@@ -61,7 +61,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-test("rows are newest first, and leave out this tab's own session", async () => {
+test("rows are newest first, and this tab's own session is marked current", async () => {
   const older = newSceneDraft(Date.now() - 2000);
   const newer = newSceneDraft(Date.now() - 1000);
   writeDraft(older);
@@ -69,12 +69,19 @@ test("rows are newest first, and leave out this tab's own session", async () => 
   const { store } = await openUnsaved();
   await screen.findByRole("button", { name: newer.title });
 
-  act(() => {
-    writeDraft({ ...newSceneDraft(), id: store.getState().scene.draftId });
-  });
+  const own = { ...newSceneDraft(), id: store.getState().scene.draftId };
+  act(() => writeDraft(own));
 
-  expect(rowNames()).toEqual([newer.title, older.title]);
-  expect(screen.getByRole("tab", { name: "Unsaved (2)" })).toBeVisible();
+  expect(rowNames()).toEqual([own.title, newer.title, older.title]);
+  expect(screen.getByRole("button", { name: own.title })).toHaveAttribute(
+    "aria-current",
+    "true",
+  );
+  // The editor would write it again on its next edit.
+  expect(
+    screen.queryByRole("button", { name: `Delete unsaved scene ${own.title}` }),
+  ).toBeNull();
+  expect(screen.getByRole("tab", { name: "Unsaved (3)" })).toBeVisible();
 });
 
 test("a row names a new scene by its title, and a saved one as changes to it", async () => {
@@ -139,7 +146,7 @@ test("with no drafts, the tab explains what will appear", async () => {
 
   expect(
     await screen.findByText(
-      "When you leave a scene without saving, your changes are kept here, in this browser, for 7 days.",
+      "When you leave a scene without saving, your changes are kept here, in this browser, for up to 7 days.",
     ),
   ).toBeVisible();
   expect(screen.getByRole("tab", { name: "Unsaved" })).toBeVisible();
@@ -160,7 +167,9 @@ test("with drafts, the tab says where they come from", async () => {
   await openUnsaved();
 
   expect(
-    await screen.findByText("Unsaved work from this browser, kept for 7 days."),
+    await screen.findByText(
+      "Unsaved work from this browser, kept for up to 7 days.",
+    ),
   ).toBeVisible();
 });
 
@@ -186,21 +195,18 @@ test("signed out, a user's drafts aren't listed", async () => {
   expect(rowNames()).toEqual([signedOut.title]);
 });
 
-test("opening a draft loads it as unsaved work at its scene's URL, under a new id", async () => {
+test("opening a draft loads it as unsaved work at its scene's URL, under a new id, with the list still open", async () => {
   const scene = seedDb.withSceneFromItems([makeItem(MIT.Point)]);
-  const draft = {
-    ...draftOf(scene, Date.now() - 60_000),
-    title: "Edited title",
-  };
+  const draft = { ...draftOf(scene), title: "Edited title" };
   writeDraft(draft);
-  const { store, location } = await openUnsaved();
+  const { store, location, dialog } = await openUnsaved();
 
   await user.click(
     await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
   );
 
   await waitFor(() => expect(location.current.pathname).toBe(`/${scene.key}`));
-  expect(location.current.search).toBe("");
+  expect(location.current.search).toBe("?overlay=scenes&list=unsaved");
   const state = store.getState().scene;
   expect(state).toMatchObject({
     key: scene.key,
@@ -211,8 +217,36 @@ test("opening a draft loads it as unsaved work at its scene's URL, under a new i
   expect(listDrafts()).toHaveLength(1);
   expect(copy.id).toBe(state.draftId);
   expect(copy.id).not.toBe(draft.id);
-  // Opening restarts its 7 days.
-  expect(copy.updatedAt).toBeGreaterThan(draft.updatedAt);
+  expect(dialog).toBeVisible();
+  const row = screen.getByRole("button", { name: `Changes to ${draft.title}` });
+  expect(row).toHaveAttribute("aria-current", "true");
+  expect(row).toHaveFocus();
+  expect(within(dialog).getByRole("status")).toHaveTextContent(
+    `Opened unsaved changes to ${draft.title}`,
+  );
+});
+
+test("clicking through drafts keeps their order, and the one left is still listed", async () => {
+  const first = draftOf(seedDb.withSceneFromItems([]), Date.now() - 1000);
+  const second = draftOf(seedDb.withSceneFromItems([]), Date.now() - 2000);
+  writeDraft(first);
+  writeDraft(second);
+  const { store } = await openUnsaved();
+  const names = [`Changes to ${first.title}`, `Changes to ${second.title}`];
+
+  await user.click(await screen.findByRole("button", { name: names[0] }));
+  await waitFor(() => expect(store.getState().scene.key).toBe(first.key));
+  await user.click(screen.getByRole("button", { name: names[1] }));
+  await waitFor(() => expect(store.getState().scene.key).toBe(second.key));
+
+  expect(rowNames()).toEqual(names);
+  expect(screen.getByRole("button", { name: names[0] })).not.toHaveAttribute(
+    "aria-current",
+  );
+  expect(screen.getByRole("button", { name: names[1] })).toHaveAttribute(
+    "aria-current",
+    "true",
+  );
 });
 
 test("a draft of a legacy scene opens as legacy", async () => {
@@ -257,7 +291,7 @@ test("a draft whose scene was deleted opens as a new scene", async () => {
     await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
   );
 
-  await waitFor(() => expect(location.current.search).toBe(""));
+  await waitFor(() => expect(store.getState().scene.title).toBe(draft.title));
   expect(location.current.pathname).toBe("/");
   expect(store.getState().scene).toMatchObject({
     key: null,

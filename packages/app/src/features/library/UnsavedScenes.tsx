@@ -83,12 +83,63 @@ const unsavedName = (record: DraftRecord) =>
     ? `unsaved changes to ${cardTitle(record.title)}`
     : `unsaved scene ${cardTitle(record.title)}`;
 
-/** This browser's drafts, newest first, except the editor's own session. */
-const useOtherDrafts = (): DraftRecord[] | null => {
-  const drafts = useDrafts();
-  const currentId = useAppSelector((state) => state.scene.draftId);
-  return drafts && drafts.filter((draft) => draft.id !== currentId);
-};
+const DraftRow: React.FC<{
+  record: DraftRecord;
+  /** The editor's own session; opening it again would do nothing. */
+  current: boolean;
+  opening: boolean;
+  now: Date;
+  openId: string;
+  metaId: string;
+  onOpen: () => void;
+  onDelete: () => void;
+}> = ({ record, current, opening, now, openId, metaId, onOpen, onDelete }) => (
+  <li className={classNames(styles.row, current && styles.current)}>
+    <div className={styles.text}>
+      <button
+        type="button"
+        id={openId}
+        className={styles.open}
+        aria-current={current || undefined}
+        aria-describedby={metaId}
+        aria-busy={opening}
+        onClick={current ? undefined : onOpen}
+      >
+        {rowTitle(record)}
+      </button>
+      <p id={metaId} className={styles.meta}>
+        {opening ? (
+          "Opening…"
+        ) : (
+          <>
+            <time dateTime={new Date(record.updatedAt).toISOString()}>
+              {formatWhen(record.updatedAt, now)}
+            </time>
+            {" · "}
+            {objectCount(record)}
+          </>
+        )}
+      </p>
+    </div>
+    {current ? (
+      // aria-current on the button already says this to screen readers.
+      <span className={styles.currentBadge} aria-hidden="true">
+        Current
+      </span>
+    ) : (
+      // The editor rewrites its own session's draft on the next edit, so
+      // deleting it wouldn't stick.
+      <IconButton
+        className={styles.delete}
+        label={`Delete ${unsavedName(record)}`}
+        aria-describedby={metaId}
+        onClick={onDelete}
+      >
+        <Icon icon={trash2} aria-hidden="true" />
+      </IconButton>
+    )}
+  </li>
+);
 
 /** Offers Undo until the list goes away: the drawer closes or the tab changes. */
 const DeletedRow: React.FC<{
@@ -113,7 +164,8 @@ const DeletedRow: React.FC<{
 
 /** The Unsaved tab's panel. */
 const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
-  const drafts = useOtherDrafts();
+  const drafts = useDrafts();
+  const currentId = useAppSelector((state) => state.scene.draftId);
   const { openDraft, openingId } = useOpenDraft();
   const idPrefix = useId();
   const openId = (id: string) => `${idPrefix}-open-${id}`;
@@ -145,6 +197,14 @@ const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
     announce(`Deleted ${unsavedName(record)}`);
   };
 
+  const open = async (record: DraftRecord) => {
+    const id = await openDraft(record);
+    if (!id) return;
+    // Opening re-keys the row, so focus follows it to its new id.
+    focusNext.current = () => document.getElementById(openId(id));
+    announce(`Opened ${unsavedName(record)}`);
+  };
+
   const undo = (record: DraftRecord) => {
     // Another tab still editing that session may have written it since.
     if (!readDraft(record.id)) writeDraft(record);
@@ -172,14 +232,14 @@ const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
           <div className={listStyles.message}>
             <p className={listStyles.hint}>
               When you leave a scene without saving, your changes are kept here,
-              in this browser, for 7 days.
+              in this browser, for up to 7 days.
             </p>
           </div>
         )}
         {rows.length > 0 && (
           <>
             <p className={classNames(listStyles.hint, styles.intro)}>
-              Unsaved work from this browser, kept for 7 days.
+              Unsaved work from this browser, kept for up to 7 days.
             </p>
             <ul role="list" className={styles.list}>
               {rows.map((record) =>
@@ -191,45 +251,17 @@ const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
                     onUndo={() => undo(record)}
                   />
                 ) : (
-                  <li key={record.id} className={styles.row}>
-                    <div className={styles.text}>
-                      <button
-                        type="button"
-                        id={openId(record.id)}
-                        className={styles.open}
-                        aria-describedby={metaId(record.id)}
-                        aria-busy={openingId === record.id}
-                        onClick={() => openDraft(record)}
-                      >
-                        {rowTitle(record)}
-                      </button>
-                      <p id={metaId(record.id)} className={styles.meta}>
-                        {openingId === record.id ? (
-                          "Opening…"
-                        ) : (
-                          <>
-                            <time
-                              dateTime={new Date(
-                                record.updatedAt,
-                              ).toISOString()}
-                            >
-                              {formatWhen(record.updatedAt, now)}
-                            </time>
-                            {" · "}
-                            {objectCount(record)}
-                          </>
-                        )}
-                      </p>
-                    </div>
-                    <IconButton
-                      className={styles.delete}
-                      label={`Delete ${unsavedName(record)}`}
-                      aria-describedby={metaId(record.id)}
-                      onClick={() => remove(record)}
-                    >
-                      <Icon icon={trash2} aria-hidden="true" />
-                    </IconButton>
-                  </li>
+                  <DraftRow
+                    key={record.id}
+                    record={record}
+                    current={record.id === currentId}
+                    opening={openingId === record.id}
+                    now={now}
+                    openId={openId(record.id)}
+                    metaId={metaId(record.id)}
+                    onOpen={() => open(record)}
+                    onDelete={() => remove(record)}
+                  />
                 ),
               )}
             </ul>
@@ -244,4 +276,3 @@ const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
 };
 
 export default UnsavedScenes;
-export { useOtherDrafts };

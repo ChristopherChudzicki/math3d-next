@@ -51,6 +51,10 @@ test("Unsaved edits survive a reload in the Unsaved tab", async ({
     await openUnsavedTab(page);
     await page.getByRole("button", { name: draftName(scene.title) }).click();
 
+    await expect(
+      page.getByRole("button", { name: draftName(scene.title) }),
+    ).toHaveAttribute("aria-current", "true");
+    await page.keyboard.press("Escape");
     await expect(page).toHaveURL(new RegExp(`/${key}$`));
     await expect(item.field("description")).toHaveValue(newDescription);
     await expect(app.sceneAction()).toHaveAccessibleName("Save");
