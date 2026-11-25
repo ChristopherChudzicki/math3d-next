@@ -2,26 +2,15 @@ import { expect, test } from "vitest";
 import { makeItem } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import type { MathItem } from "@math3d/mathitem-configs";
-import type { DraftRecord } from "@/store/scene/drafts/storage";
-import { isRestorableDraft } from "./restorable";
+import { isRestorable } from "./restorable";
 
 const folder = makeItem(MIT.Folder);
 const point = makeItem(MIT.Point);
 const camera = makeItem(MIT.Camera);
 
-const draftOf = (
-  items: unknown[],
-  itemOrder: Record<string, string[]>,
-): DraftRecord => ({
-  id: "d",
-  title: "",
+const contentOf = (items: unknown[], itemOrder: Record<string, string[]>) => ({
   items: items as MathItem[],
   itemOrder,
-  key: null,
-  author: null,
-  baseModifiedDate: null,
-  createdAt: 0,
-  updatedAt: 0,
 });
 
 const goodOrder = {
@@ -31,11 +20,13 @@ const goodOrder = {
 };
 
 test("accepts a well-formed draft", () => {
-  expect(isRestorableDraft(draftOf([folder, point, camera], goodOrder))).toBe(
+  expect(isRestorable(contentOf([folder, point, camera], goodOrder))).toBe(
     true,
   );
 });
 
+// A limit, not a goal: a draft isn't migrated when item configs change, so a
+// draft written before a property was added or removed is lost.
 test.each([
   ["an unknown item type", [folder, { ...point, type: "Nope" }, camera]],
   [
@@ -60,7 +51,7 @@ test.each([
     ],
   ],
 ])("rejects %s", (_label, items) => {
-  expect(isRestorableDraft(draftOf(items, goodOrder))).toBe(false);
+  expect(isRestorable(contentOf(items, goodOrder))).toBe(false);
 });
 
 test.each([
@@ -72,7 +63,14 @@ test.each([
   ],
   ["an order key that isn't a folder", { ...goodOrder, [point.id]: [] }],
 ])("rejects an order with %s", (_label, itemOrder) => {
-  expect(isRestorableDraft(draftOf([folder, point, camera], itemOrder))).toBe(
+  expect(isRestorable(contentOf([folder, point, camera], itemOrder))).toBe(
     false,
+  );
+});
+
+test("accepts an order key left behind by a deleted folder", () => {
+  const itemOrder = { ...goodOrder, "deleted-folder": [] };
+  expect(isRestorable(contentOf([folder, point, camera], itemOrder))).toBe(
+    true,
   );
 });

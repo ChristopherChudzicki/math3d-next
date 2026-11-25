@@ -7,7 +7,6 @@ import sceneSlice from "@/store/scene/state/scene.slice";
 import { removeDraft, writeDraft } from "@/store/scene/drafts/storage";
 import type { DraftRecord } from "@/store/scene/drafts/storage";
 import { showToast } from "@/ui/Toast/toasts";
-import { isRestorableDraft } from "./restorable";
 
 const UNOPENABLE_TOAST =
   "This unsaved work couldn’t be opened, so it was removed.";
@@ -36,41 +35,31 @@ const useOpenDraft = () => {
     showToast(UNOPENABLE_TOAST);
   };
 
-  /** Whether the draft's scene still exists, and was saved since the draft. */
+  /** Whether the draft's scene still exists, and whether it's legacy. */
   const checkBase = async (
     key: string,
-    baseModifiedDate: string | null,
-  ): Promise<{ exists: boolean; savedSince: boolean }> => {
+  ): Promise<{ exists: boolean; isLegacy: boolean }> => {
     try {
-      // The loader's cache never goes stale, so fetch fresh; that also hands
-      // the loader the current scene. Opening shouldn't wait out retries, or
-      // pause while offline.
+      // The loader's cache never goes stale, so fetch fresh. That also hands
+      // the loader the current scene, and the saved-since banner its
+      // `modifiedDate`. Opening shouldn't wait out retries, or pause offline.
       const scene = await queryClient.fetchQuery({
         ...sceneQueryOptions(key),
         staleTime: 0,
         retry: false,
         networkMode: "always",
       });
-      return {
-        exists: true,
-        savedSince:
-          baseModifiedDate !== null &&
-          Date.parse(scene.modifiedDate) > Date.parse(baseModifiedDate),
-      };
+      return { exists: true, isLegacy: scene.isLegacy ?? false };
     } catch (error) {
       // Any other failure (offline, say) opens the draft as it stands.
-      return { exists: !isApiError(error, [404]), savedSince: false };
+      return { exists: !isApiError(error, [404]), isLegacy: false };
     }
   };
 
   const open = async (record: DraftRecord) => {
-    if (!isRestorableDraft(record)) {
-      discard(record);
-      return;
-    }
     const base = record.key
-      ? await checkBase(record.key, record.baseModifiedDate)
-      : { exists: false, savedSince: false };
+      ? await checkBase(record.key)
+      : { exists: false, isLegacy: false };
     // The user closed the list while the fetch ran.
     if (!mounted.current) return;
     // A draft of a deleted scene opens as a new scene, so Save creates one.
@@ -84,13 +73,13 @@ const useOpenDraft = () => {
       title: record.title,
       key,
       author,
-      isLegacy: false,
+      isLegacy: base.isLegacy,
       modifiedDate: baseModifiedDate,
       dirty: true,
-      savedSince: base.savedSince,
     });
     try {
-      // A reducer that throws leaves the store as it was.
+      // Listed drafts are checked when read, so only a reducer that throws
+      // ends up here. That leaves the store as it was.
       dispatch(load);
     } catch {
       discard(record);
@@ -104,6 +93,7 @@ const useOpenDraft = () => {
       key,
       author,
       baseModifiedDate,
+      updatedAt: Date.now(),
     });
     navigate(`/${key ?? ""}`);
   };

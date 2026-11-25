@@ -14,6 +14,7 @@ import Sidebar from "@/ui/Sidebar";
 import { useToggle } from "@/util/hooks";
 import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
 import { isRenderer } from "@/services/renderer/renderers";
+import { useUserId } from "@/services/auth/useUserId";
 import type { Renderer } from "@/services/renderer/renderers";
 import { RENDERER_PARAM, useRenderer } from "@/services/renderer/useRenderer";
 
@@ -91,7 +92,7 @@ const VIEWPORTS: Record<Renderer, React.FC<{ className?: string }>> = {
 const MainPage: React.FC = () => {
   const { sceneKey } = useParams();
   const sceneLoad = useSceneLoader(sceneKey);
-  useDraftWriter();
+  useDraftWriter(useUserId());
   const unavailable =
     sceneLoad.status !== "ready" && sceneLoad.status !== "loading"
       ? sceneLoad.status

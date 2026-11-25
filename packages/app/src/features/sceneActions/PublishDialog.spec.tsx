@@ -13,6 +13,7 @@ import {
   user,
   waitFor,
   within,
+  writeSessionDraft,
 } from "@/test_util";
 
 const renderOwnedScene = (overrides: Partial<Scene> = {}) => {
@@ -56,6 +57,8 @@ test("publishing an edited scene removes its draft", async () => {
   act(() => {
     store.dispatch(actions.setTitle({ title: "Edited" }));
   });
+  writeSessionDraft(store);
+  expect(listDrafts()).toHaveLength(1);
 
   await openDuplicate();
 

@@ -41,18 +41,22 @@ interface SceneState {
   title: string;
   isLegacy: boolean;
   /**
-   * This session's draft id: one page load's work on one scene. A draft
-   * exists once a record with this id is in storage (`drafts/storage.ts`).
+   * This editing session's draft id; each `setScene` starts a session. A
+   * draft exists once a record with this id is in storage (`drafts/storage.ts`).
    */
   draftId: string;
-  /** `sceneFingerprint` of the scene as last loaded or saved. */
+  /**
+   * `sceneFingerprint` of the scene as last loaded or saved, plus any derived
+   * changes made before the first edit.
+   */
   baseline: string;
-  /** Saves this session; a save can leave `baseline` as it was. */
+  /** Counts saves, so the draft writer sees one even when it leaves `baseline` unchanged. */
   saveCount: number;
-  /** The loaded or saved scene's `modifiedDate`; null for an unsaved scene. */
+  /**
+   * `modifiedDate` of the saved version this session (the draft) edits; null
+   * for a new scene.
+   */
   modifiedDate: string | null;
-  /** This session opened a draft whose scene was saved after the version the draft edits. */
-  savedSince: boolean;
 }
 
 interface Subtree {

@@ -21,9 +21,10 @@ import {
   user,
   waitFor,
   within,
+  writeSessionDraft,
 } from "@/test_util";
 import { actions } from "@/store/scene/state/scene.slice";
-import { readDraft, writeDraft } from "@/store/scene/drafts/storage";
+import { readDraft } from "@/store/scene/drafts/storage";
 
 beforeAll(() => {
   Object.assign(window.navigator, {
@@ -164,6 +165,37 @@ test("an edit made while saving survives the save and stays unsaved", async () =
   expect(readDraft(store.getState().scene.draftId)?.title).toBe(
     `${scene.title} saved later`,
   );
+});
+
+test("a save that lands after another scene loads removes the draft it saved", async () => {
+  const gate = Promise.withResolvers<void>();
+  server.use(
+    http.patch(urls.scenes.detail, async () => {
+      await gate.promise;
+    }),
+  );
+  const { scene, store } = renderOwnedScene();
+  await renameScene(`${scene.title} saved`);
+  const draftId = writeSessionDraft(store);
+  await user.click(await primary());
+  const other = seedDb.withSceneFromItems([]);
+  act(() => {
+    store.dispatch(
+      actions.setScene({
+        key: other.key,
+        author: null,
+        items: other.items,
+        order: other.itemOrder,
+        title: other.title ?? "",
+        isLegacy: false,
+      }),
+    );
+  });
+  expect(readDraft(draftId)).not.toBeNull();
+
+  gate.resolve();
+
+  await waitFor(() => expect(readDraft(draftId)).toBeNull());
 });
 
 test("a failed save frees the button and leaves the edit unsaved", async () => {
@@ -401,7 +433,10 @@ describe("an opened draft whose scene was saved since", () => {
           title: "Renamed in the draft",
           isLegacy: false,
           dirty: true,
-          savedSince: true,
+          // The version the draft edits, before the save the loader fetched.
+          modifiedDate: new Date(
+            Date.parse(scene.modifiedDate) - 1000,
+          ).toISOString(),
         }),
       );
     });
@@ -409,6 +444,7 @@ describe("an opened draft whose scene was saved since", () => {
   test("warns its author, and Save a copy saves it as a new scene", async () => {
     const { scene, store } = renderOwnedScene();
     await primary();
+    expect(screen.queryByText(SAVED_SINCE)).toBeNull();
     openAsDraft(store, scene);
 
     const banner = await screen.findByText(SAVED_SINCE);
@@ -427,18 +463,7 @@ describe("an opened draft whose scene was saved since", () => {
     await primary();
     openAsDraft(store, scene);
     await screen.findByText(SAVED_SINCE);
-    const { draftId, title, items, order } = store.getState().scene;
-    writeDraft({
-      id: draftId,
-      title,
-      items: Object.values(items),
-      itemOrder: order,
-      key: scene.key,
-      author: scene.author ?? null,
-      baseModifiedDate: scene.modifiedDate,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    });
+    const draftId = writeSessionDraft(store);
 
     await user.click(await primary());
 

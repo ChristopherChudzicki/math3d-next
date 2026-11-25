@@ -1,5 +1,6 @@
 import { MathItemType } from "@math3d/mathitem-configs";
 import type { MathItem } from "@math3d/mathitem-configs";
+import type { SceneState } from "@/store/scene/state/interfaces";
 
 type SceneContent = {
   title: string;
@@ -58,5 +59,11 @@ const sceneFingerprint = ({ title, items, itemOrder }: SceneContent): string =>
     }),
   );
 
-export { sceneFingerprint };
+const sceneContentOf = (scene: SceneState): SceneContent => ({
+  title: scene.title,
+  items: Object.values(scene.items),
+  itemOrder: scene.order,
+});
+
+export { sceneContentOf, sceneFingerprint };
 export type { SceneContent };

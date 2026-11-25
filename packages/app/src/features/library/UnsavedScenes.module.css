@@ -55,6 +55,16 @@
   cursor: pointer;
 }
 
+/* The whole row is the button's target, so the row shows its focus. */
+.open:focus-visible {
+  outline: none;
+}
+
+.row:has(.open:focus-visible) {
+  outline: auto;
+  outline-offset: 1px;
+}
+
 /* Stretches the button over the whole row. */
 .open::after {
   content: "";

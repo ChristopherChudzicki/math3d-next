@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useId, useLayoutEffect, useRef, useState } from "react";
 import classNames from "classnames";
 import { Icon } from "@iconify/react/offline";
 import trash2 from "@iconify-icons/lucide/trash-2";
@@ -15,7 +9,11 @@ import IconButton from "@/ui/IconButton";
 import { TextButton } from "@/ui/TextLink";
 import { u } from "@/util/styles";
 import { useAppSelector } from "@/store/hooks";
-import { writeDraft, removeDraft } from "@/store/scene/drafts/storage";
+import {
+  readDraft,
+  removeDraft,
+  writeDraft,
+} from "@/store/scene/drafts/storage";
 import type { DraftRecord } from "@/store/scene/drafts/storage";
 import { MAIN_FOLDER } from "@/store/scene/state/util";
 import useDrafts from "./useDrafts";
@@ -24,8 +22,6 @@ import { ListType, cardTitle } from "./constants";
 import listStyles from "./ScenesList.module.css";
 import styles from "./UnsavedScenes.module.css";
 
-/** How long a deleted row offers Undo. */
-const UNDO_MS = 5000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const locale = navigator.languages[0];
@@ -33,11 +29,7 @@ const timeFormat = new Intl.DateTimeFormat(locale, {
   hour: "numeric",
   minute: "2-digit",
 });
-const dateFormat = new Intl.DateTimeFormat(locale, {
-  weekday: "short",
-  month: "short",
-  day: "numeric",
-});
+const weekdayFormat = new Intl.DateTimeFormat(locale, { weekday: "short" });
 
 /** "3:42 pm": lowercase, with a plain space (ICU puts a narrow no-break space before "PM"). */
 const formatTime = (date: Date) =>
@@ -53,14 +45,17 @@ const formatTime = (date: Date) =>
 const startOfDay = (date: Date) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 
-/** "Today 3:42 pm", "Yesterday 3:42 pm", else "Mon, Nov 17". */
+/**
+ * "Today 3:42 pm", "Yesterday 3:42 pm", else "Mon 3:42 pm": drafts last a
+ * week, so the weekday is unambiguous.
+ */
 const formatWhen = (ms: number, now = new Date()) => {
   const date = new Date(ms);
   // Rounded, since a day with a DST change isn't 24 hours.
   const daysAgo = Math.round((startOfDay(now) - startOfDay(date)) / DAY_MS);
-  if (daysAgo === 0) return `Today ${formatTime(date)}`;
-  if (daysAgo === 1) return `Yesterday ${formatTime(date)}`;
-  return dateFormat.format(date);
+  const day =
+    { 0: "Today", 1: "Yesterday" }[daysAgo] ?? weekdayFormat.format(date);
+  return `${day} ${formatTime(date)}`;
 };
 
 /** Items under `main` that aren't folders; folders hold no folders. */
@@ -95,34 +90,26 @@ const useOtherDrafts = (): DraftRecord[] => {
   return drafts.filter((draft) => draft.id !== currentId);
 };
 
+/** Offers Undo until the list goes away: the drawer closes or the tab changes. */
 const DeletedRow: React.FC<{
   record: DraftRecord;
   undoId: string;
   onUndo: () => void;
-  onExpire: () => void;
-}> = ({ record, undoId, onUndo, onExpire }) => {
-  const expire = useRef(onExpire);
-  expire.current = onExpire;
-  useEffect(() => {
-    const timer = setTimeout(() => expire.current(), UNDO_MS);
-    return () => clearTimeout(timer);
-  }, []);
-  return (
-    <li className={classNames(styles.row, styles.deleted)}>
-      <p className={styles.deletedText}>
-        Deleted ·{" "}
-        <TextButton
-          id={undoId}
-          className={styles.undo}
-          aria-label={`Undo deleting ${unsavedName(record)}`}
-          onClick={onUndo}
-        >
-          Undo
-        </TextButton>
-      </p>
-    </li>
-  );
-};
+}> = ({ record, undoId, onUndo }) => (
+  <li className={classNames(styles.row, styles.deleted)}>
+    <p className={styles.deletedText}>
+      Deleted “{rowTitle(record)}” ·{" "}
+      <TextButton
+        id={undoId}
+        className={styles.undo}
+        aria-label={`Undo deleting ${unsavedName(record)}`}
+        onClick={onUndo}
+      >
+        Undo
+      </TextButton>
+    </p>
+  </li>
+);
 
 /** The Unsaved tab's panel. */
 const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
@@ -149,22 +136,7 @@ const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
     target?.()?.focus();
   });
 
-  const panelRef = useRef<HTMLDivElement>(null);
-
   const forget = (id: string) => setDeleted(({ [id]: _, ...rest }) => rest);
-
-  const expire = (record: DraftRecord) => {
-    const undo = document.getElementById(undoId(record.id));
-    if (undo && document.activeElement === undo) {
-      const row = undo.closest("li");
-      const neighbor = (row?.nextElementSibling ??
-        row?.previousElementSibling) as HTMLElement | null;
-      // With no rows left, the panel holds only the empty state.
-      focusNext.current = () =>
-        neighbor?.querySelector<HTMLElement>("button") ?? panelRef.current;
-    }
-    forget(record.id);
-  };
 
   const remove = (record: DraftRecord) => {
     removeDraft(record.id);
@@ -174,7 +146,8 @@ const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
   };
 
   const undo = (record: DraftRecord) => {
-    writeDraft(record);
+    // Another tab still editing that session may have written it since.
+    if (!readDraft(record.id)) writeDraft(record);
     forget(record.id);
     focusNext.current = () => document.getElementById(openId(record.id));
   };
@@ -192,13 +165,13 @@ const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
       value={ListType.Unsaved}
       className={className}
       tabIndex={rows.length > 0 ? -1 : 0}
-      ref={panelRef}
     >
       <Drawer.Body>
         {rows.length === 0 ? (
           <div className={listStyles.message}>
             <p className={listStyles.hint}>
-              Scenes you edit but don’t save appear here for 7 days.
+              When you leave a scene without saving, your changes are kept here,
+              in this browser, for 7 days.
             </p>
           </div>
         ) : (
@@ -214,7 +187,6 @@ const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
                     record={record}
                     undoId={undoId(record.id)}
                     onUndo={() => undo(record)}
-                    onExpire={() => expire(record)}
                   />
                 ) : (
                   <li key={record.id} className={styles.row}>

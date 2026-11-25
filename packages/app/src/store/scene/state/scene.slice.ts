@@ -16,7 +16,10 @@ import jsonPatch from "fast-json-patch";
 
 import invariant from "tiny-invariant";
 import { assertNotNil } from "@/util/predicates";
-import { sceneFingerprint } from "@/store/scene/drafts/fingerprint";
+import {
+  sceneContentOf,
+  sceneFingerprint,
+} from "@/store/scene/drafts/fingerprint";
 import type { SceneContent } from "@/store/scene/drafts/fingerprint";
 import type { SceneState } from "./interfaces";
 import {
@@ -44,7 +47,6 @@ const getInitialState = (): SceneState => ({
   baseline: "",
   saveCount: 0,
   modifiedDate: null,
-  savedSince: false,
 });
 
 const getInsertionFolder = (
@@ -89,18 +91,23 @@ type SetScenePayload = {
   modifiedDate?: SceneState["modifiedDate"];
   /** An opened draft is unsaved work from the start. */
   dirty?: boolean;
-  savedSince?: boolean;
 };
+
+/**
+ * `true` leaves the scene clean. `"derived"` is clean too, and also isn't a
+ * change worth a draft: it follows from the scene, never from an edit.
+ */
+type Clean = boolean | "derived";
 
 type SceneCaseReducer<P> = CaseReducer<SceneState, PayloadAction<P>>;
 const withClean =
   (defaultClean: boolean = true) =>
   <P>(fn: SceneCaseReducer<P>) => {
     return {
-      prepare: (payload: P, clean = defaultClean) => {
+      prepare: (payload: P, clean: Clean = defaultClean) => {
         return {
           payload,
-          meta: { clean },
+          meta: { clean: !!clean, derived: clean === "derived" },
         };
       },
       reducer: fn,
@@ -140,7 +147,6 @@ const slice = createSlice({
         state.draftId = action.payload.draftId;
         state.baseline = sceneFingerprint({ title, items, itemOrder: order });
         state.modifiedDate = action.payload.modifiedDate ?? null;
-        state.savedSince = action.payload.savedSince ?? false;
 
         invariant(state.order[MAIN_FOLDER], "Main folder should exist.");
         invariant(
@@ -195,6 +201,7 @@ const slice = createSlice({
       order[parentFolderId] = order[parentFolderId].filter(
         (itemId) => itemId !== id,
       );
+      delete order[id];
 
       if (state.activeItemId === id) {
         state.activeItemId = undefined;
@@ -284,15 +291,11 @@ const slice = createSlice({
       title?: string;
       isLegacy?: boolean;
       revision: number;
-      loadCount: number;
       /** The content that was sent. */
       snapshot: SceneContent;
       modifiedDate: string;
     }>((state, action) => {
-      const { key, author, title, isLegacy, revision, loadCount } =
-        action.payload;
-      // The user moved on to another scene while the save was in flight.
-      if (state.loadCount !== loadCount) return;
+      const { key, author, title, isLegacy, revision } = action.payload;
       state.key = key;
       state.author = author;
       state.loaded = true;
@@ -302,19 +305,32 @@ const slice = createSlice({
       state.baseline = sceneFingerprint(action.payload.snapshot);
       state.saveCount += 1;
       state.modifiedDate = action.payload.modifiedDate;
-      state.savedSince = false;
     }),
   },
 });
 
 const { actions } = slice;
 
-type UnknownMaybeCleanAction = UnknownAction & { meta?: { clean?: boolean } };
+type UnknownMaybeCleanAction = UnknownAction & {
+  meta?: { clean?: boolean; derived?: boolean };
+};
 
 const reducer: Reducer<SceneState, UnknownMaybeCleanAction> = (
   state,
   action,
 ) => {
+  if (state && action.meta?.derived) {
+    const next = slice.reducer(state, action);
+    // Until a real edit, the baseline follows derived changes, so a camera or
+    // slider change after one doesn't start a draft.
+    if (
+      next !== state &&
+      sceneFingerprint(sceneContentOf(state)) === state.baseline
+    ) {
+      return { ...next, baseline: sceneFingerprint(sceneContentOf(next)) };
+    }
+    return next;
+  }
   if (!state || !action.type.startsWith("scene/") || action?.meta?.clean) {
     return slice.reducer(state, action);
   }
@@ -327,6 +343,6 @@ const reducer: Reducer<SceneState, UnknownMaybeCleanAction> = (
 
 const sceneSlice = { ...slice, reducer };
 
-export type { SceneState };
+export type { Clean, SceneState };
 export default sceneSlice;
 export { actions, reducer };

@@ -342,8 +342,8 @@ const MyScenes: React.FC = () => {
       <Drawer.Body>
         <div className={styles.message}>
           <p className={styles.hint}>
-            Sign in to keep scenes in your account. Unsaved work from this
-            browser is under{" "}
+            Sign in to keep scenes in your account. Changes you don’t save are
+            kept in this browser for 7 days, in{" "}
             <TextButton
               onClick={() => open("scenes", { list: ListType.Unsaved })}
             >

@@ -5,9 +5,15 @@ import {
   subscribeDrafts,
 } from "@/store/scene/drafts/storage";
 import type { DraftRecord } from "@/store/scene/drafts/storage";
+import { useUserId } from "@/services/auth/useUserId";
 
-/** Unexpired drafts in this browser, newest first; live across tabs. */
+/**
+ * The drafts this browser shows the current user, newest first, live across
+ * tabs: those written while signed out, and the user's own. Empty until
+ * sign-in status is known, so no other user's draft shows for a moment.
+ */
 const useDrafts = (): DraftRecord[] => {
+  const userId = useUserId();
   const [drafts, setDrafts] = useState(listDrafts);
   useEffect(() => {
     const unsubscribe = subscribeDrafts(() => setDrafts(listDrafts()));
@@ -16,7 +22,10 @@ const useDrafts = (): DraftRecord[] => {
     setDrafts(listDrafts());
     return unsubscribe;
   }, []);
-  return drafts;
+  if (userId === undefined) return [];
+  return drafts.filter(
+    (draft) => draft.owner === null || draft.owner === userId,
+  );
 };
 
 export default useDrafts;

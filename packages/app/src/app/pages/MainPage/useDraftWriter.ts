@@ -1,8 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { debounce } from "lodash-es";
 import { useAppStore } from "@/store/hooks";
 import type { SceneState } from "@/store/scene/state/interfaces";
-import { sceneFingerprint } from "@/store/scene/drafts/fingerprint";
+import {
+  sceneContentOf,
+  sceneFingerprint,
+} from "@/store/scene/drafts/fingerprint";
 import {
   readDraft,
   removeDraft,
@@ -11,40 +14,41 @@ import {
 
 const DEBOUNCE_MS = 1000;
 
-const contentOf = (scene: SceneState) => ({
-  title: scene.title,
-  items: Object.values(scene.items),
-  itemOrder: scene.order,
-});
+/** Who is signed in: a user id, null for nobody, undefined while unknown. */
+type Owner = number | null | undefined;
 
 /**
  * Writes the session's draft. A session has a draft once its record exists;
  * before that, only a change from the baseline starts one.
  */
-const writeFor = (scene: SceneState) => {
+const writeFor = (scene: SceneState, owner: Owner) => {
   if (!scene.loaded) return;
   const existing = readDraft(scene.draftId);
-  const content = contentOf(scene);
+  const content = sceneContentOf(scene);
   if (!existing && sceneFingerprint(content) === scene.baseline) return;
-  const now = Date.now();
   writeDraft({
     id: scene.draftId,
     ...content,
     key: scene.key,
     author: scene.author,
     baseModifiedDate: scene.modifiedDate,
-    createdAt: existing?.createdAt ?? now,
-    updatedAt: now,
+    owner: owner === undefined ? existing?.owner ?? null : owner,
+    updatedAt: Date.now(),
   });
 };
 
 /** Keeps the editor's unsaved work in a draft (`store/scene/drafts`). */
-const useDraftWriter = () => {
+const useDraftWriter = (owner: Owner) => {
   const store = useAppStore();
+  const ownerRef = useRef(owner);
+  ownerRef.current = owner;
   useEffect(() => {
     let prev = store.getState().scene;
     // Each call holds its scene, so a pending write keeps its session's id.
-    const write = debounce(writeFor, DEBOUNCE_MS);
+    const write = debounce(
+      (scene: SceneState) => writeFor(scene, ownerRef.current),
+      DEBOUNCE_MS,
+    );
 
     const unsubscribe = store.subscribe(() => {
       const next = store.getState().scene;
@@ -56,10 +60,10 @@ const useDraftWriter = () => {
       } else if (next.saveCount !== before.saveCount) {
         // The draft is done unless edits arrived while the save was sent.
         write.cancel();
-        if (sceneFingerprint(contentOf(next)) === next.baseline) {
+        if (sceneFingerprint(sceneContentOf(next)) === next.baseline) {
           removeDraft(next.draftId);
         } else {
-          writeFor(next);
+          writeFor(next, ownerRef.current);
         }
       } else if (next.revision !== before.revision) {
         write(next);

@@ -111,7 +111,6 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
         title: newTitle,
         isLegacy: result.isLegacy ?? false,
         revision,
-        loadCount,
         snapshot,
         modifiedDate: result.modifiedDate,
       }),

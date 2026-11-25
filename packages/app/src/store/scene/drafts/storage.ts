@@ -1,6 +1,7 @@
 import type { MathItem } from "@math3d/mathitem-configs";
 import { sceneFingerprint } from "./fingerprint";
 import type { SceneContent } from "./fingerprint";
+import { isRestorable } from "./restorable";
 
 // Unsaved scenes, one `localStorage` entry per editing session. Storage can
 // be blocked or full; every access fails silently, since losing a draft beats
@@ -14,14 +15,19 @@ type DraftRecord = {
   /** The saved scene the draft edits; null for a new scene. */
   key: string | null;
   author: number | null;
-  /** The saved scene's `modifiedDate` as of the draft's last write. */
+  /**
+   * `modifiedDate` of the saved version this session (the draft) edits; null
+   * for a new scene.
+   */
   baseModifiedDate: string | null;
-  createdAt: number;
+  /** Who was signed in at the latest write; null if nobody was. */
+  owner: number | null;
   updatedAt: number;
 };
 
 const PREFIX = "math3d:draft:";
-const MAX_DRAFTS = 30;
+const MAX_DRAFTS = 50;
+const MAX_DRAFTS_PER_OWNER = 30;
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 const storageKey = (id: string) => `${PREFIX}${id}`;
@@ -29,6 +35,7 @@ const storageKey = (id: string) => `${PREFIX}${id}`;
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((listener) => listener());
 
+/** A stored draft, or null if it's unreadable or can't be opened. */
 const parse = (raw: string | null): DraftRecord | null => {
   if (raw === null) return null;
   try {
@@ -37,9 +44,11 @@ const parse = (raw: string | null): DraftRecord | null => {
       typeof record?.id !== "string" ||
       typeof record.title !== "string" ||
       typeof record.updatedAt !== "number" ||
+      !(record.owner === null || typeof record.owner === "number") ||
       !Array.isArray(record.items) ||
       typeof record.itemOrder !== "object" ||
-      record.itemOrder === null
+      record.itemOrder === null ||
+      !isRestorable(record)
     ) {
       return null;
     }
@@ -117,27 +126,41 @@ const removeDraft = (id: string) => {
   notify();
 };
 
+const isQuotaError = (error: unknown) =>
+  error instanceof DOMException && error.name === "QuotaExceededError";
+
+/**
+ * Writes `record`. A new record first makes room under the caps: 30 drafts
+ * per owner, then 50 in all. A full quota evicts until the write fits, the
+ * owner's oldest drafts first, then the oldest of all.
+ */
 const writeDraft = (record: DraftRecord, now = Date.now()) => {
-  const drafts = pruneDrafts(now);
-  const others = drafts.filter((draft) => draft.id !== record.id);
-  const isNew = others.length === drafts.length;
-  const evictOldest = () => {
-    const oldest = others.pop();
-    if (oldest) removeKey(storageKey(oldest.id));
-    return !!oldest;
-  };
-  if (isNew && others.length >= MAX_DRAFTS) evictOldest();
+  const key = storageKey(record.id);
   const raw = JSON.stringify(record);
-  try {
-    localStorage.setItem(storageKey(record.id), raw);
-  } catch {
-    // Most likely a full quota: make room once, then give up.
-    if (evictOldest()) {
-      try {
-        localStorage.setItem(storageKey(record.id), raw);
-      } catch {
-        // Ignored, as is every storage failure here.
-      }
+  // Read every draft only when room is needed.
+  let others: DraftRecord[] | undefined;
+  const getOthers = () => {
+    others ??= pruneDrafts(now).filter((draft) => draft.id !== record.id);
+    return others;
+  };
+  const own = () => getOthers().filter((draft) => draft.owner === record.owner);
+  const evict = (draft: DraftRecord) => {
+    removeKey(storageKey(draft.id));
+    others = getOthers().filter((other) => other !== draft);
+  };
+
+  if (readRaw(key) === null) {
+    while (own().length >= MAX_DRAFTS_PER_OWNER) evict(own().at(-1)!);
+    while (getOthers().length >= MAX_DRAFTS) evict(getOthers().at(-1)!);
+  }
+  for (;;) {
+    try {
+      localStorage.setItem(key, raw);
+      break;
+    } catch (error) {
+      const oldest = own().at(-1) ?? getOthers().at(-1);
+      if (!isQuotaError(error) || !oldest) break;
+      evict(oldest);
     }
   }
   notify();
@@ -173,6 +196,7 @@ const subscribeDrafts = (listener: () => void): (() => void) => {
 export {
   MAX_AGE_MS,
   MAX_DRAFTS,
+  MAX_DRAFTS_PER_OWNER,
   PREFIX as DRAFT_KEY_PREFIX,
   listDrafts,
   pruneDrafts,

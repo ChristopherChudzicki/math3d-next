@@ -10,11 +10,7 @@ import type { AppStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
 import * as select from "@/store/scene/state/selectors";
 import { storeWithScene } from "@/test_util/storeWithScene";
-import {
-  listDrafts,
-  readDraft,
-  writeDraft,
-} from "@/store/scene/drafts/storage";
+import { listDrafts, readDraft } from "@/store/scene/drafts/storage";
 import useDraftWriter, { DEBOUNCE_MS } from "./useDraftWriter";
 
 const POINT = "point";
@@ -30,10 +26,17 @@ const loadScene = () => {
   return scene;
 };
 
-const mountWriter = (store: AppStore) =>
-  renderHook(() => useDraftWriter(), {
-    wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  });
+const mountWriter = (
+  store: AppStore,
+  owner: number | null | undefined = null,
+) =>
+  renderHook<void, { owner: number | null | undefined }>(
+    (props) => useDraftWriter(props.owner),
+    {
+      initialProps: { owner },
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    },
+  );
 
 const editExpression = (store: AppStore, coords: string) =>
   act(() => {
@@ -54,7 +57,7 @@ const advance = (ms = DEBOUNCE_MS) =>
 const markSavedNow = (
   store: AppStore,
   sent: ReturnType<typeof select.sceneInfo>,
-  sentAt: { revision: number; loadCount: number },
+  sentAt: { revision: number },
 ) =>
   act(() => {
     store.dispatch(
@@ -74,7 +77,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
-  localStorage.clear();
 });
 
 test("camera moves and slider drags make no draft", () => {
@@ -100,6 +102,70 @@ test("camera moves and slider drags make no draft", () => {
   advance();
 
   expect(listDrafts()).toEqual([]);
+});
+
+test("a derived change, then a slider drag, makes no draft", () => {
+  const store = storeWithScene(loadScene());
+  mountWriter(store);
+
+  act(() => {
+    store.dispatch(
+      actions.patchProperty(
+        { id: POINT, path: "/description", value: "derived" },
+        "derived",
+      ),
+    );
+    store.dispatch(
+      actions.setProperties({
+        id: SLIDER,
+        type: MIT.VariableSlider,
+        properties: { value: { lhs: "T", rhs: "2", type: "assignment" } },
+      }),
+    );
+  });
+  advance();
+
+  expect(listDrafts()).toEqual([]);
+});
+
+test("an edit, then a derived change and a slider drag, still makes a draft", () => {
+  const store = storeWithScene(loadScene());
+  mountWriter(store);
+
+  editExpression(store, "[1,1,1]");
+  act(() => {
+    store.dispatch(
+      actions.patchProperty(
+        { id: POINT, path: "/description", value: "derived" },
+        "derived",
+      ),
+    );
+    store.dispatch(
+      actions.setProperties({
+        id: SLIDER,
+        type: MIT.VariableSlider,
+        properties: { value: { lhs: "T", rhs: "2", type: "assignment" } },
+      }),
+    );
+  });
+  advance();
+
+  expect(listDrafts()).toHaveLength(1);
+});
+
+test("a draft records who was signed in, and keeps its owner while that's unknown", () => {
+  const store = storeWithScene(loadScene());
+  const view = mountWriter(store, 7);
+  const { draftId } = store.getState().scene;
+
+  editExpression(store, "[1,1,1]");
+  advance();
+  expect(readDraft(draftId)?.owner).toBe(7);
+
+  view.rerender({ owner: undefined });
+  editExpression(store, "[2,2,2]");
+  advance();
+  expect(readDraft(draftId)?.owner).toBe(7);
 });
 
 test("an edit is written once the debounce settles, and later edits update the same draft", () => {
@@ -138,43 +204,12 @@ test("undoing an edit by hand keeps the draft, until a save", () => {
   invariant("coords" in original);
   editExpression(store, original.coords);
   advance();
-  const { revision, loadCount, draftId } = store.getState().scene;
+  const { revision, draftId } = store.getState().scene;
   expect(readDraft(draftId)).not.toBeNull();
 
   markSavedNow(store, select.sceneInfo(store.getState()), {
     revision,
-    loadCount,
   });
-  expect(readDraft(draftId)).toBeNull();
-});
-
-test("saving an opened draft with no further edit removes it", () => {
-  const store = storeWithScene(loadScene());
-  mountWriter(store);
-  const source = loadScene();
-  act(() => {
-    store.dispatch(
-      actions.setScene({
-        ...source,
-        order: source.itemOrder,
-        dirty: true,
-      }),
-    );
-  });
-  const { revision, loadCount, draftId } = store.getState().scene;
-  const content = select.sceneInfo(store.getState());
-  writeDraft({
-    id: draftId,
-    ...content,
-    key: source.key,
-    author: source.author,
-    baseModifiedDate: null,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-  });
-
-  markSavedNow(store, content, { revision, loadCount });
-
   expect(readDraft(draftId)).toBeNull();
 });
 
@@ -201,11 +236,10 @@ test("a save with no edits during it removes the draft", () => {
   mountWriter(store);
   editExpression(store, "[1,1,1]");
   advance();
-  const { revision, loadCount, draftId } = store.getState().scene;
+  const { revision, draftId } = store.getState().scene;
 
   markSavedNow(store, select.sceneInfo(store.getState()), {
     revision,
-    loadCount,
   });
 
   expect(readDraft(draftId)).toBeNull();
@@ -216,11 +250,11 @@ test("a save with edits during it keeps the draft, under the saved key", () => {
   mountWriter(store);
   editExpression(store, "[1,1,1]");
   advance();
-  const { revision, loadCount, draftId } = store.getState().scene;
+  const { revision, draftId } = store.getState().scene;
   const sent = select.sceneInfo(store.getState());
 
   editExpression(store, "[2,2,2]");
-  markSavedNow(store, sent, { revision, loadCount });
+  markSavedNow(store, sent, { revision });
 
   expect(readDraft(draftId)?.key).toBe("saved-key");
 });
@@ -233,6 +267,18 @@ test("hiding the tab writes a pending edit at once", () => {
   vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
   act(() => {
     document.dispatchEvent(new Event("visibilitychange"));
+  });
+
+  expect(readDraft(store.getState().scene.draftId)).not.toBeNull();
+});
+
+test("leaving the page writes a pending edit at once", () => {
+  const store = storeWithScene(loadScene());
+  mountWriter(store);
+  editExpression(store, "[1,1,1]");
+
+  act(() => {
+    window.dispatchEvent(new Event("pagehide"));
   });
 
   expect(readDraft(store.getState().scene.draftId)).not.toBeNull();
