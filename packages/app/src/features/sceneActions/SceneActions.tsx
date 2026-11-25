@@ -102,6 +102,7 @@ type PhoneSceneActionProps = {
   flashing: boolean;
   onAction: (action: Action, from: OpenedFrom) => void;
   popupRef: React.Ref<HTMLDivElement>;
+  triggerRef: React.Ref<HTMLButtonElement>;
 };
 
 /**
@@ -117,6 +118,7 @@ const PhoneSceneAction: React.FC<PhoneSceneActionProps> = ({
   flashing,
   onAction,
   popupRef,
+  triggerRef,
 }) => {
   const icon = saving ? (
     <Spinner size="1em" />
@@ -143,6 +145,7 @@ const PhoneSceneAction: React.FC<PhoneSceneActionProps> = ({
   return (
     <Menu.Root>
       <Menu.Trigger
+        ref={triggerRef}
         render={
           <IconButton
             data-testid="scene-action"
@@ -191,6 +194,7 @@ const SceneActions: React.FC = () => {
   // restore it after commit.
   const controlRef = useRef<HTMLSpanElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const refocus = useRef(false);
   const [shownPhone, setShownPhone] = useState(isPhone);
   if (shownPhone !== isPhone) {
@@ -234,11 +238,9 @@ const SceneActions: React.FC = () => {
   const dialogFinalFocus = () => {
     // null keeps Base UI's default: the opener, here the banner's link.
     if (!openedFrom.current) return null;
-    const control = controlRef.current;
     return (
-      (openedFrom.current === "menu" &&
-        control?.querySelector<HTMLElement>('[aria-haspopup="menu"]')) ||
-      control?.querySelector("button") ||
+      (openedFrom.current === "menu" && triggerRef.current) ||
+      controlRef.current?.querySelector("button") ||
       null
     );
   };
@@ -389,6 +391,7 @@ const SceneActions: React.FC = () => {
         flashing={flash !== null}
         onAction={run}
         popupRef={popupRef}
+        triggerRef={triggerRef}
       />
     );
   } else {
@@ -408,6 +411,7 @@ const SceneActions: React.FC = () => {
         {menu.length > 0 ? (
           <Menu.Root>
             <Menu.Trigger
+              ref={triggerRef}
               disabled={saving}
               render={
                 <IconButton

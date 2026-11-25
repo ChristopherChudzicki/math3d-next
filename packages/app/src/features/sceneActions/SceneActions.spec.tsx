@@ -677,6 +677,21 @@ describe("on a phone", () => {
     await waitFor(async () => expect(await primary()).toHaveFocus());
   });
 
+  test("a dialog opened from a lone button and closed after crossing the breakpoint returns focus to the new button", async () => {
+    setPhone(false);
+    const scene = seedDb.withSceneFromItems([]);
+    renderTestApp(`/${scene.key}`);
+    await user.click(await primary());
+    const dialog = await screen.findByRole("dialog", { name: "Share scene" });
+
+    setPhone(true);
+    await user.click(within(dialog).getByRole("button", { name: "Close" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Share" })).toHaveFocus(),
+    );
+  });
+
   test("focus elsewhere stays put across the breakpoint", async () => {
     renderOwnedScene();
     await primary();
