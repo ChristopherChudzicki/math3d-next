@@ -34,42 +34,28 @@ import styles from "./SceneActions.module.css";
 
 const SAVE_FAILED = "Couldn’t save your changes. Try again.";
 
-type Primary = "share" | "save-new" | "save" | "copy-link" | "save-copy";
-type MenuAction = "duplicate" | "copy-link";
+type Action =
+  | "share"
+  | "save-new"
+  | "save"
+  | "save-copy"
+  | "copy-link"
+  | "duplicate";
 
-const LABELS: Record<Primary, string> = {
-  share: "Share",
-  "save-new": "Save",
-  save: "Save",
-  "copy-link": "Copy link",
-  "save-copy": "Save a copy",
+// `icon` is phone only; desktop shows labels alone.
+const ACTIONS: Record<Action, { label: string; icon: typeof saveIcon }> = {
+  share: { label: "Share", icon: shareIcon },
+  "save-new": { label: "Save", icon: saveIcon },
+  save: { label: "Save", icon: saveIcon },
+  "save-copy": { label: "Save a copy", icon: saveIcon },
+  "copy-link": { label: "Copy link", icon: linkIcon },
+  duplicate: { label: "Duplicate", icon: copyIcon },
 };
-
-const MENU_LABELS: Record<MenuAction, string> = {
-  duplicate: "Duplicate",
-  "copy-link": "Copy link",
-};
-
-// On a phone the primary shows as an icon instead of its label.
-const ICONS: Record<Primary, typeof saveIcon> = {
-  share: shareIcon,
-  "save-new": saveIcon,
-  save: saveIcon,
-  "copy-link": linkIcon,
-  "save-copy": saveIcon,
-};
-
-const MENU_ICONS: Record<MenuAction, typeof saveIcon> = {
-  duplicate: copyIcon,
-  "copy-link": linkIcon,
-};
-
-// One order in every state, so Copy link doesn't move once a Save turns it
-// from a secondary action into the primary.
-const PHONE_MENU_ORDER: MenuAction[] = ["copy-link", "duplicate"];
 
 // Fits the longest label, "Save a copy", so a label swap never shifts layout.
 const PRIMARY_WIDTH = "7.5rem";
+// A lone md IconButton (`--button-size`). A menu button is wider.
+const PHONE_PLACEHOLDER_WIDTH = "2.25rem";
 const MIN_SAVING_DELAY = 500;
 const FLASH_TIMEOUT = 2000;
 
@@ -83,12 +69,13 @@ const getActions = ({
   key: string | null;
   author: number | null;
   dirty: boolean;
-}): { primary: Primary; menu: MenuAction[] } => {
+}): { primary: Action; menu: Action[] } => {
   if (userId === null) return { primary: "share", menu: [] };
   if (key === null) return { primary: "save-new", menu: [] };
   if (author !== userId) return { primary: "save-copy", menu: ["copy-link"] };
+  // Copy link stays above Duplicate, where it is when it's the primary.
   return dirty
-    ? { primary: "save", menu: ["duplicate", "copy-link"] }
+    ? { primary: "save", menu: ["copy-link", "duplicate"] }
     : { primary: "copy-link", menu: ["duplicate"] };
 };
 
@@ -104,14 +91,14 @@ const sleep = (ms: number) =>
   });
 
 type PhoneSceneActionProps = {
-  primary: Primary;
-  menu: MenuAction[];
+  primary: Action;
+  menu: Action[];
   label: string;
   enabled: boolean;
   saving: boolean;
   flashing: boolean;
-  onPrimary: () => void;
-  onMenuAction: (action: MenuAction) => void;
+  onAction: (action: Action) => void;
+  popupRef: React.Ref<HTMLDivElement>;
 };
 
 /**
@@ -125,13 +112,16 @@ const PhoneSceneAction: React.FC<PhoneSceneActionProps> = ({
   enabled,
   saving,
   flashing,
-  onPrimary,
-  onMenuAction,
+  onAction,
+  popupRef,
 }) => {
   const icon = saving ? (
     <Spinner size="1em" />
   ) : (
-    <Icon icon={flashing ? checkIcon : ICONS[primary]} aria-hidden="true" />
+    <Icon
+      icon={flashing ? checkIcon : ACTIONS[primary].icon}
+      aria-hidden="true"
+    />
   );
   if (menu.length === 0) {
     return (
@@ -141,7 +131,7 @@ const PhoneSceneAction: React.FC<PhoneSceneActionProps> = ({
         tone="primary"
         label={label}
         loading={!enabled}
-        onClick={onPrimary}
+        onClick={() => onAction(primary)}
       >
         {icon}
       </IconButton>
@@ -166,47 +156,45 @@ const PhoneSceneAction: React.FC<PhoneSceneActionProps> = ({
           </IconButton>
         }
       />
-      {/* The items' icons explain the button's. */}
-      <Menu.Popup>
-        <Menu.Item
-          icon={<Icon icon={ICONS[primary]} />}
-          disabled={saving}
-          onClick={onPrimary}
-        >
-          {LABELS[primary]}
-        </Menu.Item>
-        {PHONE_MENU_ORDER.filter((action) => menu.includes(action)).map(
-          (action) => (
-            <Menu.Item
-              key={action}
-              icon={<Icon icon={MENU_ICONS[action]} />}
-              disabled={saving}
-              onClick={() => onMenuAction(action)}
-            >
-              {MENU_LABELS[action]}
-            </Menu.Item>
-          ),
-        )}
+      {/* The primary item repeats the trigger's icon beside its label, giving
+          the icon a key. */}
+      <Menu.Popup ref={popupRef}>
+        {[primary, ...menu].map((action) => (
+          <Menu.Item
+            key={action}
+            icon={<Icon icon={ACTIONS[action].icon} />}
+            disabled={saving}
+            onClick={() => onAction(action)}
+          >
+            {ACTIONS[action].label}
+          </Menu.Item>
+        ))}
       </Menu.Popup>
     </Menu.Root>
   );
 };
 
 /**
- * The header's scene action: one button whose label says what it will do
- * (Share, Save, Copy link, Save a copy), plus a menu of secondary actions.
+ * The header's scene action. On desktop, one button whose label says what it
+ * will do (Share, Save, Copy link, Save a copy), plus a menu of secondary
+ * actions; on a phone, `PhoneSceneAction`.
  */
 const SceneActions: React.FC = () => {
   const authStatus = useAuthStatus();
   const isPhone = useMediaQuery(PHONE_QUERY);
   // The phone and desktop controls are different elements, so crossing the
   // breakpoint (a rotation, a zoom) would drop keyboard focus to the page.
+  // Check for focus during render, while the old control still has it, and
+  // restore it after commit.
   const controlRef = useRef<HTMLSpanElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
   const refocus = useRef(false);
   const [shownPhone, setShownPhone] = useState(isPhone);
   if (shownPhone !== isPhone) {
-    refocus.current =
-      controlRef.current?.contains(document.activeElement) ?? false;
+    const focused = document.activeElement;
+    refocus.current = [controlRef, popupRef].some(
+      (ref) => ref.current?.contains(focused) ?? false,
+    );
     setShownPhone(isPhone);
   }
   useLayoutEffect(() => {
@@ -233,10 +221,17 @@ const SceneActions: React.FC = () => {
   const [opened, setOpened] = useState<{
     dialog: Dialog;
     load: number;
+    phone: boolean;
   } | null>(null);
   const dialog = opened?.load === sceneLoad ? opened.dialog : null;
   const setDialog = (next: Dialog | null) =>
-    setOpened(next && { dialog: next, load: sceneLoad });
+    setOpened(next && { dialog: next, load: sceneLoad, phone: isPhone });
+  // A dialog returns focus to its opener, which crossing the breakpoint
+  // replaces; null keeps Base UI's default.
+  const dialogFinalFocus = () =>
+    opened?.phone === isPhone
+      ? null
+      : controlRef.current?.querySelector("button") ?? null;
   const [saving, setSaving] = useState(false);
   const [flash, setFlash] = useState<{ text: string } | null>(null);
 
@@ -285,7 +280,8 @@ const SceneActions: React.FC = () => {
     dirty,
   });
 
-  const label = (saving && "Saving...") || flash?.text || LABELS[primary];
+  const label =
+    (saving && "Saving...") || flash?.text || ACTIONS[primary].label;
   const enabled = !saving && !flash && (primary !== "save-new" || dirty);
 
   const copyLink = async () => {
@@ -336,26 +332,18 @@ const SceneActions: React.FC = () => {
     }
   };
 
-  const runMenuAction = (action: MenuAction) => {
-    if (action === "duplicate") {
-      setDialog({ kind: "publish", mode: "copy" });
-    } else {
-      copyLink();
-    }
-  };
-
-  const handlePrimary = () => {
-    if (primary === "share") {
+  const run = (action: Action) => {
+    if (action === "share") {
       setDialog(
         dirty || key === null
           ? { kind: "publish", mode: "share" }
           : { kind: "publish", mode: "share", existingUrl: sceneUrl(key) },
       );
-    } else if (primary === "save-new") {
+    } else if (action === "save-new") {
       setDialog({ kind: "publish", mode: "save" });
-    } else if (primary === "save-copy") {
+    } else if (action === "save-copy" || action === "duplicate") {
       setDialog({ kind: "publish", mode: "copy" });
-    } else if (primary === "save") {
+    } else if (action === "save") {
       save();
     } else {
       copyLink();
@@ -372,7 +360,7 @@ const SceneActions: React.FC = () => {
     control = (
       <span
         className={styles.placeholder}
-        style={{ width: isPhone ? "2.25rem" : PRIMARY_WIDTH }}
+        style={{ width: isPhone ? PHONE_PLACEHOLDER_WIDTH : PRIMARY_WIDTH }}
         aria-hidden
       />
     );
@@ -385,8 +373,8 @@ const SceneActions: React.FC = () => {
         enabled={enabled}
         saving={saving}
         flashing={flash !== null}
-        onPrimary={handlePrimary}
-        onMenuAction={runMenuAction}
+        onAction={run}
+        popupRef={popupRef}
       />
     );
   } else {
@@ -398,7 +386,7 @@ const SceneActions: React.FC = () => {
           // Not `disabled`: a disabled button drops keyboard focus to the page
           // after every Save or Copy link.
           loading={!enabled}
-          onClick={handlePrimary}
+          onClick={() => run(primary)}
           style={{ width: PRIMARY_WIDTH }}
         >
           {label}
@@ -417,10 +405,10 @@ const SceneActions: React.FC = () => {
                 </IconButton>
               }
             />
-            <Menu.Popup>
+            <Menu.Popup ref={popupRef}>
               {menu.map((action) => (
-                <Menu.Item key={action} onClick={() => runMenuAction(action)}>
-                  {MENU_LABELS[action]}
+                <Menu.Item key={action} onClick={() => run(action)}>
+                  {ACTIONS[action].label}
                 </Menu.Item>
               ))}
             </Menu.Popup>
@@ -433,7 +421,7 @@ const SceneActions: React.FC = () => {
   return (
     <>
       <span role="status" className={styles.status}>
-        {/* On desktop the button's own text says "Saving...". */}
+        {/* Desktop's button text says "Saving..."; the phone's icon can't. */}
         {saving && isPhone ? "Saving..." : flash?.text}
       </span>
       <span ref={controlRef} className={styles.control}>
@@ -444,10 +432,16 @@ const SceneActions: React.FC = () => {
           mode={dialog.mode}
           existingUrl={dialog.existingUrl}
           onClose={closeDialog}
+          finalFocus={dialogFinalFocus}
         />
       ) : null}
       {dialog?.kind === "link" ? (
-        <LinkDialog heading="Copy link" url={dialog.url} onClose={closeDialog}>
+        <LinkDialog
+          heading="Copy link"
+          url={dialog.url}
+          onClose={closeDialog}
+          finalFocus={dialogFinalFocus}
+        >
           <p>
             {dialog.unsaved
               ? "This link shows the scene as last saved, without your changes."

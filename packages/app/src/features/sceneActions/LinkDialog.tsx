@@ -53,6 +53,7 @@ type LinkDialogProps = {
   heading: string;
   url: string;
   onClose: () => void;
+  finalFocus?: () => HTMLElement | null;
   children?: React.ReactNode;
 };
 
@@ -60,6 +61,7 @@ const LinkDialog: React.FC<LinkDialogProps> = ({
   heading,
   url,
   onClose,
+  finalFocus,
   children,
 }) => {
   const { copy, message } = useLinkCopy(url);
@@ -71,7 +73,7 @@ const LinkDialog: React.FC<LinkDialogProps> = ({
         if (!open) onClose();
       }}
     >
-      <Dialog.Popup size="sm" initialFocus={copyRef}>
+      <Dialog.Popup size="sm" initialFocus={copyRef} finalFocus={finalFocus}>
         <Dialog.Header>
           <Dialog.Title>{heading}</Dialog.Title>
         </Dialog.Header>

@@ -133,7 +133,7 @@ test("an owned scene with edits saves in place", async () => {
   await renameScene(`${scene.title} edited`);
 
   expect(await primary()).toHaveTextContent(/^Save$/);
-  expect(await menuEntries()).toEqual(["Duplicate", "Copy link"]);
+  expect(await menuEntries()).toEqual(["Copy link", "Duplicate"]);
   const sawSavedSince = watchForText(SAVED_SINCE);
   await user.click(await primary());
 
@@ -505,7 +505,8 @@ describe("an opened draft whose scene was saved since", () => {
 });
 
 describe("on a phone", () => {
-  // jsdom has no matchMedia, so components render their desktop branch.
+  // jsdom has no matchMedia, so useMediaQuery reads false; stub one that
+  // matches PHONE_QUERY.
   let phone = true;
   const listeners = new Set<() => void>();
   const setPhone = (next: boolean) => {
@@ -526,7 +527,7 @@ describe("on a phone", () => {
   });
   afterEach(() => {
     listeners.clear();
-    // @ts-expect-error jsdom defines no matchMedia to restore
+    // @ts-expect-error lib.dom types matchMedia as required; jsdom has none to restore
     delete window.matchMedia;
   });
 
@@ -546,7 +547,7 @@ describe("on a phone", () => {
     ).toBeVisible();
   });
 
-  test("an unsaved scene's Save icon stays inert until edited", async () => {
+  test("an unsaved scene's Save icon is inert before any edit", async () => {
     renderTestApp("/", { isAuthenticated: true });
 
     const save = await screen.findByRole("button", { name: "Save" });
@@ -570,6 +571,28 @@ describe("on a phone", () => {
     expect(
       (await screen.findAllByRole("menuitem")).map((el) => el.textContent),
     ).toEqual(["Save", "Copy link", "Duplicate"]);
+  });
+
+  test("the menu's items are disabled while saving", async () => {
+    const gate = Promise.withResolvers<void>();
+    // Returning nothing falls through to the mock API's PATCH handler.
+    server.use(
+      http.patch(urls.scenes.detail, async () => {
+        await gate.promise;
+      }),
+    );
+    const { scene } = renderOwnedScene();
+    await renameScene(`${scene.title} edited`);
+
+    await openMenu();
+    await user.click(await screen.findByRole("menuitem", { name: "Save" }));
+    await openMenu();
+
+    const items = await screen.findAllByRole("menuitem");
+    items.forEach((item) =>
+      expect(item).toHaveAttribute("aria-disabled", "true"),
+    );
+    gate.resolve();
   });
 
   test("Save from the menu saves in place and announces each step", async () => {
@@ -617,5 +640,51 @@ describe("on a phone", () => {
 
     expect(await primary()).toHaveTextContent(/^Copy link$/);
     expect(await primary()).toHaveFocus();
+  });
+
+  test("focus follows the control across the breakpoint from its open menu", async () => {
+    renderOwnedScene();
+    const trigger = await screen.findByRole("button", {
+      name: "Scene actions",
+    });
+    act(() => trigger.focus());
+    await user.keyboard("{Enter}");
+    const menu = await screen.findByRole("menu");
+    await waitFor(() =>
+      expect(menu).toContainElement(document.activeElement as HTMLElement),
+    );
+
+    setPhone(false);
+
+    expect(await primary()).toHaveTextContent(/^Copy link$/);
+    await waitFor(async () => expect(await primary()).toHaveFocus());
+  });
+
+  test("focus elsewhere stays put across the breakpoint", async () => {
+    renderOwnedScene();
+    await primary();
+    const rename = screen.getByRole("button", { name: "Rename scene" });
+    act(() => rename.focus());
+
+    setPhone(false);
+
+    expect(await primary()).toHaveTextContent(/^Copy link$/);
+    expect(rename).toHaveFocus();
+  });
+
+  test("a dialog closed after crossing the breakpoint returns focus to the new control", async () => {
+    const { scene } = renderOwnedScene();
+    await renameScene(`${scene.title} edited`);
+    await openMenu();
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Copy link" }),
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Copy link" });
+
+    setPhone(false);
+    await user.click(within(dialog).getByRole("button", { name: "Close" }));
+
+    await waitFor(async () => expect(await primary()).toHaveFocus());
+    expect(await primary()).toHaveTextContent(/^Save$/);
   });
 });

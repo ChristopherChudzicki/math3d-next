@@ -57,7 +57,8 @@
   margin-right: 1rem;
 }
 
-/* Phones: the scene title gets the room "Math3d" and wide spacing would take. */
+/* Phones (`PHONE_QUERY` in config/breakpoints.ts): the scene title gets the
+   room "Math3d" and wide spacing would take. */
 @media (max-width: 600px) {
   /* Without the brand's column: start, title, nav. */
   .header {
