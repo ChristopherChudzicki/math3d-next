@@ -27,6 +27,7 @@ const FUNCTION_ARITY: Readonly<Record<string, Arity>> = {
   sum: "one",
   mean: "one",
   ones: "one",
+  identity: "one",
   grad: "one",
   curl: "one",
   div: "one",

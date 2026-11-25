@@ -505,6 +505,7 @@
   "exp",
   "expm",
   "expm1",
+  "eye",
   "factorial",
   "factory",
   "fft",

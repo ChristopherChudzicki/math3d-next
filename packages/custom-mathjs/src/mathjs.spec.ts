@@ -106,6 +106,17 @@ describe("mathjs instance", () => {
     expect(math.evaluate(expr).valueOf()).toEqual(expected);
   });
 
+  it("builds identity matrices as identity, and as eye like math3d-react", () => {
+    expect(math.evaluate("identity(2)").valueOf()).toEqual([
+      [1, 0],
+      [0, 1],
+    ]);
+    expect(math.evaluate("eye(2, 3)").valueOf()).toEqual([
+      [1, 0, 0],
+      [0, 1, 0],
+    ]);
+  });
+
   it.each([
     ["(-8)^(1/3)", "-2"],
     ["pow(-8, 2/3)", "4"],

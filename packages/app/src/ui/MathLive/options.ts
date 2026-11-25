@@ -41,6 +41,7 @@ export const inlineShortcuts = {
   lcm: "\\operatorname{lcm}",
   arg: "\\operatorname{arg}",
   ones: "\\operatorname{ones}",
+  identity: "\\operatorname{identity}",
   dotMultiply: "\\operatorname{dotMultiply}",
   rescale: "\\operatorname{rescale}",
   // sqrt

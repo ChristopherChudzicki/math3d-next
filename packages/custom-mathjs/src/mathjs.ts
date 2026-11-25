@@ -84,6 +84,7 @@ import {
   indexDependencies,
   mapDependencies,
   onesDependencies,
+  identityDependencies,
   indexTransformDependencies,
   rangeTransformDependencies,
   subsetTransformDependencies,
@@ -225,6 +226,7 @@ const mathjs = create({
   indexDependencies,
   mapDependencies,
   onesDependencies,
+  identityDependencies,
   // Expressions count from 1, as in full mathjs: a[1], a[end], index(1),
   // subset's out-of-range errors, map's callback index, and the dimension
   // arguments of column, concat, min, max, sum and mean. Ranges include
@@ -246,6 +248,8 @@ const mathjs = create({
 
 mathjs.import({
   ln: mathjs.log,
+  // mathjs 3's name for identity, which legacy math3d-react scenes call.
+  eye: mathjs.identity,
   diff: createTotalDerivative,
   unitT: createUnitT,
   unitN: createUnitN,
