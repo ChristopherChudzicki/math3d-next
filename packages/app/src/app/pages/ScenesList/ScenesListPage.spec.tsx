@@ -1,8 +1,16 @@
-import { renderTestApp, screen, waitFor, user, act, within } from "@/test_util";
+import {
+  renderTestApp,
+  screen,
+  waitFor,
+  user,
+  act,
+  within,
+  matchMediaQueries,
+} from "@/test_util";
 import { http, HttpResponse } from "msw";
 import { seedDb } from "@math3d/mock-api";
 import { server } from "@math3d/mock-api/node";
-import { test, expect } from "vitest";
+import { beforeEach, describe, test, expect } from "vitest";
 
 test("the scenes dialog opens via ?overlay=scenes&list=examples, focusing the selected tab", async () => {
   const scene = seedDb.withSceneFromItems([]);
@@ -144,4 +152,51 @@ test("switching tabs replaces history; Back leaves the dialog entirely", async (
     expect(location.current.search).not.toContain("overlay="),
   );
   expect(location.current.pathname).toBe(`/${scene.key}`);
+});
+
+describe("where the drawer covers the scene", () => {
+  // The scenes drawer's width.
+  beforeEach(() => matchMediaQueries(["(max-width: 672px)"]));
+
+  test("choosing an example closes the drawer, and Back reopens it over the previous scene", async () => {
+    const scene = seedDb.withSceneFromItems([]);
+    const example = seedDb.withExampleScene();
+    const { location, router } = renderTestApp(`/${scene.key}`);
+    const openScenes = await screen.findByRole("button", {
+      name: "Open scenes",
+    });
+    await user.click(openScenes);
+
+    await user.click(await screen.findByRole("link", { name: example.title }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Scenes" })).toBeNull(),
+    );
+    expect(location.current.pathname).toBe(`/${example.key}`);
+    expect(location.current.search).toBe("");
+    expect(openScenes).toHaveFocus();
+
+    await act(() => router.navigate(-1));
+    expect(
+      await screen.findByRole("dialog", { name: "Scenes" }),
+    ).toBeInTheDocument();
+    expect(location.current.pathname).toBe(`/${scene.key}`);
+  });
+
+  test("choosing the open scene closes the drawer, popping its entry", async () => {
+    const example = seedDb.withExampleScene();
+    const { location, router } = renderTestApp(`/${example.key}`);
+    await user.click(
+      await screen.findByRole("button", { name: "Open scenes" }),
+    );
+
+    await user.click(await screen.findByRole("link", { name: example.title }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Scenes" })).toBeNull(),
+    );
+    expect(location.current.pathname).toBe(`/${example.key}`);
+    expect(location.current.search).toBe("");
+    expect(router.state.historyAction).toBe("POP");
+  });
 });

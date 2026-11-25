@@ -1,6 +1,5 @@
 import {
   afterAll,
-  afterEach,
   beforeAll,
   beforeEach,
   describe,
@@ -17,6 +16,7 @@ import {
   act,
   countRequests,
   expectToast,
+  matchMediaQueries,
   renameScene,
   renderTestApp,
   screen,
@@ -522,31 +522,9 @@ test("a dialog opened from the menu returns focus to the menu button", async () 
 });
 
 describe("on a phone", () => {
-  // jsdom has no matchMedia, so useMediaQuery reads false; stub one that
-  // matches PHONE_QUERY.
-  let phone = true;
-  const listeners = new Set<() => void>();
-  const setPhone = (next: boolean) => {
-    phone = next;
-    act(() => listeners.forEach((listener) => listener()));
-  };
-  beforeEach(() => {
-    phone = true;
-    window.matchMedia = ((query: string) => ({
-      get matches() {
-        return phone && query === PHONE_QUERY;
-      },
-      addEventListener: (_: string, listener: () => void) =>
-        listeners.add(listener),
-      removeEventListener: (_: string, listener: () => void) =>
-        listeners.delete(listener),
-    })) as unknown as typeof window.matchMedia;
-  });
-  afterEach(() => {
-    listeners.clear();
-    // @ts-expect-error lib.dom types matchMedia as required; jsdom has none to restore
-    delete window.matchMedia;
-  });
+  const setPhone = (phone: boolean) =>
+    matchMediaQueries(phone ? [PHONE_QUERY] : []);
+  beforeEach(() => setPhone(true));
 
   const openMenu = async () =>
     user.click(await screen.findByRole("button", { name: "Scene actions" }));

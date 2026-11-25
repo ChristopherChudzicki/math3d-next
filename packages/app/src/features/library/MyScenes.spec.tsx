@@ -5,6 +5,7 @@ import { seedDb } from "@math3d/mock-api";
 import {
   act,
   expectToast,
+  matchMediaQueries,
   renderTestApp,
   screen,
   user,
@@ -106,6 +107,23 @@ test("archiving hides the card, announces it, and focuses the next card", async 
   expect(within(dialog).getByRole("status")).toHaveTextContent(
     "Archived Alpha",
   );
+});
+
+test("where the drawer covers the scene, cards link to scenes alone, and archiving focuses the next card", async () => {
+  // The scenes drawer's width.
+  matchMediaQueries(["(max-width: 672px)"]);
+  const { owner, scenes } = seedScenes(["Alpha", "Beta"]);
+  await openMyScenes(owner);
+  await screen.findByRole("link", { name: "Alpha" });
+
+  await chooseAction("Alpha", "Archive");
+
+  await waitFor(() =>
+    expect(screen.queryByRole("link", { name: "Alpha" })).toBeNull(),
+  );
+  const beta = screen.getByRole("link", { name: "Beta" });
+  expect(beta).toHaveAttribute("href", `/${scenes[1].key}`);
+  expect(beta).toHaveFocus();
 });
 
 test("a failed archive toasts, and archiving on retry dismisses the toast", async () => {

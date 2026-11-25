@@ -12,8 +12,12 @@ type SceneCardProps = {
   to: string;
   /** May 404 (no render yet); the placeholder stays until it loads. */
   imageUrl?: string | null;
-  /** The scene already open; a plain click on its card does nothing. */
+  /**
+   * The scene already open. A plain click on its card calls `onCurrentClick`
+   * instead of following the link.
+   */
   current?: boolean;
+  onCurrentClick?: () => void;
   /** ISO timestamp. With it, the card shows a "Last modified" line. */
   modifiedDate?: string;
   archived?: boolean;
@@ -55,6 +59,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
   to,
   imageUrl,
   current = false,
+  onCurrentClick,
   modifiedDate,
   archived = false,
   actions,
@@ -64,7 +69,10 @@ const SceneCard: React.FC<SceneCardProps> = ({
   const handleClick = (e: React.MouseEvent) => {
     // A same-URL link replaces the entry and drops its history state, which
     // useOverlay's close() needs.
-    if (current && isPlainClick(e)) e.preventDefault();
+    if (current && isPlainClick(e)) {
+      e.preventDefault();
+      onCurrentClick?.();
+    }
   };
   return (
     <li className={classNames(styles.card, current && styles.current)}>

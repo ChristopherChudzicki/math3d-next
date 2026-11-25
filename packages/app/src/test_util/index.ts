@@ -13,12 +13,14 @@ import countRequests from "./countRequests";
 import expectToast from "./expectToast";
 import { storeRendererPreference } from "./renderer";
 import writeSessionDraft from "./sessionDraft";
+import matchMediaQueries from "./matchMedia";
 
 export * from "./test_util";
 export {
   act,
   countRequests,
   expectToast,
+  matchMediaQueries,
   fireEvent,
   prettyDOM,
   screen,

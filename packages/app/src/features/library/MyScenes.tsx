@@ -47,17 +47,22 @@ const countMessage = (count: number) => {
  * Button merge refs into a new callback each render, so a ref map is briefly
  * empty during the very commit in which a closing dialog restores focus.
  */
-const cardLink = (key: string) =>
+const cardLink = (href: string) =>
   document
     .getElementById(SCROLL_ID)
-    ?.querySelector<HTMLAnchorElement>(
-      `a[href="${sceneHref(key, ListType.Me)}"]`,
-    ) ?? null;
-const cardMenuButton = (key: string) =>
-  cardLink(key)?.closest("li")?.querySelector("button") ?? null;
+    ?.querySelector<HTMLAnchorElement>(`a[href="${href}"]`) ?? null;
+const cardMenuButton = (href: string) =>
+  cardLink(href)?.closest("li")?.querySelector("button") ?? null;
 
-const MyScenesList: React.FC = () => {
+type MyScenesProps = {
+  /** The drawer covers the scene, so opening one closes it. */
+  closeOnOpen: boolean;
+};
+
+const MyScenesList: React.FC<MyScenesProps> = ({ closeOnOpen }) => {
   const { sceneKey } = useParams();
+  const { close } = useOverlay();
+  const hrefOf = (key: string) => sceneHref(key, ListType.Me, closeOnOpen);
   const navigate = useNavigate();
   const [filterText, setFilterText] = useState("");
   const [filterValue, setFilterValue] = useState("");
@@ -140,7 +145,7 @@ const MyScenesList: React.FC = () => {
     return (items[i + 1] ?? items[i - 1])?.key ?? null;
   };
   const elementFor = (key: string | null) =>
-    (key && cardLink(key)) || filterRef.current;
+    (key && cardLink(hrefOf(key))) || filterRef.current;
 
   const toggleArchived = async (scene: MiniScene) => {
     const archiving = !scene.archived;
@@ -191,7 +196,7 @@ const MyScenesList: React.FC = () => {
   const deleteDialogFinalFocus = () => {
     const { deleted, key } = deleteFocus.current;
     if (deleted) return elementFor(key);
-    return key ? cardMenuButton(key) : null;
+    return key ? cardMenuButton(hrefOf(key)) : null;
   };
 
   const renderBody = () => {
@@ -239,12 +244,13 @@ const MyScenesList: React.FC = () => {
           {items.map((item) => (
             <SceneCard
               key={item.key}
-              to={sceneHref(item.key, ListType.Me)}
+              to={hrefOf(item.key)}
               title={titleOf(item)}
               imageUrl={item.imageUrl}
               modifiedDate={item.modifiedDate}
               archived={item.archived}
               current={item.key === sceneKey}
+              onCurrentClick={closeOnOpen ? close : undefined}
               actions={
                 <Menu.Root>
                   <Menu.Trigger
@@ -326,7 +332,7 @@ const MyScenesList: React.FC = () => {
   );
 };
 
-const MyScenes: React.FC = () => {
+const MyScenes: React.FC<MyScenesProps> = ({ closeOnOpen }) => {
   const isAuthenticated = useAuthStatus();
   const signIn = useSignInDialog();
   const { open } = useOverlay();
@@ -358,7 +364,7 @@ const MyScenes: React.FC = () => {
       </Drawer.Body>
     );
   }
-  return <MyScenesList />;
+  return <MyScenesList closeOnOpen={closeOnOpen} />;
 };
 
 export default MyScenes;
