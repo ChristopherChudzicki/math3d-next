@@ -343,7 +343,7 @@ const MyScenes: React.FC = () => {
         <div className={styles.message}>
           <p className={styles.hint}>
             Sign in to keep scenes in your account. Changes you don’t save are
-            kept in this browser for 7 days, in{" "}
+            kept in this browser for up to 7 days, in{" "}
             <TextButton
               onClick={() => open("scenes", { list: ListType.Unsaved })}
             >

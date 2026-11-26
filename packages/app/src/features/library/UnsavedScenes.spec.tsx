@@ -4,7 +4,15 @@ import { delay, http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { makeItem, seedDb, urls } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { act, renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import {
+  act,
+  expectToast,
+  renderTestApp,
+  screen,
+  user,
+  waitFor,
+  within,
+} from "@/test_util";
 import {
   listDrafts,
   readDraft,
@@ -61,7 +69,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-test("rows are newest first, and leave out this tab's own session", async () => {
+test("rows are newest first, and this tab's own session is marked current", async () => {
   const older = newSceneDraft(Date.now() - 2000);
   const newer = newSceneDraft(Date.now() - 1000);
   writeDraft(older);
@@ -69,12 +77,41 @@ test("rows are newest first, and leave out this tab's own session", async () => 
   const { store } = await openUnsaved();
   await screen.findByRole("button", { name: newer.title });
 
-  act(() => {
-    writeDraft({ ...newSceneDraft(), id: store.getState().scene.draftId });
-  });
+  const own = { ...newSceneDraft(), id: store.getState().scene.draftId };
+  act(() => writeDraft(own));
 
-  expect(rowNames()).toEqual([newer.title, older.title]);
-  expect(screen.getByRole("tab", { name: "Unsaved (2)" })).toBeVisible();
+  expect(rowNames()).toEqual([own.title, newer.title, older.title]);
+  const ownRow = screen.getByRole("button", { name: own.title });
+  expect(ownRow).toHaveAttribute("aria-current", "true");
+  expect(ownRow).toHaveAttribute("aria-disabled", "true");
+  expect(
+    screen.queryByRole("button", { name: `Delete unsaved scene ${own.title}` }),
+  ).toBeNull();
+  expect(screen.getByRole("tab", { name: "Unsaved (3)" })).toBeVisible();
+
+  await user.click(screen.getByRole("button", { name: own.title }));
+
+  expect(store.getState().scene.draftId).toBe(own.id);
+  expect(readDraft(own.id)).toEqual(own);
+});
+
+test("behind \"Scene not found\", the editor's session isn't current and can be reopened", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const { store, router, location } = renderTestApp(`/${scene.key}`);
+  await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
+  const own = { ...draftOf(scene), id: store.getState().scene.draftId };
+  writeDraft(own);
+
+  await act(() => router.navigate("/missing?overlay=scenes&list=unsaved"));
+  await expectToast("This scene doesn’t exist.");
+  const row = await screen.findByRole("button", {
+    name: `Changes to ${own.title}`,
+  });
+  expect(row).not.toHaveAttribute("aria-current");
+  await user.click(row);
+
+  await waitFor(() => expect(location.current.pathname).toBe(`/${scene.key}`));
+  expect(store.getState().scene.draftId).not.toBe(own.id);
 });
 
 test("a row names a new scene by its title, and a saved one as changes to it", async () => {
@@ -139,7 +176,7 @@ test("with no drafts, the tab explains what will appear", async () => {
 
   expect(
     await screen.findByText(
-      "When you leave a scene without saving, your changes are kept here, in this browser, for 7 days.",
+      "Changes you don’t save are kept here, in this browser, for up to 7 days.",
     ),
   ).toBeVisible();
   expect(screen.getByRole("tab", { name: "Unsaved" })).toBeVisible();
@@ -152,7 +189,7 @@ test("while sign-in status is unknown, the tab lists nothing and doesn't say it'
 
   expect(within(dialog).getByRole("tab", { name: "Unsaved" })).toBeVisible();
   expect(within(dialog).queryByRole("list")).toBeNull();
-  expect(within(dialog).queryByText(/When you leave a scene/)).toBeNull();
+  expect(within(dialog).queryByText(/Changes you don’t save/)).toBeNull();
 });
 
 test("with drafts, the tab says where they come from", async () => {
@@ -160,7 +197,9 @@ test("with drafts, the tab says where they come from", async () => {
   await openUnsaved();
 
   expect(
-    await screen.findByText("Unsaved work from this browser, kept for 7 days."),
+    await screen.findByText(
+      "Unsaved work from this browser, kept for up to 7 days.",
+    ),
   ).toBeVisible();
 });
 
@@ -186,21 +225,18 @@ test("signed out, a user's drafts aren't listed", async () => {
   expect(rowNames()).toEqual([signedOut.title]);
 });
 
-test("opening a draft loads it as unsaved work at its scene's URL, under a new id", async () => {
+test("opening a draft loads it as unsaved work at its scene's URL, under a new id, with the list still open", async () => {
   const scene = seedDb.withSceneFromItems([makeItem(MIT.Point)]);
-  const draft = {
-    ...draftOf(scene, Date.now() - 60_000),
-    title: "Edited title",
-  };
+  const draft = { ...draftOf(scene), title: "Edited title" };
   writeDraft(draft);
-  const { store, location } = await openUnsaved();
+  const { store, location, dialog } = await openUnsaved();
 
   await user.click(
     await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
   );
 
   await waitFor(() => expect(location.current.pathname).toBe(`/${scene.key}`));
-  expect(location.current.search).toBe("");
+  expect(location.current.search).toBe("?overlay=scenes&list=unsaved");
   const state = store.getState().scene;
   expect(state).toMatchObject({
     key: scene.key,
@@ -211,8 +247,57 @@ test("opening a draft loads it as unsaved work at its scene's URL, under a new i
   expect(listDrafts()).toHaveLength(1);
   expect(copy.id).toBe(state.draftId);
   expect(copy.id).not.toBe(draft.id);
-  // Opening restarts its 7 days.
-  expect(copy.updatedAt).toBeGreaterThan(draft.updatedAt);
+  expect(dialog).toBeVisible();
+  const row = screen.getByRole("button", { name: `Changes to ${draft.title}` });
+  expect(row).toHaveFocus();
+  expect(within(dialog).getByRole("status")).toHaveTextContent(
+    `Opened unsaved changes to ${draft.title}`,
+  );
+});
+
+test("clicking through drafts keeps their order, and the one you left stays listed, no longer current", async () => {
+  const saved = draftOf(seedDb.withSceneFromItems([]), Date.now() - 1000);
+  const untitled = newSceneDraft(Date.now() - 2000);
+  writeDraft(saved);
+  writeDraft(untitled);
+  const { store, location } = await openUnsaved();
+  const names = [`Changes to ${saved.title}`, untitled.title];
+
+  await user.click(await screen.findByRole("button", { name: names[0] }));
+  await waitFor(() => expect(location.current.pathname).toBe(`/${saved.key}`));
+  await waitFor(() => {
+    const row = screen.getByRole("button", { name: names[0] });
+    expect(row).toHaveAttribute("aria-current", "true");
+  });
+  await user.click(screen.getByRole("button", { name: names[1] }));
+  await waitFor(() => expect(store.getState().scene.key).toBeNull());
+
+  expect(location.current.pathname).toBe("/");
+  expect(rowNames()).toEqual(names);
+  expect(screen.getByRole("button", { name: names[0] })).not.toHaveAttribute(
+    "aria-current",
+  );
+  expect(screen.getByRole("button", { name: names[1] })).toHaveAttribute(
+    "aria-current",
+    "true",
+  );
+});
+
+test("a draft written by another tab while it opens opens as written", async () => {
+  const release = holdSceneFetch();
+  const draft = draftOf(seedDb.withSceneFromItems([]));
+  writeDraft(draft);
+  const { store, queryClient } = await openUnsaved();
+
+  await user.click(
+    await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
+  );
+  act(() => writeDraft({ ...draft, title: "Edited in another tab" }));
+  release();
+  await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+
+  expect(store.getState().scene.title).toBe("Edited in another tab");
+  expect(listDrafts().map((d) => d.title)).toEqual(["Edited in another tab"]);
 });
 
 test("a draft of a legacy scene opens as legacy", async () => {
@@ -252,13 +337,15 @@ test("a draft whose scene was deleted opens as a new scene", async () => {
   const draft = { ...draftOf(seedDb.withSceneFromItems([])), key: "deleted" };
   writeDraft(draft);
   const { store, location } = await openUnsaved();
+  const entry = location.current.key;
 
   await user.click(
     await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
   );
 
-  await waitFor(() => expect(location.current.search).toBe(""));
-  expect(location.current.pathname).toBe("/");
+  await waitFor(() => expect(store.getState().scene.title).toBe(draft.title));
+  // Already at "/", so no history entry is added.
+  expect(location.current.key).toBe(entry);
   expect(store.getState().scene).toMatchObject({
     key: null,
     author: null,
@@ -319,6 +406,50 @@ test("closing the list while a draft's scene is checked leaves the editor as it 
   expect(store.getState().scene.draftId).toBe(before);
   expect(location.current.pathname).toBe("/");
   expect(readDraft(draft.id)).not.toBeNull();
+});
+
+test("switching tabs while a draft's scene is checked leaves the editor as it was", async () => {
+  const release = holdSceneFetch();
+  const draft = draftOf(seedDb.withSceneFromItems([]));
+  writeDraft(draft);
+  const { store, queryClient } = await openUnsaved();
+  const before = store.getState().scene.draftId;
+
+  await user.click(
+    await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
+  );
+  await user.click(screen.getByRole("tab", { name: "Examples" }));
+  release();
+  await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+
+  expect(store.getState().scene.draftId).toBe(before);
+  expect(screen.getByRole("tab", { name: "Examples" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  expect(readDraft(draft.id)).not.toBeNull();
+});
+
+test("deleting a draft while it opens leaves it deleted, and the editor as it was", async () => {
+  const release = holdSceneFetch();
+  const draft = draftOf(seedDb.withSceneFromItems([]));
+  writeDraft(draft);
+  const { store, queryClient } = await openUnsaved();
+  const before = store.getState().scene.draftId;
+
+  await user.click(
+    await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
+  );
+  await user.click(
+    screen.getByRole("button", {
+      name: `Delete unsaved changes to ${draft.title}`,
+    }),
+  );
+  release();
+  await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+
+  expect(store.getState().scene.draftId).toBe(before);
+  expect(listDrafts()).toEqual([]);
 });
 
 test("deleting a row offers Undo, which brings the draft back", async () => {

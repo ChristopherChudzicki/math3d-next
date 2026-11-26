@@ -26,7 +26,7 @@
 }
 
 @media (hover: hover) {
-  .row:not(.deleted):hover {
+  .row:not(.deleted, .current):hover {
     border-color: var(--color-secondary-light);
   }
 }
@@ -98,4 +98,21 @@
   justify-content: center;
   min-width: 2.75rem;
   min-height: 2.75rem;
+}
+
+.current {
+  border-color: var(--color-primary);
+}
+
+/* Clicking the current row does nothing. */
+.current .open {
+  cursor: default;
+}
+
+.currentBadge {
+  composes: badge from "./SceneCard/SceneCard.module.css";
+  flex: none;
+  margin-inline-end: 0.5rem;
+  background-color: var(--color-primary);
+  color: white;
 }

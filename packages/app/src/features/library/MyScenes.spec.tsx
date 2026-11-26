@@ -375,7 +375,7 @@ test("signed out, the panel offers sign-in and points to Unsaved", async () => {
   expect(
     await screen.findByText(/^Sign in to keep scenes in your account\./),
   ).toHaveTextContent(
-    "Sign in to keep scenes in your account. Changes you don’t save are kept in this browser for 7 days, in Unsaved.",
+    "Sign in to keep scenes in your account. Changes you don’t save are kept in this browser for up to 7 days, in Unsaved.",
   );
   expect(screen.getByRole("button", { name: "Sign in" })).toBeVisible();
 
