@@ -1,36 +1,40 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { isApiError, sceneQueryOptions } from "@math3d/api";
 import { useAppDispatch } from "@/store/hooks";
 import sceneSlice from "@/store/scene/state/scene.slice";
-import { removeDraft, writeDraft } from "@/store/scene/drafts/storage";
+import {
+  readDraft,
+  removeDraft,
+  writeDraft,
+} from "@/store/scene/drafts/storage";
 import type { DraftRecord } from "@/store/scene/drafts/storage";
 import { showToast } from "@/ui/Toast/toasts";
-import { scenePath, useCarriedParams } from "./useSceneLinks";
+import { ListType } from "./constants";
+import useSceneLinks from "./useSceneLinks";
 
 const UNOPENABLE_TOAST =
   "This unsaved work couldn’t be opened, so it was removed.";
 
 /**
- * Opens a draft in the editor as unsaved work, under a fresh draft id, then
- * navigates to its scene's URL, which closes the overlay. A draft that can't
- * be loaded is removed, and the editor keeps what it had.
+ * Opens a draft in the editor as unsaved work, under a fresh draft id, at its
+ * scene's URL, keeping the Unsaved tab open as a scene card would (see
+ * `useSceneLinks`). A draft that can't be loaded is removed, and the editor
+ * keeps what it had.
  */
 const useOpenDraft = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const carried = useCarriedParams();
+  const links = useSceneLinks(ListType.Unsaved);
+  // The router's location, read after an await. (The overlay layer's location
+  // freezes on close.)
+  const location = useLocation();
+  const locationRef = useRef(location);
+  locationRef.current = location;
   const queryClient = useQueryClient();
   const [openingId, setOpeningId] = useState<string | null>(null);
   const opening = useRef(false);
-  const mounted = useRef(true);
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
 
   const discard = (record: DraftRecord) => {
     removeDraft(record.id);
@@ -69,21 +73,25 @@ const useOpenDraft = () => {
     }
   };
 
-  const open = async (record: DraftRecord) => {
+  /** The opened copy, or null if the draft wasn't opened. */
+  const open = async (record: DraftRecord): Promise<DraftRecord | null> => {
+    const from = locationRef.current.key;
     const base = record.key
       ? await checkBase(record.key, record.baseModifiedDate)
       : { exists: false, isLegacy: false, savedSince: false };
-    // The user closed the list while the fetch ran.
-    if (!mounted.current) return;
+    // While the fetch ran, the user closed the list, went elsewhere, or
+    // deleted the draft. Another tab may have written it, so read it again.
+    const latest = readDraft(record.id);
+    if (locationRef.current.key !== from || !latest) return null;
     // A draft of a deleted scene opens as a new scene, so Save creates one.
     const key = base.exists ? record.key : null;
     const author = key ? record.author : null;
     const baseModifiedDate = key ? record.baseModifiedDate : null;
 
     const load = sceneSlice.actions.setScene({
-      items: record.items,
-      order: record.itemOrder,
-      title: record.title,
+      items: latest.items,
+      order: latest.itemOrder,
+      title: latest.title,
       key,
       author,
       isLegacy: base.isLegacy,
@@ -97,32 +105,42 @@ const useOpenDraft = () => {
       dispatch(load);
     } catch {
       discard(record);
-      return;
+      return null;
     }
-    // Removed first, so the copy reuses its slot and its bytes.
+    // Removed first, so the copy reuses its slot and its bytes. It keeps its
+    // `updatedAt`, so rows don't reorder as the user clicks through them.
     removeDraft(record.id);
-    writeDraft({
-      ...record,
+    const copy = {
+      ...latest,
       id: load.payload.draftId,
       key,
       author,
       baseModifiedDate,
-      updatedAt: Date.now(),
-    });
-    navigate(scenePath(key ?? "", carried));
+    };
+    writeDraft(copy);
+    // Same path: a push would add a duplicate history entry. It closes the
+    // drawer where a card for the open scene would.
+    if (locationRef.current.pathname !== `/${key ?? ""}`) {
+      navigate(links.href(key ?? ""));
+    } else {
+      links.onCurrentClick?.();
+    }
+    return copy;
   };
 
-  const openDraft = async (record: DraftRecord) => {
+  const openDraft = async (
+    record: DraftRecord,
+  ): Promise<DraftRecord | null> => {
     // A second click while the first fetches would open it again, leaving two
     // copies.
-    if (opening.current) return;
+    if (opening.current) return null;
     opening.current = true;
     setOpeningId(record.id);
     try {
-      await open(record);
+      return await open(record);
     } finally {
       opening.current = false;
-      if (mounted.current) setOpeningId(null);
+      setOpeningId(null);
     }
   };
 

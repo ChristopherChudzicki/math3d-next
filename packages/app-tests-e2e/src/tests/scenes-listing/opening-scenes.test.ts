@@ -32,5 +32,7 @@ test("Choosing a scene keeps the drawer open beside it, and closes the drawer on
   await drawer.getByRole("link", { name: scene2.title }).click();
   await expect(page).toHaveURL(new RegExp(`/${key2}$`));
   await expect(drawer).toBeHidden();
-  await expect(page.getByRole("button", { name: "Open scenes" })).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: "Math3d, open scenes" }),
+  ).toBeFocused();
 });

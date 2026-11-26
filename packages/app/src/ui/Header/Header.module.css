@@ -1,44 +1,60 @@
 .header {
-  /* height: var(--header-height); */
-  height: 50px;
+  height: var(--header-height);
   background-color: var(--color-secondary-lightest);
   border-bottom: 1pt solid var(--color-secondary-light);
 
   display: grid;
-  grid-template-columns: auto min-content minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-rows: var(--header-height);
   align-items: center;
   padding-left: 1rem;
   padding-right: 1rem;
 }
 
-.start {
+.brand {
   display: flex;
   align-items: center;
 }
 
-.start:not(:empty) {
-  margin-right: 0.5rem;
-  margin-left: -0.5rem;
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
+.wordmark {
   font-weight: 900;
   font-size: 1.25rem;
   color: var(--color-text-light);
 }
 
-.brand::after {
+.home {
+  text-decoration: none;
+}
+
+/* The scenes button's hover and press tints drop --color-text-light below
+   4.5:1, and the home link has no other hover cue. */
+@media (hover: hover) {
+  :hover > .wordmark {
+    color: var(--color-text-primary);
+  }
+}
+
+:active > .wordmark {
+  color: var(--color-text-primary);
+}
+
+.title-slot {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* No divider without a title, e.g. while a scene loads or when it can't. */
+.title-slot:not(:empty)::before {
   content: "";
+  flex-shrink: 0;
   width: 1px;
   height: 1.25rem;
   margin: 0 0.75rem;
   background-color: var(--color-secondary-light);
 }
 
-.title-slot {
+.title-slot > * {
   min-width: 0;
 }
 
@@ -60,12 +76,9 @@
 /* Phones (`PHONE_QUERY` in config/breakpoints.ts): the scene title gets the
    room "Math3d" and wide spacing would take. */
 @media (max-width: 600px) {
-  /* Without the brand's column: start, title, nav. */
-  .header {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-  }
-
-  .brand {
+  .wordmark,
+  .home,
+  .title-slot:not(:empty)::before {
     display: none;
   }
 

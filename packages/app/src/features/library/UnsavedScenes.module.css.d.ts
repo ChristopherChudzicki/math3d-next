@@ -1,4 +1,6 @@
 declare const styles: {
+  readonly "current": string;
+  readonly "currentBadge": string;
   readonly "delete": string;
   readonly "deleted": string;
   readonly "deletedText": string;

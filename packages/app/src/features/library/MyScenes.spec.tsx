@@ -117,7 +117,9 @@ test("where the drawer covers the scene, choosing the open scene closes the draw
   const { owner, scenes } = seedScenes(["Alpha"]);
   const [{ key }] = scenes;
   const { router, location } = renderTestApp(`/${key}`, { user: owner });
-  await user.click(await screen.findByRole("button", { name: "Open scenes" }));
+  await user.click(
+    await screen.findByRole("button", { name: "Math3d, open scenes" }),
+  );
 
   await user.click(await screen.findByRole("link", { name: "Alpha" }));
 
@@ -415,7 +417,7 @@ test("signed out, the panel offers sign-in and points to Unsaved", async () => {
   expect(
     await screen.findByText(/^Sign in to keep scenes in your account\./),
   ).toHaveTextContent(
-    "Sign in to keep scenes in your account. Changes you don’t save are kept in this browser for 7 days, in Unsaved.",
+    "Sign in to keep scenes in your account. Changes you don’t save are kept in this browser for up to 7 days, in Unsaved.",
   );
   expect(screen.getByRole("button", { name: "Sign in" })).toBeVisible();
 

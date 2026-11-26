@@ -188,7 +188,7 @@ describe("where the drawer covers the scene", () => {
     const example = seedDb.withExampleScene();
     const { location, router } = renderTestApp(`/${scene.key}`);
     const openScenes = await screen.findByRole("button", {
-      name: "Open scenes",
+      name: "Math3d, open scenes",
     });
     await user.click(openScenes);
 
@@ -222,7 +222,7 @@ describe("where the drawer covers the scene", () => {
     const example = seedDb.withExampleScene();
     const { location, router } = renderTestApp(`/${example.key}`);
     await user.click(
-      await screen.findByRole("button", { name: "Open scenes" }),
+      await screen.findByRole("button", { name: "Math3d, open scenes" }),
     );
 
     await user.click(await screen.findByRole("link", { name: example.title }));
