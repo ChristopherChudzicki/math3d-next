@@ -31,7 +31,7 @@ import DeleteSceneDialog from "./DeleteSceneDialog";
 import LoadFailed from "./LoadFailed";
 import SceneCard from "./SceneCard/SceneCard";
 import { ListType, cardTitle } from "./constants";
-import useSceneLinks from "./useSceneLinks";
+import useSceneLinks, { scenePath, useCarriedParams } from "./useSceneLinks";
 import styles from "./ScenesList.module.css";
 
 const SCROLL_ID = "my-scenes-scroll";
@@ -58,6 +58,7 @@ const cardMenuButton = (href: string) =>
 const MyScenesList: React.FC = () => {
   const { sceneKey } = useParams();
   const links = useSceneLinks(ListType.Me);
+  const carried = useCarriedParams();
   const navigate = useNavigate();
   const [filterText, setFilterText] = useState("");
   const [filterValue, setFilterValue] = useState("");
@@ -185,7 +186,10 @@ const MyScenesList: React.FC = () => {
     if (scene.key === sceneKey) {
       // The deleted scene's URL must not stay the current entry. (If the
       // dialog was opened by a push, the entry below still holds it.)
-      navigate("/?overlay=scenes&list=me", { replace: true });
+      navigate(
+        scenePath("", { overlay: "scenes", list: ListType.Me, ...carried }),
+        { replace: true },
+      );
     }
   };
   const deleteDialogFinalFocus = () => {

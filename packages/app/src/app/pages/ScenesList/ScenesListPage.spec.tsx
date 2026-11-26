@@ -113,7 +113,7 @@ test("choosing an example opens it, keeping the drawer open with focus on the ca
 
 test.each([
   {
-    from: "controls=0&renderer=mathbox&utm_source=feed",
+    from: "controls=0&utm_source=feed",
     carried: "&controls=0",
   },
   { from: "controls=1", carried: "" },

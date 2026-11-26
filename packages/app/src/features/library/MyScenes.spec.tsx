@@ -209,9 +209,12 @@ test("deleting the only card focuses the filter field", async () => {
   );
 });
 
-test("deleting the open scene replaces its URL with the scenes list", async () => {
+test("deleting the open scene replaces its URL with the scenes list, keeping controls=0", async () => {
   const { owner, scenes } = seedScenes(["Alpha"]);
-  const { location } = await openMyScenes(owner, `/${scenes[0].key}`);
+  const { location } = renderTestApp(
+    `/${scenes[0].key}?controls=0&overlay=scenes&list=me`,
+    { user: owner },
+  );
   await screen.findByRole("link", { name: "Alpha" });
 
   await chooseAction("Alpha", "Delete");
@@ -219,7 +222,7 @@ test("deleting the open scene replaces its URL with the scenes list", async () =
   await user.click(within(confirm).getByRole("button", { name: "Delete" }));
 
   await waitFor(() => expect(location.current.pathname).toBe("/"));
-  expect(location.current.search).toContain("list=me");
+  expect(location.current.search).toBe("?overlay=scenes&list=me&controls=0");
 });
 
 test("clicking the open scene's card does nothing, so Close still pops the drawer's entry", async () => {

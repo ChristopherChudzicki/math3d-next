@@ -6,24 +6,27 @@ import { useUrlLayerSearchParams } from "@/services/overlays/UrlLayer";
 import { SCENES_DRAWER_SIZE } from "./constants";
 import type { ListType } from "./constants";
 
-/** The current URL's `CARRIED_SCENE_PARAMS`, for a link to another scene. */
-const useCarriedParams = (): URLSearchParams => {
+type Params = Record<string, string>;
+
+/** The URL layer's `CARRIED_SCENE_PARAMS`, for a link to a scene. */
+const useCarriedParams = (): Params => {
   const search = useUrlLayerSearchParams();
-  const carried = new URLSearchParams();
-  CARRIED_SCENE_PARAMS.forEach(([name, value]) => {
-    if (search.get(name) === value) carried.set(name, value);
-  });
-  return carried;
+  return Object.fromEntries(
+    Object.entries(CARRIED_SCENE_PARAMS).filter(
+      ([name, value]) => search.get(name) === value,
+    ),
+  );
 };
 
-const scenePath = (key: string, params: URLSearchParams) => {
-  const search = params.toString();
+const scenePath = (key: string, params: Params) => {
+  const search = new URLSearchParams(params).toString();
   return search ? `/${key}?${search}` : `/${key}`;
 };
 
 /**
- * Links for a tab's scene cards. Beside the scene, the drawer stays open on
- * `list`; where it covers the scene, opening one closes it.
+ * Links for a tab's scene cards, keeping `CARRIED_SCENE_PARAMS`. Beside the
+ * scene, the drawer stays open on `list`; where it covers the scene, opening
+ * one closes it.
  */
 const useSceneLinks = (list: ListType) => {
   const coversScene = useMediaQuery(
@@ -32,13 +35,11 @@ const useSceneLinks = (list: ListType) => {
   const { close } = useOverlay();
   const carried = useCarriedParams();
   return {
-    href: (key: string) => {
-      const params = new URLSearchParams(
-        coversScene ? {} : { overlay: "scenes", list },
-      );
-      carried.forEach((value, name) => params.append(name, value));
-      return scenePath(key, params);
-    },
+    href: (key: string) =>
+      scenePath(
+        key,
+        coversScene ? carried : { overlay: "scenes", list, ...carried },
+      ),
     /** For the open scene's card, which doesn't follow its link. */
     onCurrentClick: coversScene ? close : undefined,
   };
