@@ -1,8 +1,20 @@
-import { renderTestApp, screen, waitFor, user, act, within } from "@/test_util";
+import {
+  renderTestApp,
+  screen,
+  waitFor,
+  user,
+  act,
+  within,
+  matchMediaQueries,
+} from "@/test_util";
 import { http, HttpResponse } from "msw";
 import { seedDb } from "@math3d/mock-api";
 import { server } from "@math3d/mock-api/node";
-import { test, expect } from "vitest";
+import { beforeEach, describe, test, expect } from "vitest";
+
+// The drawer's 672px width, spelled out so a wrong unit or width in
+// fillsViewportQuery fails.
+const DRAWER_COVERS_SCENE = "(max-width: 672px)";
 
 test("the scenes dialog opens via ?overlay=scenes&list=examples, focusing the selected tab", async () => {
   const scene = seedDb.withSceneFromItems([]);
@@ -85,7 +97,7 @@ test("signed in, the tabs are My Scenes, Examples, then Unsaved", async () => {
   ]);
 });
 
-test("choosing an example opens it, keeping the drawer open with focus on the card", async () => {
+test("beside the scene, choosing an example opens it, keeping the drawer open with focus on the card", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const example = seedDb.withExampleScene();
   const { location } = renderTestApp(
@@ -102,6 +114,28 @@ test("choosing an example opens it, keeping the drawer open with focus on the ca
   expect(card).toHaveFocus();
   expect(card).toHaveAttribute("aria-current", "page");
 });
+
+test.each([
+  {
+    from: "controls=0&utm_source=feed",
+    carried: "&controls=0",
+  },
+  { from: "controls=1", carried: "" },
+])(
+  "a card's link keeps only controls=0 from ?$from",
+  async ({ from, carried }) => {
+    const scene = seedDb.withSceneFromItems([]);
+    const example = seedDb.withExampleScene();
+    renderTestApp(`/${scene.key}?${from}&overlay=scenes&list=examples`);
+
+    expect(
+      await screen.findByRole("link", { name: example.title }),
+    ).toHaveAttribute(
+      "href",
+      `/${example.key}?overlay=scenes&list=examples${carried}`,
+    );
+  },
+);
 
 test("an unknown ?list= value self-corrects to list=examples", async () => {
   const scene = seedDb.withSceneFromItems([]);
@@ -144,4 +178,60 @@ test("switching tabs replaces history; Back leaves the dialog entirely", async (
     expect(location.current.search).not.toContain("overlay="),
   );
   expect(location.current.pathname).toBe(`/${scene.key}`);
+});
+
+describe("where the drawer covers the scene", () => {
+  beforeEach(() => matchMediaQueries([DRAWER_COVERS_SCENE]));
+
+  test("choosing an example closes the drawer, and Back reopens it over the previous scene", async () => {
+    const scene = seedDb.withSceneFromItems([]);
+    const example = seedDb.withExampleScene();
+    const { location, router } = renderTestApp(`/${scene.key}`);
+    const openScenes = await screen.findByRole("button", {
+      name: "Math3d, open scenes",
+    });
+    await user.click(openScenes);
+
+    await user.click(await screen.findByRole("link", { name: example.title }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Scenes" })).toBeNull(),
+    );
+    expect(location.current.pathname).toBe(`/${example.key}`);
+    expect(location.current.search).toBe("");
+    expect(openScenes).toHaveFocus();
+
+    await act(() => router.navigate(-1));
+    expect(
+      await screen.findByRole("dialog", { name: "Scenes" }),
+    ).toBeInTheDocument();
+    expect(location.current.pathname).toBe(`/${scene.key}`);
+  });
+
+  test("a card's link keeps controls=0", async () => {
+    const scene = seedDb.withSceneFromItems([]);
+    const example = seedDb.withExampleScene();
+    renderTestApp(`/${scene.key}?controls=0&overlay=scenes&list=examples`);
+
+    expect(
+      await screen.findByRole("link", { name: example.title }),
+    ).toHaveAttribute("href", `/${example.key}?controls=0`);
+  });
+
+  test("choosing the open scene closes the drawer, popping its entry", async () => {
+    const example = seedDb.withExampleScene();
+    const { location, router } = renderTestApp(`/${example.key}`);
+    await user.click(
+      await screen.findByRole("button", { name: "Math3d, open scenes" }),
+    );
+
+    await user.click(await screen.findByRole("link", { name: example.title }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Scenes" })).toBeNull(),
+    );
+    expect(location.current.pathname).toBe(`/${example.key}`);
+    expect(location.current.search).toBe("");
+    expect(router.state.historyAction).toBe("POP");
+  });
 });

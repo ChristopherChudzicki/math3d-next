@@ -5,6 +5,7 @@ import { seedDb } from "@math3d/mock-api";
 import {
   act,
   expectToast,
+  matchMediaQueries,
   renderTestApp,
   screen,
   user,
@@ -13,6 +14,9 @@ import {
 } from "@/test_util";
 
 const ME_LIST = "*/v1/me/scenes/";
+// The drawer's 672px width, spelled out so a wrong unit or width in
+// fillsViewportQuery fails.
+const DRAWER_COVERS_SCENE = "(max-width: 672px)";
 
 /** Seeds scenes for a new user, newest first in the order given. */
 const seedScenes = (titles: string[]) => {
@@ -108,6 +112,41 @@ test("archiving hides the card, announces it, and focuses the next card", async 
   );
 });
 
+test("where the drawer covers the scene, choosing the open scene closes the drawer, popping its entry", async () => {
+  matchMediaQueries([DRAWER_COVERS_SCENE]);
+  const { owner, scenes } = seedScenes(["Alpha"]);
+  const [{ key }] = scenes;
+  const { router, location } = renderTestApp(`/${key}`, { user: owner });
+  await user.click(
+    await screen.findByRole("button", { name: "Math3d, open scenes" }),
+  );
+
+  await user.click(await screen.findByRole("link", { name: "Alpha" }));
+
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog", { name: "Scenes" })).toBeNull(),
+  );
+  expect(location.current.pathname).toBe(`/${key}`);
+  expect(location.current.search).toBe("");
+  expect(router.state.historyAction).toBe("POP");
+});
+
+test("where the drawer covers the scene, cards link to scenes without the drawer, and archiving focuses the next card", async () => {
+  matchMediaQueries([DRAWER_COVERS_SCENE]);
+  const { owner, scenes } = seedScenes(["Alpha", "Beta"]);
+  await openMyScenes(owner);
+  await screen.findByRole("link", { name: "Alpha" });
+
+  await chooseAction("Alpha", "Archive");
+
+  await waitFor(() =>
+    expect(screen.queryByRole("link", { name: "Alpha" })).toBeNull(),
+  );
+  const beta = screen.getByRole("link", { name: "Beta" });
+  expect(beta).toHaveAttribute("href", `/${scenes[1].key}`);
+  expect(beta).toHaveFocus();
+});
+
 test("a failed archive toasts, and archiving on retry dismisses the toast", async () => {
   const { owner } = seedScenes(["Alpha"]);
   server.use(
@@ -172,9 +211,12 @@ test("deleting the only card focuses the filter field", async () => {
   );
 });
 
-test("deleting the open scene replaces its URL with the scenes list", async () => {
+test("deleting the open scene replaces its URL with the scenes list, keeping controls=0", async () => {
   const { owner, scenes } = seedScenes(["Alpha"]);
-  const { location } = await openMyScenes(owner, `/${scenes[0].key}`);
+  const { location } = renderTestApp(
+    `/${scenes[0].key}?controls=0&overlay=scenes&list=me`,
+    { user: owner },
+  );
   await screen.findByRole("link", { name: "Alpha" });
 
   await chooseAction("Alpha", "Delete");
@@ -182,10 +224,10 @@ test("deleting the open scene replaces its URL with the scenes list", async () =
   await user.click(within(confirm).getByRole("button", { name: "Delete" }));
 
   await waitFor(() => expect(location.current.pathname).toBe("/"));
-  expect(location.current.search).toContain("list=me");
+  expect(location.current.search).toBe("?overlay=scenes&list=me&controls=0");
 });
 
-test("clicking the open scene's card does nothing, so Close still pops the drawer's entry", async () => {
+test("beside the scene, clicking the open scene's card does nothing, so Close still pops the drawer's entry", async () => {
   const { owner, scenes } = seedScenes(["Alpha"]);
   const [{ key }] = scenes;
   const { router, location } = renderTestApp(`/${key}`, { user: owner });

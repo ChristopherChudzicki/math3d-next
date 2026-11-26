@@ -67,12 +67,3 @@
 .popup:focus-visible {
   outline: none;
 }
-
-.md {
-  width: 24rem;
-}
-
-/* Three 14rem cards per row, with Body's padding and a 1rem gap. */
-.lg {
-  width: 48rem;
-}

@@ -11,19 +11,22 @@ import {
 } from "@/store/scene/drafts/storage";
 import type { DraftRecord } from "@/store/scene/drafts/storage";
 import { showToast } from "@/ui/Toast/toasts";
-import { ListType, sceneHref } from "./constants";
+import { ListType } from "./constants";
+import useSceneLinks from "./useSceneLinks";
 
 const UNOPENABLE_TOAST =
   "This unsaved work couldn’t be opened, so it was removed.";
 
 /**
  * Opens a draft in the editor as unsaved work, under a fresh draft id, at its
- * scene's URL with the Unsaved tab still open. A draft that can't be loaded is
- * removed, and the editor keeps what it had.
+ * scene's URL, keeping the Unsaved tab open as a scene card would (see
+ * `useSceneLinks`). A draft that can't be loaded is removed, and the editor
+ * keeps what it had.
  */
 const useOpenDraft = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const links = useSceneLinks(ListType.Unsaved);
   // The router's location, read after an await. (The overlay layer's location
   // freezes on close.)
   const location = useLocation();
@@ -115,9 +118,12 @@ const useOpenDraft = () => {
       baseModifiedDate,
     };
     writeDraft(copy);
-    // Same path: a push would add a duplicate history entry.
+    // Same path: a push would add a duplicate history entry. It closes the
+    // drawer where a card for the open scene would.
     if (locationRef.current.pathname !== `/${key ?? ""}`) {
-      navigate(sceneHref(key ?? "", ListType.Unsaved));
+      navigate(links.href(key ?? ""));
+    } else {
+      links.onCurrentClick?.();
     }
     return copy;
   };

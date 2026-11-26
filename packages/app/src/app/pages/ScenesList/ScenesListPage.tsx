@@ -10,7 +10,11 @@ import ExamplesListing from "@/features/library/ExamplesListing";
 import MyScenes from "@/features/library/MyScenes";
 import UnsavedScenes from "@/features/library/UnsavedScenes";
 import useDrafts from "@/features/library/useDrafts";
-import { ListType, OPEN_SCENES_BUTTON_ID } from "@/features/library/constants";
+import {
+  ListType,
+  OPEN_SCENES_BUTTON_ID,
+  SCENES_DRAWER_SIZE,
+} from "@/features/library/constants";
 import styles from "./ScenesListPage.module.css";
 
 const normalizeListType = (
@@ -114,7 +118,11 @@ const ScenesList: React.FC<OverlayProps> = ({ open, children }) => {
 
   return (
     <Drawer.Root open={open} onOpenChange={handleOpenChange}>
-      <Drawer.Popup side="right" size="lg" finalFocus={focusOpenScenesButton}>
+      <Drawer.Popup
+        side="right"
+        size={SCENES_DRAWER_SIZE}
+        finalFocus={focusOpenScenesButton}
+      >
         <ScenesListContent>{children}</ScenesListContent>
       </Drawer.Popup>
     </Drawer.Root>

@@ -7,6 +7,7 @@ import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import {
   act,
   expectToast,
+  matchMediaQueries,
   renderTestApp,
   screen,
   user,
@@ -41,6 +42,10 @@ const newSceneDraft = (updatedAt?: number): DraftRecord => ({
   author: null,
   baseModifiedDate: null,
 });
+
+// The drawer's 672px width, spelled out so a wrong unit or width in
+// fillsViewportQuery fails.
+const DRAWER_COVERS_SCENE = "(max-width: 672px)";
 
 const openUnsaved = async (options?: Parameters<typeof renderTestApp>[1]) => {
   const view = renderTestApp("/?overlay=scenes&list=unsaved", options);
@@ -298,6 +303,57 @@ test("a draft written by another tab while it opens opens as written", async () 
 
   expect(store.getState().scene.title).toBe("Edited in another tab");
   expect(listDrafts().map((d) => d.title)).toEqual(["Edited in another tab"]);
+});
+
+test("opening a draft keeps controls=0", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const draft = draftOf(scene);
+  writeDraft(draft);
+  const { location } = renderTestApp(
+    "/?controls=0&overlay=scenes&list=unsaved",
+  );
+
+  await user.click(
+    await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
+  );
+
+  await waitFor(() => expect(location.current.pathname).toBe(`/${scene.key}`));
+  expect(location.current.search).toBe(
+    "?overlay=scenes&list=unsaved&controls=0",
+  );
+});
+
+test("where the drawer covers the scene, opening a draft closes the drawer", async () => {
+  matchMediaQueries([DRAWER_COVERS_SCENE]);
+  const scene = seedDb.withSceneFromItems([]);
+  const draft = draftOf(scene);
+  writeDraft(draft);
+  const { location } = await openUnsaved();
+
+  await user.click(
+    await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
+  );
+
+  await waitFor(() => expect(location.current.pathname).toBe(`/${scene.key}`));
+  expect(location.current.search).toBe("");
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog", { name: "Scenes" })).toBeNull(),
+  );
+});
+
+test("where the drawer covers the scene, opening a draft at the current URL closes the drawer", async () => {
+  matchMediaQueries([DRAWER_COVERS_SCENE]);
+  const draft = newSceneDraft();
+  writeDraft(draft);
+  const { store, location } = await openUnsaved();
+
+  await user.click(await screen.findByRole("button", { name: draft.title }));
+
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog", { name: "Scenes" })).toBeNull(),
+  );
+  expect(store.getState().scene.title).toBe(draft.title);
+  expect(location.current).toMatchObject({ pathname: "/", search: "" });
 });
 
 test("a draft of a legacy scene opens as legacy", async () => {

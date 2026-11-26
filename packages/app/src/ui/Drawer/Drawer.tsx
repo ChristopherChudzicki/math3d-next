@@ -7,10 +7,24 @@ import * as styles from "./Drawer.module.css";
 type DrawerSide = "left" | "right";
 type DrawerSize = "md" | "lg";
 
-type PopupProps = Omit<BaseDialog.Popup.Props, "className" | "render"> & {
+// In px, so fillsViewportQuery matches them: a media query's rem is the
+// browser's default font size, not the root's 14px.
+const WIDTHS: Record<DrawerSize, number> = {
+  md: 336,
+  // 48rem at the root's 14px: room for three 14rem cards per row.
+  lg: 672,
+};
+
+type PopupProps = Omit<
+  BaseDialog.Popup.Props,
+  "className" | "render" | "style"
+> & {
   /** The screen edge the drawer slides in from. */
   side?: DrawerSide;
-  /** Width: md for a form or a list, lg for browsing. */
+  /**
+   * Width, which `className` can't override: md for a form or a list, lg for
+   * browsing.
+   */
   size?: DrawerSize;
   className?: string;
 };
@@ -35,11 +49,16 @@ const Popup: React.FC<PopupProps> = ({
       <BaseDialog.Popup
         {...others}
         render={renderInertWhileClosing}
-        className={classNames(styles.popup, styles[size], className)}
+        className={classNames(styles.popup, className)}
+        style={{ width: WIDTHS[size] }}
       />
     </BaseDialog.Viewport>
   </BaseDialog.Portal>
 );
+
+/** Matches while a drawer of this size fills the viewport's width. */
+const fillsViewportQuery = (size: DrawerSize) =>
+  `(max-width: ${WIDTHS[size]}px)`;
 
 export {
   Root,
@@ -51,5 +70,5 @@ export {
   Body,
   Actions,
 } from "@/ui/Dialog/Dialog";
-export { Popup };
+export { Popup, fillsViewportQuery };
 export type { DrawerSide, DrawerSize, PopupProps };

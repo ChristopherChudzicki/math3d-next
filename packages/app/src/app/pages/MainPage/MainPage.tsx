@@ -12,6 +12,7 @@ import SceneControls from "@/features/editor/sidebar/SceneControls";
 import SliderAnimations from "@/features/editor/items/forms/VariableSlider/SliderAnimations";
 import Sidebar from "@/ui/Sidebar";
 import { useToggle } from "@/util/hooks";
+import { CONTROLS_PARAM } from "@/config/sceneParams";
 import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
 import { isRenderer } from "@/services/renderer/renderers";
 import { useUserId } from "@/services/auth/useUserId";
@@ -127,7 +128,7 @@ const MainPage: React.FC = () => {
   }, [sceneKey, legacyDialog]);
 
   const [controlsVisibility, setControlsVisibility] = useSearchEnum({
-    name: "controls",
+    name: CONTROLS_PARAM,
     values: CONTROLS_VALUES,
     defaultValue: "1",
   });

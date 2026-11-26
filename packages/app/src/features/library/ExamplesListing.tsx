@@ -6,7 +6,8 @@ import LoadingSpinner from "@/ui/LoadingSpinner";
 import { useKeptFailure } from "@/util/hooks";
 import LoadFailed from "./LoadFailed";
 import SceneCard from "./SceneCard/SceneCard";
-import { ListType, cardTitle, sceneHref } from "./constants";
+import { ListType, cardTitle } from "./constants";
+import useSceneLinks from "./useSceneLinks";
 import styles from "./ScenesList.module.css";
 
 /** Enough for every example in one page. */
@@ -14,6 +15,7 @@ const EXAMPLES_LIMIT = 100;
 
 const ExamplesListing: React.FC = () => {
   const { sceneKey } = useParams();
+  const links = useSceneLinks(ListType.Examples);
   const query = useExampleScenes({ limit: EXAMPLES_LIMIT });
   const { failure, retrying, failedAttempts, retry } = useKeptFailure(query, {
     key: "examples",
@@ -34,10 +36,11 @@ const ExamplesListing: React.FC = () => {
           {query.data.items.map((scene) => (
             <SceneCard
               key={scene.key}
-              to={sceneHref(scene.key, ListType.Examples)}
+              to={links.href(scene.key)}
               title={cardTitle(scene.title)}
               imageUrl={scene.imageUrl}
               current={scene.key === sceneKey}
+              onCurrentClick={links.onCurrentClick}
             />
           ))}
         </ul>

@@ -30,7 +30,8 @@ import { dismissToast, showToast } from "@/ui/Toast/toasts";
 import DeleteSceneDialog from "./DeleteSceneDialog";
 import LoadFailed from "./LoadFailed";
 import SceneCard from "./SceneCard/SceneCard";
-import { ListType, cardTitle, sceneHref } from "./constants";
+import { ListType, cardTitle } from "./constants";
+import useSceneLinks, { scenePath } from "./useSceneLinks";
 import styles from "./ScenesList.module.css";
 
 const SCROLL_ID = "my-scenes-scroll";
@@ -47,17 +48,16 @@ const countMessage = (count: number) => {
  * Button merge refs into a new callback each render, so a ref map is briefly
  * empty during the very commit in which a closing dialog restores focus.
  */
-const cardLink = (key: string) =>
+const cardLink = (href: string) =>
   document
     .getElementById(SCROLL_ID)
-    ?.querySelector<HTMLAnchorElement>(
-      `a[href="${sceneHref(key, ListType.Me)}"]`,
-    ) ?? null;
-const cardMenuButton = (key: string) =>
-  cardLink(key)?.closest("li")?.querySelector("button") ?? null;
+    ?.querySelector<HTMLAnchorElement>(`a[href="${href}"]`) ?? null;
+const cardMenuButton = (href: string) =>
+  cardLink(href)?.closest("li")?.querySelector("button") ?? null;
 
 const MyScenesList: React.FC = () => {
   const { sceneKey } = useParams();
+  const links = useSceneLinks(ListType.Me);
   const navigate = useNavigate();
   const [filterText, setFilterText] = useState("");
   const [filterValue, setFilterValue] = useState("");
@@ -140,7 +140,7 @@ const MyScenesList: React.FC = () => {
     return (items[i + 1] ?? items[i - 1])?.key ?? null;
   };
   const elementFor = (key: string | null) =>
-    (key && cardLink(key)) || filterRef.current;
+    (key && cardLink(links.href(key))) || filterRef.current;
 
   const toggleArchived = async (scene: MiniScene) => {
     const archiving = !scene.archived;
@@ -185,13 +185,20 @@ const MyScenesList: React.FC = () => {
     if (scene.key === sceneKey) {
       // The deleted scene's URL must not stay the current entry. (If the
       // dialog was opened by a push, the entry below still holds it.)
-      navigate("/?overlay=scenes&list=me", { replace: true });
+      navigate(
+        scenePath("", {
+          overlay: "scenes",
+          list: ListType.Me,
+          ...links.carried,
+        }),
+        { replace: true },
+      );
     }
   };
   const deleteDialogFinalFocus = () => {
     const { deleted, key } = deleteFocus.current;
     if (deleted) return elementFor(key);
-    return key ? cardMenuButton(key) : null;
+    return key ? cardMenuButton(links.href(key)) : null;
   };
 
   const renderBody = () => {
@@ -239,12 +246,13 @@ const MyScenesList: React.FC = () => {
           {items.map((item) => (
             <SceneCard
               key={item.key}
-              to={sceneHref(item.key, ListType.Me)}
+              to={links.href(item.key)}
               title={titleOf(item)}
               imageUrl={item.imageUrl}
               modifiedDate={item.modifiedDate}
               archived={item.archived}
               current={item.key === sceneKey}
+              onCurrentClick={links.onCurrentClick}
               actions={
                 <Menu.Root>
                   <Menu.Trigger
