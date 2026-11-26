@@ -67,9 +67,9 @@ const SceneCard: React.FC<SceneCardProps> = ({
   const metaId = useId();
   const hasMeta = modifiedDate !== undefined;
   const handleClick = (e: React.MouseEvent) => {
-    // Following the link would replace this entry (same URL), dropping the
-    // history state useOverlay's close() needs, or push a second entry for
-    // the open scene.
+    // A same-URL link replaces this entry, dropping the history state
+    // useOverlay's close() needs; any other pushes a second entry for the
+    // open scene.
     if (current && isPlainClick(e)) {
       e.preventDefault();
       onCurrentClick?.();

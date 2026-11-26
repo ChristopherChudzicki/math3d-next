@@ -16,7 +16,7 @@ import {
 const ME_LIST = "*/v1/me/scenes/";
 // The drawer's 672px width, spelled out so a wrong unit or width in
 // fillsViewportQuery fails.
-const PHONE = "(max-width: 672px)";
+const DRAWER_COVERS_SCENE = "(max-width: 672px)";
 
 /** Seeds scenes for a new user, newest first in the order given. */
 const seedScenes = (titles: string[]) => {
@@ -113,7 +113,7 @@ test("archiving hides the card, announces it, and focuses the next card", async 
 });
 
 test("where the drawer covers the scene, choosing the open scene closes the drawer, popping its entry", async () => {
-  matchMediaQueries([PHONE]);
+  matchMediaQueries([DRAWER_COVERS_SCENE]);
   const { owner, scenes } = seedScenes(["Alpha"]);
   const [{ key }] = scenes;
   const { router, location } = renderTestApp(`/${key}`, { user: owner });
@@ -129,8 +129,8 @@ test("where the drawer covers the scene, choosing the open scene closes the draw
   expect(router.state.historyAction).toBe("POP");
 });
 
-test("where the drawer covers the scene, cards link to scenes alone, and archiving focuses the next card", async () => {
-  matchMediaQueries([PHONE]);
+test("where the drawer covers the scene, cards link to scenes without the drawer, and archiving focuses the next card", async () => {
+  matchMediaQueries([DRAWER_COVERS_SCENE]);
   const { owner, scenes } = seedScenes(["Alpha", "Beta"]);
   await openMyScenes(owner);
   await screen.findByRole("link", { name: "Alpha" });
@@ -225,7 +225,7 @@ test("deleting the open scene replaces its URL with the scenes list, keeping con
   expect(location.current.search).toBe("?overlay=scenes&list=me&controls=0");
 });
 
-test("clicking the open scene's card does nothing, so Close still pops the drawer's entry", async () => {
+test("beside the scene, clicking the open scene's card does nothing, so Close still pops the drawer's entry", async () => {
   const { owner, scenes } = seedScenes(["Alpha"]);
   const [{ key }] = scenes;
   const { router, location } = renderTestApp(`/${key}`, { user: owner });

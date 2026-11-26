@@ -2,7 +2,7 @@
 const CONTROLS_PARAM = "controls";
 
 /**
- * Params the scenes drawer keeps from the current URL when it opens a scene,
+ * Params the scenes drawer keeps from the current URL when it navigates,
  * each only when it has the listed value. Copying params wholesale would give
  * crawlers unboundedly many URLs per scene.
  */

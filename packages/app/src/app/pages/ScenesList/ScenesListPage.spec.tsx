@@ -12,6 +12,10 @@ import { seedDb } from "@math3d/mock-api";
 import { server } from "@math3d/mock-api/node";
 import { beforeEach, describe, test, expect } from "vitest";
 
+// The drawer's 672px width, spelled out so a wrong unit or width in
+// fillsViewportQuery fails.
+const DRAWER_COVERS_SCENE = "(max-width: 672px)";
+
 test("the scenes dialog opens via ?overlay=scenes&list=examples, focusing the selected tab", async () => {
   const scene = seedDb.withSceneFromItems([]);
   renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
@@ -93,7 +97,7 @@ test("signed in, the tabs are My Scenes, Examples, then Unsaved", async () => {
   ]);
 });
 
-test("choosing an example opens it, keeping the drawer open with focus on the card", async () => {
+test("beside the scene, choosing an example opens it, keeping the drawer open with focus on the card", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const example = seedDb.withExampleScene();
   const { location } = renderTestApp(
@@ -177,9 +181,7 @@ test("switching tabs replaces history; Back leaves the dialog entirely", async (
 });
 
 describe("where the drawer covers the scene", () => {
-  // The drawer's 672px width, spelled out so a wrong unit or width in
-  // fillsViewportQuery fails.
-  beforeEach(() => matchMediaQueries(["(max-width: 672px)"]));
+  beforeEach(() => matchMediaQueries([DRAWER_COVERS_SCENE]));
 
   test("choosing an example closes the drawer, and Back reopens it over the previous scene", async () => {
     const scene = seedDb.withSceneFromItems([]);

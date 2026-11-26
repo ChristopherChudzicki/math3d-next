@@ -8,7 +8,7 @@ import type { ListType } from "./constants";
 
 type Params = Record<string, string>;
 
-/** The URL layer's `CARRIED_SCENE_PARAMS`, for a link to a scene. */
+/** The `CARRIED_SCENE_PARAMS` in the current URL, for a link to a scene. */
 const useCarriedParams = (): Params => {
   const search = useUrlLayerSearchParams();
   return Object.fromEntries(
@@ -24,9 +24,9 @@ const scenePath = (key: string, params: Params) => {
 };
 
 /**
- * Links for a tab's scene cards, keeping `CARRIED_SCENE_PARAMS`. Beside the
- * scene, the drawer stays open on `list`; where it covers the scene, opening
- * one closes it.
+ * Hrefs for a tab's scene cards, keeping `CARRIED_SCENE_PARAMS`. While the
+ * drawer leaves the scene visible, a card keeps it open on `list`; where the
+ * drawer fills the viewport, a card opens the scene alone, closing it.
  */
 const useSceneLinks = (list: ListType) => {
   const coversScene = useMediaQuery(
@@ -42,6 +42,7 @@ const useSceneLinks = (list: ListType) => {
       ),
     /** For the open scene's card, which doesn't follow its link. */
     onCurrentClick: coversScene ? close : undefined,
+    carried,
   };
 };
 
