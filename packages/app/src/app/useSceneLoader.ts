@@ -87,7 +87,7 @@ const useSceneLoader = (sceneKey?: string): SceneLoad => {
 
   // The site's crawler / link-preview default lives in
   // <meta name="default-title">, which the metadata Worker leaves untouched
-  // (it only rewrites <title> per-scene at the edge). Read it once as the
+  // (it rewrites <title> per page at the edge). Read it once as the
   // no-scene default so the loader gets the true site title whether or not the
   // Worker ran; fall back to document.title for dev/tests where the meta may be
   // absent. Restoring it (not just skipping the write) also keeps SPA

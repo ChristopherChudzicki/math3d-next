@@ -10,7 +10,7 @@
     <title>Math3d: Online 3d Graphing Calculator</title>
     <!--
       Worker-stable copy of the default <title>. The metadata Worker rewrites
-      <title> per-scene at the edge but never touches default-title, so the SPA
+      <title> per page at the edge but never touches default-title, so the SPA
       loader reads the true site default from here regardless of whether the
       Worker ran. Keep this content identical to <title> above.
     -->
@@ -22,15 +22,11 @@
       name="description"
       content="An interactive 3D graphing calculator in your browser. Draw, animate, and share surfaces, curves, points, lines, and vectors."
     />
-    <meta
-      name="keywords"
-      content="graphing,3d,math,calculator,threejs,mathbox,multivariable, three dimensional"
-    />
 
     <!--
       Open Graph / Twitter defaults for social link previews. These are the
       site-wide defaults baked into the SPA shell; the metadata Worker rewrites
-      the per-scene title/og:title/og:url at the edge. %VITE_SITE_ORIGIN% is
+      the per-page title/og:title/og:url at the edge. %VITE_SITE_ORIGIN% is
       substituted at build time (crawlers need absolute image/url values).
     -->
     <meta property="og:site_name" content="Math3d" />
@@ -41,6 +37,8 @@
       content="An interactive 3D graphing calculator in your browser. Draw, animate, and share surfaces, curves, points, lines, and vectors."
     />
     <meta property="og:url" content="%VITE_SITE_ORIGIN%/" />
+    <!-- The home page's. The metadata Worker sets or removes it on every other page. -->
+    <link rel="canonical" href="%VITE_SITE_ORIGIN%/" />
     <meta property="og:image" content="%VITE_SITE_ORIGIN%/og/default.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />

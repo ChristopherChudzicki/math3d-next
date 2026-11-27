@@ -12,6 +12,9 @@
 
 export const TITLE_MAX_CODEPOINTS = 200;
 
+/** The `<title>` for a page named `name`. */
+export const tabTitle = (name: string): string => `${name} | Math3d`;
+
 /** What the SPA shows in place of an untitled scene's title. */
 export const UNTITLED = "Untitled";
 
@@ -40,5 +43,5 @@ export const sceneTabTitle = (
   siteDefault: string,
 ): string => {
   const name = sceneDisplayName(rawTitle);
-  return name === null ? siteDefault : `${name} | Math3d`;
+  return name === null ? siteDefault : tabTitle(name);
 };
