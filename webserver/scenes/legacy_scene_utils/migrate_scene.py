@@ -80,7 +80,7 @@ def get_axis_scales(old_items: dict) -> tuple[AxisScale, AxisScale, AxisScale]:
     return scales[0], scales[1], scales[2]
 
 
-def _legacy_title(metadata: dict) -> str:
+def legacy_title(metadata: dict) -> str:
     """Legacy titles may span lines and store "Untitled"; Scene titles are
     single-line, and blank means untitled."""
     title = re.sub(r"\r\n|[\r\n]", " ", metadata.get("title", "")).strip()
@@ -161,7 +161,7 @@ def translate_legacy_scene(dehydrated: dict) -> TranslatedScene:
     return TranslatedScene(
         items=items,
         item_order=item_order,
-        title=_legacy_title(metadata),
+        title=legacy_title(metadata),
         creation_date=None if creation_date is None else creation_date.replace('"', ""),
         issues=migrator.log.issues(),
     )

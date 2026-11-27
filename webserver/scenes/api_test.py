@@ -221,16 +221,41 @@ def test_meta_unknown_key_returns_404():
 
 
 @pytest.mark.django_db
-def test_meta_unmigrated_legacy_key_returns_404_without_migrating():
-    # /meta/ only serves migrated (Scene) scenes: an un-migrated legacy key
-    # 404s (the Worker then serves the default card) and — like the rest of the
-    # endpoint — must NOT trigger or persist a migration.
-    legacy = LegacyScene.objects.create(dehydrated=LEGACY_DEHYDRATED_FIXTURE)
+@pytest.mark.parametrize(
+    ("metadata", "expected"),
+    [
+        ({"title": "Old"}, "Old"),
+        ({"title": "Untitled"}, ""),
+        ({}, ""),
+    ],
+)
+def test_meta_unmigrated_legacy_key_returns_its_title_without_migrating(
+    metadata, expected
+):
+    legacy = LegacyScene.objects.create(
+        dehydrated={**LEGACY_DEHYDRATED_FIXTURE, "metadata": metadata}
+    )
     resp = Client().get(_meta(legacy.key))
-    assert resp.status_code == 404
+    assert resp.status_code == 200
+    assert resp.json() == {"title": expected}
     assert not Scene.objects.filter(key=legacy.key).exists()
     legacy.refresh_from_db()
     assert legacy.times_accessed == 0
+
+
+@pytest.mark.django_db
+def test_meta_prefers_the_scene_row_over_its_legacy_row():
+    legacy = LegacyScene.objects.create(dehydrated=LEGACY_DEHYDRATED_FIXTURE)
+    scene = SceneFactory.create(key=legacy.key, is_legacy=False)
+    assert Client().get(_meta(legacy.key)).json() == {"title": scene.title}
+
+
+@pytest.mark.django_db
+def test_meta_legacy_key_outside_key_pattern_returns_404():
+    # get_scene skips migrating a key outside SCENE_KEY_PATTERN, then 404s.
+    legacy = LegacyScene.objects.create(key="x", dehydrated=LEGACY_DEHYDRATED_FIXTURE)
+    assert Client().get(_meta(legacy.key)).status_code == 404
+    assert Client().get(_detail(legacy.key)).status_code == 404
 
 
 @pytest.mark.django_db
