@@ -8,8 +8,18 @@ import { ROUTER_OPTIONS } from "./routerOptions";
 /** The app's router; tests pass a memory history. */
 export const createAppRouter = ({
   history,
-}: { history?: RouterHistory } = {}) =>
-  createRouter({ ...ROUTER_OPTIONS, routeTree, history });
+}: { history?: RouterHistory } = {}) => {
+  const router = createRouter({ ...ROUTER_OPTIONS, routeTree, history });
+  // The canonical link names the page first loaded, and Chrome on Android
+  // shares it in place of the address. Crawlers load each URL fresh, so a page
+  // reached in the app needs none.
+  router.subscribe("onResolved", ({ fromLocation, pathChanged }) => {
+    if (fromLocation && pathChanged) {
+      document.querySelector('link[rel="canonical"]')?.remove();
+    }
+  });
+  return router;
+};
 
 declare module "@tanstack/react-router" {
   interface Register {

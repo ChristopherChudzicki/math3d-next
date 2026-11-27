@@ -129,6 +129,7 @@ it("keeps the shell's default title for an untitled scene but still rewrites og:
   expect(t.title).toBe(DEFAULT_TITLE);
   expect(t.ogTitle).toBe(DEFAULT_TITLE);
   expect(t.ogUrl).toBe("https://og.math3d.test/abc123");
+  expect(t.canonical).toBe("https://og.math3d.test/abc123");
 });
 
 it("escapes a hostile title (no tag/attribute breakout)", async () => {
@@ -151,7 +152,7 @@ it("escapes a hostile title (no tag/attribute breakout)", async () => {
 });
 
 it("names the help page and points its canonical link at it", async () => {
-  const res = await call("/app/help/reference", makeEnv(), {
+  const res = await call("/app/help/reference/?overlay=scenes", makeEnv(), {
     "If-None-Match": SHELL_ETAG,
   });
   expect(res.status).toBe(200);
@@ -165,7 +166,7 @@ it("names the help page and points its canonical link at it", async () => {
   expect(res.headers.get("etag")).toBeNull();
 });
 
-it("names a scene by its key alone, without a trailing slash or query", async () => {
+it("points a scene's canonical link at its key alone, with no trailing slash or query", async () => {
   stubMeta({ status: 200 }, { title: "My Torus" });
   const t = await tags(await call("/abc123/?controls=0", makeEnv()));
   expect(t.canonical).toBe("https://og.math3d.test/abc123");
@@ -239,7 +240,7 @@ it.each([
   },
 );
 
-it("lets a client revalidate the home page reached by a missed path", async () => {
+it("lets a client revalidate the home page at a path no asset matches (//)", async () => {
   const res = await call("//", makeEnv(), { "If-None-Match": SHELL_ETAG });
   expect(res.status).toBe(304);
 });
@@ -286,10 +287,7 @@ it("fails open AND marks the response private when the /meta/ fetch rejects", as
   // A transient backend failure must not let a titleless generic shell be
   // cached by a shared intermediary under this scene's URL.
   expect(res.headers.get("cache-control")).toContain("private");
-  const t = await tags(res);
-  expect(t.title).toBe(DEFAULT_TITLE);
-  expect(t.ogUrl).toBe("https://og.math3d.test/abc123");
-  expect(t.canonical).toBe("https://og.math3d.test/abc123");
+  expect((await tags(res)).title).toBe(DEFAULT_TITLE);
 });
 
 it("fetches /meta/ with a bare URL and forwards no request headers/cookies", async () => {
