@@ -34,8 +34,8 @@ is logged and dropped, never thrown.**
 | `app/sign-in-error.tsx`   | `/app/sign-in-error`             | `SignInErrorPage` |
 
 - **Route files are thin:** options plus a component from `app/pages/`
-  (`app/RootLayout` for the root). Pages never import route files; lint
-  enforces it.
+  (`app/RootLayout` for the root). Lint bars the rest of `src/app` from
+  importing route files, the route tree and the router.
 - **The root route has `errorComponent: ErrorPage`**, which also catches throws
   from `RootLayout`, and `notFoundComponent: NotFoundPage`. Unmatched paths go
   there, so there are no `*` routes. Its `onCatch` reports to Sentry each time
@@ -119,11 +119,12 @@ is logged and dropped, never thrown.**
   `oneOf` narrows from an `as const` array, and a numeric one needs `mixed<…>`
   (yup narrows `oneOf` only on strings).
 - **Every param is on the root schema except `controls`,** which only the
-  editor reads. `renderer` is on the root as any value, `null` included, and
-  the editor narrows it to a renderer, so a bad one is logged and dropped
-  there. A child's `validateSearch` gets the parent's result and is spread on
-  top of it,[^merge] so a child can narrow a param its parent accepts, but
-  can't recover one its parent dropped. `FramePage` marks an unknown renderer
+  editor validates; scene links carry `controls=0` (`useSceneLinks`).
+  `renderer` is on the root as any value, `null` included, and the editor
+  narrows it to a renderer, so a bad one is logged and dropped there. A
+  child's `validateSearch` gets the parent's result and is spread on top of
+  it,[^merge] so a child can narrow a param its parent accepts, but can't
+  recover one its parent dropped. `FramePage` marks an unknown renderer
   failed (`data-scene-error="invalid-renderer"`): a screenshot never falls
   back to another renderer (ADR-0009). Shared code sees `renderer` as
   `{} | null | undefined` and keeps its `isRenderer` guard.
@@ -167,9 +168,9 @@ is logged and dropped, never thrown.**
   `createAppRouter`; lint fails a spec that drops a promise.
 - **`renderWithRouter(ui, { url, state })`** (`test_util/routerTesting`)
   mounts a component under one root route with the app's options and root
-  search fields; `url` may be a list of entries. `state` is seeded with `history.replace` before
-  the router exists. `navigateTo`, `goBack` and `goForward` wrap navigation in
-  `act`.
+  search fields; `url` may be a list of entries. `state` is seeded with
+  `history.replace` before the router exists. `navigateTo`, `goBack` and
+  `goForward` wrap navigation in `act`.
 - **`renderTestApp`'s `location` reports `search` and `hash` as in the URL.**
   State assertions use `toMatchObject`: TanStack adds `key`, `__TSR_key`,
   `__TSR_index` and `__hashScrollIntoViewOptions`.
@@ -237,4 +238,6 @@ is logged and dropped, never thrown.**
     so a digit-only value past 2^53 (a long numeric ad id, say) loses
     precision.
 
-[^bundle]: esbuild, minified, React external, for the router exports this app uses; 2026-11-26.
+[^bundle]:
+    esbuild, minified, React external, for the router exports this app uses;
+    2026-11-26.

@@ -9,9 +9,9 @@ const Wordmark: React.FC = () => (
 );
 
 /**
- * A mouse-only link home, given home's target, for `Header`'s `brand`. Pair it
- * with a visible "Back to Math3d" link, which keyboard and screen-reader users
- * get instead.
+ * A mouse-only link home, for `Header`'s `brand`; pass it the home link's
+ * target (`homeLink`). Pair it with a visible "Back to Math3d" link, which
+ * keyboard and screen-reader users get instead.
  */
 const HomeLink = ((props: AnchorProps) => (
   <Anchor {...props} tabIndex={-1} aria-hidden="true" className={styles.home}>

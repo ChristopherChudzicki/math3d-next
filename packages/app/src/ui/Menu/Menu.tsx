@@ -85,7 +85,7 @@ type LinkItemProps = Omit<BaseMenu.LinkItem.Props, "className" | "children"> &
 
 /**
  * A menu item that navigates. For client-side routing, pass the router's
- * link as `render`, e.g. `render={<Link to="/examples" />}`. Closes the menu
+ * link as `render`, e.g. `render={<Anchor to="/app/help/reference" />}`. Closes the menu
  * on click (Base UI's default is to stay open), since a client-side
  * navigation leaves the menu mounted.
  */

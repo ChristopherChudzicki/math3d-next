@@ -278,7 +278,8 @@ module.exports = {
         ],
       },
     },
-    // The route pages render only on their own routes.
+    // The route pages render only on their own routes; urlState is the read
+    // API everything else uses.
     {
       files: [
         "src/app/pages/MainPage/**",
