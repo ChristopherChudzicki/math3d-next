@@ -34,7 +34,7 @@ Why `math3d.org`:
 One Worker, in this repo with its own `wrangler.jsonc`, answers every request to `www.math3d.org` and `next.math3d.org`:
 
 - `301` to the same path and query on `math3d.org`; `308` for anything but `GET` and `HEAD`, so a request keeps its method.
-- `Cache-Control: no-store` on every redirect. The `301` tells search engines the move is permanent; `no-store` keeps Chrome (and, to confirm, Safari and Firefox) from caching it, so a wrong redirect can be fixed on the server.
+- `Cache-Control: no-store` on every redirect. The `301` tells search engines the move is permanent; `no-store` keeps Chrome (and, to confirm, Safari and Firefox) from caching it, so a mistake during the cutover, or a later change of direction, can be fixed on the server. Once the cutover has settled, a short `max-age` would save repeat visitors a request to `www`.
 - From `www` only, it appends `from_www=1`; the app checks the name, not the value.
 - It copies the path and query onto the constant host `math3d.org`; resolving the path as a URL instead would send `www.math3d.org//evil.example` off the site.
 - Its routes name the two hosts exactly. A wildcard would catch the API's host.
@@ -86,7 +86,7 @@ The second group cannot be atomic: `APP_BASE_URL` is a Heroku setting, and the r
 
 ## Alternatives considered
 
-- **Keep `www` canonical.** No indexed URL changes and there is no cached `301` to get past. Rejected for the reasons under "Why `math3d.org`"; the cost of moving is paid once.
+- **Keep `www` canonical.** No indexed URL changes, no cached `301` to get past, and no `from_www` to keep. Rejected for the reasons under "Why `math3d.org`".
 - **A Cloudflare redirect rule for `www`.** No code, but it cannot set `Cache-Control`, so to avoid caching another `301` it would have to be a `302`, a weaker signal to search engines.
 - **A Cloudflare Snippet.** Does what the Worker does, but needs the Pro plan and lives in the dashboard. The Worker is in source control and tested.
 - **Clear only where a cached redirect is detected** (`fetch` with `cache: "only-if-cached"` and `redirect: "manual"`). It would spare other browsers the cold load, but the detection misses some entries and reports stale ones.[^probe]
