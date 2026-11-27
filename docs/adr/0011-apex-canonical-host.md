@@ -12,7 +12,7 @@ Making `math3d.org` canonical means `www` redirects to it. A browser holding the
 
 ## Decision
 
-**`https://math3d.org` is the canonical host.** `www` and `next` redirect to it from a small Worker in this repo. The `www` redirect adds `?from_www=1`, so a browser holding the cached `301` reaches the app instead of looping. The app then checks for that entry and, if it finds one, clears it.
+**`https://math3d.org` is the canonical host.** `www` and `next` redirect to it from a small Worker in this repo. The `www` redirect adds `?from_www=1`, so a browser holding the cached `301` reaches the app instead of looping. The first time a browser arrives that way, the app clears its HTTP cache for `math3d.org`, the cached `301` included.
 
 | Host              | Today                         | After the cutover                                                |
 | ----------------- | ----------------------------- | ---------------------------------------------------------------- |
@@ -42,29 +42,22 @@ One Worker, in this repo with its own `wrangler.jsonc`, answers every request to
 1. A browser holding the cached `301` is sent from `math3d.org/abc` to `www.math3d.org/abc` by its own cache.
 2. The redirect Worker sends it to `math3d.org/abc?from_www=1`. The cache is keyed by the whole URL, so this one is not in it and the request reaches the app. **This step alone prevents the loop.**
 3. On every arrival with `from_www`, the app removes it from the address bar with `history.replaceState`, before Sentry or the router reads the URL.
-4. In the background, the app probes the same URL without `from_www` (the clean URL) with `fetch(url, { cache: "only-if-cached", mode: "same-origin", redirect: "manual" })`, which is answered from the cache or not at all. A response of type `opaqueredirect` means the cache holds a redirect for that URL.
-5. Only then, the app:
-   - fetches `/app/clear-cache` (the clear route), a route of the app's Worker that answers with `Clear-Site-Data: "cache"`. The browser drops its HTTP cache for `https://math3d.org`, the cached `301` for every path included. Cookies and `localStorage` are untouched.[^csd]
-   - refetches the clean URL with `cache: "reload"`, to overwrite the cached `301` for that one URL in a browser where the header has no effect.
+4. If a `localStorage` flag is not yet set, the app fetches `/app/clear-cache` (the clear route) in the background, then sets the flag. The route belongs to the app's Worker and answers with `Clear-Site-Data: "cache"`: the browser drops its HTTP cache for `https://math3d.org`, the cached `301` for every path included. Cookies and `localStorage` are untouched.[^csd]
 
-Steps 4 and 5 are an optimisation. Without them, step 2 still prevents the loop, and each later visit takes one extra redirect through `www`. A browser with nothing cached for the clean URL, arriving by an ordinary `www` link or bookmark, clears nothing and keeps its cached assets.
+Step 4 is an optimisation. Without it, step 2 still prevents the loop, and each later visit by a browser holding the cached `301` takes one extra redirect through `www`.
 
 Measured locally:[^test]
 
-- Chrome: affected. The probe finds the cached `301`, and the clear removes it for every path.
-- Firefox: not affected. It asks the server again before reusing a `301` without freshness headers.[^firefox]
-- Safari: affected. The probe finds the cached `301`, but `Clear-Site-Data` had no effect, for a reason not yet known.[^safari]
-
-The probe is not exact:[^probe]
-
-- It misses a cached `301` that Chrome stored for a link click from another site. The clear removes such an entry, but the probe does not see it.
-- It also finds a stale redirect, such as the `302` that `math3d.org` has sent since 2026-11-25, and clears for a browser that could never loop.
+- Chrome: affected. The clear removes the cached `301` for every path, however it was cached.
+- Firefox: not affected. It asks the server again before reusing a `301` without freshness headers.
+- Safari: affected, and the clear had no effect, for a reason not yet known.[^safari] Its entries expire by 2027-11-25, a year after the last one could have been cached.
 
 ### How long this stays
 
 - The redirect Worker stays for as long as `www` and `next` redirect.
-- `from_www` stays for as long as `www` redirects. No date or count makes removing it safe: Chrome's cached `301` has no expiry, a browser that has not come back cannot be counted, and without the parameter a browser that still holds one gets the error page.
-- Steps 4 and 5 can be removed at any time; the cost is one redirect through `www` for a browser still holding the cached `301`. Safari's entries expire by 2027-11-25, a year after the last one could have been cached.
+- `from_www` stays for as long as `www` redirects, unless the owner decides otherwise. Without it, a browser that still holds the cached `301` gets the error page. Chrome's entry has no expiry, and nothing can count browsers that have not come back, so no measurement shows when removal is safe.
+- _Opinion (owner's):_ the site is about ten years old. Dropping `from_www` would probably be acceptable after two years and surely after five, and most likely it simply stays.
+- Step 4 can be removed at any time. The cost is one redirect through `www` per visit for a browser still holding the cached `301`.
 
 ### Rules
 
@@ -90,13 +83,13 @@ Stopping a redirect means removing its route in Cloudflare. Redeploying an older
 To confirm on `next.math3d.org` before the cutover:
 
 - Whether `Clear-Site-Data` removes a cached redirect in Safari at all.
-- That `cache: "reload"` overwrites a cached `301` in Safari. It has not been measured.
 - That Safari and Firefox do not keep a `301` sent with `no-store`. Until then, only Chrome is known to survive a later reversal of a redirect without looping.
 
 ## Consequences
 
 - Every indexed legacy URL moves from `www` to `math3d.org`. Search engines follow the `301`s; expect weeks of reshuffling in results.
-- A browser holding the cached `301` pays one extra redirect and one cold load of the app's assets, once. Where the clear has no effect, it pays the redirect once for each path it had cached and no cold load.
+- Every browser pays one cold load of the app's assets after its first arrival through `www`, whether or not it held the cached `301`.
+- Where the clear has no effect, as measured in Safari, a browser holding the cached `301` takes one extra redirect per visit until the entry expires.
 - **Unsaved drafts made on `next.math3d.org` are lost.** They are in `localStorage`, which is per host, and `next` becomes a redirect. The renderer preference and dismissed banners reset the same way. Nothing in this decision carries them over.
 - `www` links arrive as `?from_www=1` for good, and the app strips it on every such arrival.
 - Anyone can make a browser request the clear route. It costs that visitor at most one cold load.
@@ -107,18 +100,16 @@ To confirm on `next.math3d.org` before the cutover:
 - **Keep `www` canonical.** No indexed URL changes and there is no cached `301` to get past. Rejected for the reasons under "Why `math3d.org`"; the cost of moving is paid once.
 - **A Cloudflare redirect rule for `www`.** No code, but it cannot set `Cache-Control`, so to avoid caching another `301` it would have to be a `302`, a weaker signal to search engines. Adding a parameter to a query that may be empty also takes two rules.
 - **A Cloudflare Snippet.** Does what the Worker does, but needs the Pro plan and lives in the dashboard. The Worker is in source control and tested.
-- **`Clear-Site-Data` on every `from_www` response, from a Cloudflare response-header rule.** No app code, but it empties the cache on every visit that arrives through `www`, so every `www` bookmark and old link cold-loads the app each time. The rule also lives in the dashboard.
-- **Clear once per browser, remembered in `localStorage`.** No probe, and it also clears entries the probe misses, but every browser arriving through `www` pays one cold load whether or not it held the cached `301`.
-- **Remove `from_www` once a count of affected browsers reaches zero.** The count sees only browsers that come back and that the probe detects, so zero does not mean none are left.
+- **Clear only where the app finds a cached redirect.** A `fetch` with `cache: "only-if-cached"` and `redirect: "manual"` detects one, which would spare other browsers the cold load and count the affected ones. Rejected because the detection is unreliable in both directions.[^probe]
+- **`Clear-Site-Data` on every `from_www` response, from a Cloudflare response-header rule.** No app code, but every `www` bookmark and old link would cold-load the app on every visit, and the rule lives in the dashboard.
 - **Serve the app on both hosts with a canonical link and no redirect.** Avoids the loop, but leaves each visitor's drafts and preferences split across two hosts permanently.
 - **Wait for the cached `301` to expire.** Chrome's never does.
 - **Clear the cache from the legacy site before the cutover.** `Clear-Site-Data` clears only the origin that sends it, and a browser holding the cached `301` never contacts `math3d.org`.
 
 [^lifetime]: Chromium gives a `301` without freshness headers an unlimited lifetime, and WebKit one year (both read from source). The entry goes when the cache evicts it for space, the user clears browsing data, or the cache is reset.
-[^test]: Measured on 2026-11-25 and 2026-11-26 with fresh profiles against a local server answering for two `.localhost` hostnames over plain HTTP, with entries minutes old: Google Chrome 158 driven by Playwright, Firefox 155 headless, Safari 27.0.1 in a `safaridriver` automation window. Every visit was a typed-style navigation. Not tested: HTTPS, a reload on Chrome's error page.
+[^test]: Measured on 2026-11-25 and 2026-11-26 with fresh profiles against a local server answering for `.localhost` hostnames over plain HTTP, with entries minutes old: Google Chrome 158 driven by Playwright, Firefox 155 headless, Safari 27.0.1 in a `safaridriver` automation window. Not tested: HTTPS, a reload on Chrome's error page.
 [^nostore]: Confirmed in Chrome; Safari and Firefox are still to confirm (see "Cutover order").
 [^csd]: `Clear-Site-Data: "cache"` needs a secure origin (HTTPS; `localhost` also qualifies) and is documented for Chrome, Safari 17 and later, and Firefox 138 and later (also 63 to 93). Chrome may go on serving some cached entries until the tab reloads.
-[^firefox]: Given a `301` with an explicit `max-age`, Firefox reuses it, and the probe and the clear both work.
-[^safari]: The header had no effect on the page response or on a `fetch`. `.localhost` counts as a secure origin in WebKit's source, so plain HTTP is probably not the cause. The probed URL also loaded directly afterwards with step 5 switched off, which is unexplained and not relied on.
-[^probe]: Both measured in Chrome 158 on 2026-11-26. Chromium keys a main-frame navigation started by another site separately from one typed or started by the site itself. Probing with `cache: "default"` instead sends a stale entry to the network and still reports a fresh cached `301`, at the cost of one request per `from_www` arrival.
+[^safari]: The header had no effect on the page response or on a `fetch`. `.localhost` counts as a secure origin in WebKit's source, so plain HTTP is probably not the cause.
+[^probe]: Measured in Chrome 158. Chromium keys a navigation started by another site separately, so the probe misses a `301` cached by a link click from a search result, though the clear removes it. It also reports a stale redirect, such as the `302` that `math3d.org` sends today.
 [^traffic]: Cloudflare "Top hosts", a single reading on 2026-11-25 whose window was not noted: `www.math3d.org` 8.51k requests, `math3d.org` 1.34k, `next.math3d.org` 635, `old.math3d.org` 160.
