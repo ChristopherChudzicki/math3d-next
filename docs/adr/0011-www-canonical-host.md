@@ -34,7 +34,8 @@ Moving to `math3d.org` would mean reversing a redirect that browsers have cached
 One Worker, in this repo with its own `wrangler.jsonc`, answers every request to `math3d.org` and `next.math3d.org`. A Cloudflare redirect rule cannot set `Cache-Control`, which is why this is a Worker.
 
 - `301` to the same path and query on `www.math3d.org`; `308` for anything but `GET` and `HEAD`, so a request keeps its method.
-- `Cache-Control: max-age=86400` on every redirect. The `301` tells search engines the move is permanent; the one-day lifetime means a browser asks again within a day, so the direction can be changed on the server.
+- `Cache-Control: max-age=2592000` (30 days) on every redirect. The `301` tells search engines the move is permanent; the lifetime means every browser asks again within a month, so the direction can still be changed on the server.
+- The `next` redirect starts at `max-age=3600` and moves to 30 days once the cutover has settled, so rolling the cutover back does not leave browsers redirected for a month.
 - It copies the path and query onto the constant host `www.math3d.org`; resolving the path as a URL instead would send `math3d.org//evil.example` off the site.
 - Its routes name the two hosts exactly. A wildcard would catch the API's host.
 - Each host is its own route, so the two redirects start and stop separately.
@@ -72,7 +73,7 @@ _Opinion (owner's):_ complicated, potentially dangerous, hard to monitor, and mo
 - No indexed legacy URL changes host, and a browser holding the cached `301` keeps working.
 - **Unsaved drafts made on `next.math3d.org` are lost.** They are in `localStorage`, which is per host, and `next` becomes a redirect. The renderer preference and dismissed banners reset the same way. Nothing in this decision carries them over.
 - Sessions survive the move: the session cookie belongs to the API host, which shares a registrable domain with `www.math3d.org`, and the CSRF cookie is set for `.math3d.org`.
-- The legacy cached `301` remains in Chrome until the cache evicts it, so a later move to `math3d.org` meets the same problem in whatever browsers still hold it. The Worker's redirects add no new entries older than a day.
+- The legacy cached `301` remains in Chrome until the cache evicts it, so a later move to `math3d.org` meets the same problem in whatever browsers still hold it. The Worker's redirects add no entry that outlives 30 days.
 
 ## Alternatives considered
 
