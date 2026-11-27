@@ -15,26 +15,36 @@ Moving to `math3d.org` would mean reversing a redirect that browsers have cached
 
 ## Decision
 
-**`https://www.math3d.org` stays the canonical host.** `math3d.org` and `next.math3d.org` redirect to it. Making `math3d.org` canonical is rejected; see "Why not `math3d.org`".
+**`https://www.math3d.org` stays the canonical host.** `math3d.org` and `next.math3d.org` redirect to it with a `301` that carries an explicit lifetime. Making `math3d.org` canonical is rejected; see "Why not `math3d.org`".
 
 | Host              | Today                         | After the cutover                      |
 | ----------------- | ----------------------------- | -------------------------------------- |
 | `www.math3d.org`  | The legacy site               | This app                               |
-| `math3d.org`      | Redirect to `www`             | The same                               |
+| `math3d.org`      | Redirect to `www`             | Redirect to `www`, same path and query |
 | `next.math3d.org` | This app                      | Redirect to `www`, same path and query |
 | `old.math3d.org`  | The legacy site, as `noindex` | The same, until it is retired          |
 
 ### Rules
 
 - **No redirect on these hosts is a `301` without an explicit lifetime.** A `302`, or a `301` with `Cache-Control`, can be changed on the server later; a `301` without one cannot, which is what made this decision expensive to reverse.
-- Both redirects are Cloudflare redirect rules answering `302`, as `math3d.org` does today. A redirect rule cannot set `Cache-Control`, so a `301` with a lifetime would need a Worker; the `302` is a weaker signal to search engines, backed by the canonical link.
 - Every page has a `rel="canonical"` link on `www.math3d.org`. For `/` it goes in the static `index.html`, because the app's Worker does not serve `/`.
+
+### The redirect Worker
+
+One Worker, in this repo with its own `wrangler.jsonc`, answers every request to `math3d.org` and `next.math3d.org`. A Cloudflare redirect rule cannot set `Cache-Control`, which is why this is a Worker.
+
+- `301` to the same path and query on `www.math3d.org`; `308` for anything but `GET` and `HEAD`, so a request keeps its method.
+- `Cache-Control: max-age=86400` on every redirect. The `301` tells search engines the move is permanent; the one-day lifetime means a browser asks again within a day, so the direction can be changed on the server.
+- It copies the path and query onto the constant host `www.math3d.org`; resolving the path as a URL instead would send `math3d.org//evil.example` off the site.
+- Its routes name the two hosts exactly. A wildcard would catch the API's host.
+- Each host is its own route, so the two redirects start and stop separately.
 
 ### Cutover order
 
 1. Ahead of time:
    - ship the `rel="canonical"` links;
-   - add `https://www.math3d.org` to the API's `CORS_ALLOWED_ORIGINS`.
+   - add `https://www.math3d.org` to the API's `CORS_ALLOWED_ORIGINS`;
+   - deploy the redirect Worker and give it `math3d.org` in place of today's `302`. The direction does not change, so this needs no coordination.
 2. Together, within minutes of each other:
    - first, point `www.math3d.org` at the app in place of the legacy site (the release's deploy job requests that origin);
    - deploy the app with `VITE_SITE_ORIGIN=https://www.math3d.org` and `VITE_LEGACY_APP_BASE_URL=https://old.math3d.org`;
@@ -62,13 +72,13 @@ _Opinion (owner's):_ complicated, potentially dangerous, hard to monitor, and mo
 - No indexed legacy URL changes host, and a browser holding the cached `301` keeps working.
 - **Unsaved drafts made on `next.math3d.org` are lost.** They are in `localStorage`, which is per host, and `next` becomes a redirect. The renderer preference and dismissed banners reset the same way. Nothing in this decision carries them over.
 - Sessions survive the move: the session cookie belongs to the API host, which shares a registrable domain with `www.math3d.org`, and the CSRF cookie is set for `.math3d.org`.
-- The cached `301` remains in Chrome indefinitely, so a later move to `math3d.org` would meet the same problem.
+- The legacy cached `301` remains in Chrome until the cache evicts it, so a later move to `math3d.org` meets the same problem in whatever browsers still hold it. The Worker's redirects add no new entries older than a day.
 
 ## Alternatives considered
 
 - **`math3d.org` as the canonical host.** See "Why not `math3d.org`".
 - **Serve the app on both hosts with a canonical link and no redirect.** Leaves each visitor's drafts and preferences split across two hosts permanently.
-- **A redirect Worker answering `301` with a short `max-age`.** A stronger signal to search engines than a `302`, for one more deployed thing to maintain. Can be adopted later without revisiting this decision.
+- **Cloudflare redirect rules answering `302`,** as `math3d.org` does today. No code, but a weaker signal to search engines than a `301`.
 
 [^lifetime]: Chromium gives a `301` without freshness headers an unlimited lifetime, and WebKit one year (both read from source). The entry goes when the cache evicts it for space, the user clears browsing data, or the cache is reset.
 [^test]: Measured on 2026-11-25 and 2026-11-26 with fresh profiles against a local server answering for `.localhost` hostnames over plain HTTP, with entries minutes old: Google Chrome 158 driven by Playwright, Firefox 155 headless, Safari 27.0.1 in a `safaridriver` automation window. Not tested: HTTPS, real hostnames, a reload on Chrome's error page.
