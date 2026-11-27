@@ -65,7 +65,7 @@ In local tests `Clear-Site-Data` cleared the cached `301` in Chrome but had no e
 1. Ahead of time:
    - ship the `rel="canonical"` links;
    - add `https://math3d.org` to the API's `CORS_ALLOWED_ORIGINS`;
-   - on `next.math3d.org`, confirm that Safari and Firefox do not keep a `301` sent with `no-store`, and whether `Clear-Site-Data` clears a cached redirect in Safari at all.
+   - rehearse on two spare hostnames under `math3d.org`, over HTTPS, in Chrome, Safari and Firefox: cache a `301` without freshness headers, reverse the direction, and check that `from_www` gets past it. The rehearsal also settles whether Safari and Firefox keep a `301` sent with `no-store`, and whether `Clear-Site-Data` clears a cached redirect in Safari at all.
 2. Together, within minutes of each other:
    - first, attach `math3d.org` to the app in place of its redirect to `www` (the release's deploy job requests that origin);
    - deploy the app with `VITE_SITE_ORIGIN=https://math3d.org` and `VITE_LEGACY_APP_BASE_URL=https://old.math3d.org`;
