@@ -12,7 +12,7 @@ Making `math3d.org` canonical means `www` redirects to it. A browser holding the
 
 ## Decision
 
-**`https://math3d.org` is the canonical host. `www` and `next` redirect to it from a small Worker in this repo, and the `www` redirect adds `?from=www`, which gets a browser past the cached `301` and lets the app clear it.**
+**`https://math3d.org` is the canonical host. `www` and `next` redirect to it from a small Worker in this repo, and the `www` redirect adds `?from_www=1`, which gets a browser past the cached `301` and lets the app clear it.**
 
 Why `math3d.org`:
 
@@ -20,12 +20,12 @@ Why `math3d.org`:
 - Visitors already use it: in Cloudflare's per-host request counts it gets about one request for every six to `www`, and a visit to `www` is many requests where a visit to `math3d.org` is one redirect.[^traffic]
 - _Opinion (owner's):_ a significant part of this is simple preference.
 
-| Host              | Today                         | After the cutover                                    |
-| ----------------- | ----------------------------- | ---------------------------------------------------- |
-| `math3d.org`      | Redirect to `www`             | This app                                             |
-| `www.math3d.org`  | The legacy site               | Redirect to `math3d.org`, same path, plus `from=www` |
-| `next.math3d.org` | This app                      | Redirect to `math3d.org`, same path                  |
-| `old.math3d.org`  | The legacy site, as `noindex` | The same, until it is retired                        |
+| Host              | Today                         | After the cutover                                      |
+| ----------------- | ----------------------------- | ------------------------------------------------------ |
+| `math3d.org`      | Redirect to `www`             | This app                                               |
+| `www.math3d.org`  | The legacy site               | Redirect to `math3d.org`, same path, plus `from_www=1` |
+| `next.math3d.org` | This app                      | Redirect to `math3d.org`, same path                    |
+| `old.math3d.org`  | The legacy site, as `noindex` | The same, until it is retired                          |
 
 ### The redirect Worker
 
@@ -33,15 +33,15 @@ One Worker, in this repo with its own `wrangler.jsonc`, answers every request to
 
 - `301` to the same path and query on `math3d.org`.
 - **`Cache-Control: no-store` on every redirect.** The `301` tells search engines the move is permanent; `no-store` keeps browsers from caching it, so a wrong redirect can be fixed on the server.
-- From `www` only, it sets the query parameter `from=www`.
+- From `www` only, it sets the query parameter `from_www=1`. Only the name is read; the value is ignored.
 - The target's host is the constant `math3d.org`, with the request's path and query copied onto it. Building the target by resolving the path as a URL would let `www.math3d.org//evil.example` redirect off the site.
 
 ### Past the cached `301`
 
 1. A browser holding the cached `301` is sent from `math3d.org/abc` to `www.math3d.org/abc` by its own cache.
-2. The redirect Worker sends it to `math3d.org/abc?from=www`. The cache is keyed by the whole URL, so this one is not in it and the request reaches the app. **This step alone prevents the loop.**
-3. A Cloudflare response-header rule adds `Clear-Site-Data: "cache"` to any `math3d.org` response whose request has `from=www`. The browser drops its HTTP cache for `https://math3d.org`, the cached `301` for every path included. Cookies and `localStorage` are untouched.[^csd]
-4. The app removes `from=www` from the address bar with `history.replaceState`, before anything reads the URL to build a link.
+2. The redirect Worker sends it to `math3d.org/abc?from_www=1`. The cache is keyed by the whole URL, so this one is not in it and the request reaches the app. **This step alone prevents the loop.**
+3. A Cloudflare response-header rule adds `Clear-Site-Data: "cache"` to any `math3d.org` response whose request has a `from_www` parameter. The browser drops its HTTP cache for `https://math3d.org`, the cached `301` for every path included. Cookies and `localStorage` are untouched.[^csd]
+4. The app removes `from_www` from the address bar with `history.replaceState`, before anything reads the URL to build a link.
 5. For a browser that ignores the header, the app also refetches the clean URL with `fetch(url, { cache: "reload" })`, which replaces the cached `301` for that one URL.
 
 Steps 3 and 5 only save later visits a redirect through `www`. In Chrome 158, after step 3 the visited URL and a second, unvisited one both load directly; after step 5 alone, only the visited one does.[^test]
@@ -51,8 +51,8 @@ The header comes from a rule because the Worker that serves the app cannot set i
 ### Rules for the cutover
 
 - **Every redirect on these hosts is `no-store` or has an explicit, short lifetime.**
-- Every page has a `rel="canonical"` link without `from=www` before the `www` redirect goes live. Otherwise search engines index the URL they were redirected to.
-- `from=www` is removed in the browser only. A redirect that removed it would land on the cached `301` again.
+- Every page has a `rel="canonical"` link without `from_www` before the `www` redirect goes live. Otherwise search engines index the URL they were redirected to.
+- `from_www` is removed in the browser only. A redirect that removed it would land on the cached `301` again.
 - Order:
   1. Ahead of time, add `https://math3d.org` to the API's `CORS_ALLOWED_ORIGINS`.
   2. Together: deploy the app to `math3d.org` with `VITE_SITE_ORIGIN` set to it and `VITE_LEGACY_APP_BASE_URL` set to `https://old.math3d.org`, set the API's `APP_BASE_URL` to it, and start the `next` redirect.
@@ -69,9 +69,9 @@ To confirm on `next.math3d.org` before the cutover:
 - Every indexed legacy URL moves from `www` to `math3d.org`. Search engines follow the `301`s; expect weeks of reshuffling in results.
 - A browser holding the cached `301` pays one extra redirect and one cold load of the app's assets, once.
 - **Unsaved drafts made on `next.math3d.org` are lost.** They are in `localStorage`, which is per host, and `next` becomes a redirect. The renderer preference and dismissed banners reset the same way. Nothing in this decision carries them over.
-- The redirect Worker and the handling of `from=www` stay for as long as `www` redirects, which is indefinitely.
-- The `Clear-Site-Data` rule lives in the Cloudflare dashboard, not the repo. Its value must stay exactly `"cache"` and its filter exactly `from=www`: `"storage"` or `"*"` would erase every visitor's drafts, and a wider filter would cold-load the app on every visit.
-- Anyone can write a link with `from=www`. It costs the visitor who follows it one cold load.
+- The redirect Worker and the handling of `from_www` stay for as long as `www` redirects, which is indefinitely.
+- The `Clear-Site-Data` rule lives in the Cloudflare dashboard, not the repo. Its value must stay exactly `"cache"` and its filter must match the `from_www` parameter only: `"storage"` or `"*"` would erase every visitor's drafts, and a wider filter would cold-load the app on every visit.
+- Anyone can write a link with `from_www`. It costs the visitor who follows it one cold load.
 - Sessions survive the move: the session cookie belongs to the API host, which shares a registrable domain with `math3d.org`, and the CSRF cookie is set for `.math3d.org`.
 
 ## Alternatives considered
