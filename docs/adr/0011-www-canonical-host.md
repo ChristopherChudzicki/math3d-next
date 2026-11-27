@@ -56,7 +56,7 @@ The second group cannot be atomic: `APP_BASE_URL` is a Heroku setting, and the r
 
 ## Why not `math3d.org`
 
-What it buys is a shorter address to post, say aloud, and copy from the address bar. About one request goes to `math3d.org` for every six to `www` (Cloudflare, 2026-11-25; a rough signal).[^traffic]
+`math3d.org` already works as an address to type, post and say aloud, because it redirects. Making it canonical buys only a shorter address when one is copied from the address bar, and one redirect fewer for those who arrive at `math3d.org`: about one request for every six to `www` (Cloudflare, 2026-11-25; a rough signal).[^traffic]
 
 What it costs is a workaround for the cached `301`, which was designed and measured before being rejected:
 
