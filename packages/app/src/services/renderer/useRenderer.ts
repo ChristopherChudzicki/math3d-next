@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { useSearch } from "@tanstack/react-router";
 import { useSetSearch } from "@/services/navigation/useSetSearch";
+import { useRootSearch } from "@/services/navigation/urlState";
 import { resolveRenderer } from "./resolveRenderer";
 import type { Renderer } from "./renderers";
 import {
@@ -12,7 +12,7 @@ const useRenderer = (): {
   renderer: Renderer;
   chooseRenderer: (renderer: Renderer) => void;
 } => {
-  const param = useSearch({ strict: false }).renderer;
+  const param = useRootSearch().renderer;
   const setSearch = useSetSearch();
   const preference = useRendererPreference();
   const renderer = resolveRenderer({ param, preference });

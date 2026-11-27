@@ -72,7 +72,7 @@ const MainPage: React.FC = () => {
     legacyDialog.off();
   }, [sceneKey, legacyDialog]);
 
-  const controlsOpen = route.useSearch().controls !== 0;
+  const controlsOpen = route.useSearch({ select: (s) => s.controls }) !== 0;
   const { renderer } = useRenderer();
   const SceneViewport = VIEWPORTS[renderer];
   const setSearch = useSetSearch();

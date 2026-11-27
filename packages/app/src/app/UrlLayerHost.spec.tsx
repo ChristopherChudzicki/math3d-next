@@ -21,7 +21,7 @@ test("no overlay param renders no dialog", async () => {
   expect(screen.queryByRole("dialog")).toBe(null);
 });
 
-// `constructor` is on every object's prototype chain, so a lookup by name
+// `constructor` is on every object's prototype chain, so `OVERLAYS[name]`
 // would find it.
 test("an unknown overlay value is dropped, leaving sign-in free to open", async () => {
   const error = vi.spyOn(console, "error").mockImplementation(() => {});

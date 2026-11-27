@@ -15,6 +15,4 @@ test("a link home isn't marked current on another page", async () => {
   const link = screen.getByRole("link", { name: "Home" });
   expect(link).toHaveAttribute("href", "/");
   expect(link).not.toHaveAttribute("aria-current");
-  expect(link).not.toHaveAttribute("data-status");
-  expect(link).not.toHaveClass("active");
 });

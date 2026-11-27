@@ -16,8 +16,9 @@ const UrlLayerContext = createContext<UrlLayerContextValue | null>(null);
 /**
  * The location a layer's dialog reads. While it closes, that is the location
  * it last had open, so its content doesn't react to params that already left
- * the URL. Layer code reads the URL only through this, never `useSearch`: the
- * two update a render apart, and the frozen location must agree with `open`.
+ * the URL. Layer content reads search params and history state only through
+ * this, never `useRootSearch`: the two update a render apart, and the frozen
+ * location must agree with `open`.
  */
 export const useUrlLayerLocation = (): AppLocation => {
   const routerLocation = useLocation();

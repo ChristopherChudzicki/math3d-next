@@ -1,7 +1,8 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import MainPage from "@/app/pages/MainPage/MainPage";
+import { controlsSearchFields } from "@/app/pages/MainPage/search";
 import { SCENE_KEY_PATTERN } from "@/config/sceneKey";
-import { rendererSearchFields } from "@/services/renderer/search";
+import { editorRendererSearchFields } from "@/services/renderer/search";
 import { lenientSearch } from "@/util/lenientSearch";
 
 export const Route = createFileRoute("/{-$sceneKey}")({
@@ -16,6 +17,9 @@ export const Route = createFileRoute("/{-$sceneKey}")({
       return { sceneKey };
     },
   },
-  validateSearch: lenientSearch(rendererSearchFields),
+  validateSearch: lenientSearch({
+    ...editorRendererSearchFields,
+    ...controlsSearchFields,
+  }),
   component: MainPage,
 });

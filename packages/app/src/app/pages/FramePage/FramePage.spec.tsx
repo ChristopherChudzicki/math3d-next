@@ -134,14 +134,17 @@ test("a renderer that can't start marks the page failed, with no fallback", asyn
   expect(localStorage.getItem(RENDERER_PREFERENCE_KEY)).toBeNull();
 });
 
-test("an unknown ?renderer marks the page failed", async () => {
-  const scene = new SceneBuilder();
-  seedDb.withScene(scene.json());
+test.each(["foo", "null"])(
+  "?renderer=%s marks the page failed",
+  async (renderer) => {
+    const scene = new SceneBuilder();
+    seedDb.withScene(scene.json());
 
-  await renderTestApp(`/app/frame/${scene.key}?renderer=foo`);
+    await renderTestApp(`/app/frame/${scene.key}?renderer=${renderer}`);
 
-  expect(await screen.findByTestId("scene")).toHaveAttribute(
-    "data-scene-error",
-    "invalid-renderer",
-  );
-});
+    expect(await screen.findByTestId("scene")).toHaveAttribute(
+      "data-scene-error",
+      "invalid-renderer",
+    );
+  },
+);

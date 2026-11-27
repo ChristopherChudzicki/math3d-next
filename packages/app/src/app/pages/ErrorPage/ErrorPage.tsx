@@ -30,7 +30,10 @@ const normalizeError = (error: unknown): NormalizedError => {
   return { message: copy.unknownError };
 };
 
-/** The root route's `onCatch`: runs once per error its boundary catches. */
+/**
+ * The root route's `onCatch`: runs each time its boundary catches, so twice
+ * for a crash on a URL the router rewrites on load (a bad search value).
+ */
 const reportRenderError = (error: unknown) => {
   // Not `handled: true` (captureException's default): this error took the
   // user to the fallback page.

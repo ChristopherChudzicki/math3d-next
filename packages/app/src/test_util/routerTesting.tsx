@@ -13,7 +13,6 @@ import type {
 } from "@tanstack/react-router";
 import { ROUTER_OPTIONS } from "@/app/routerOptions";
 import { rootSearchFields } from "@/app/searchFields";
-import { rendererSearchFields } from "@/services/renderer/search";
 import { lenientSearch } from "@/util/lenientSearch";
 
 /**
@@ -64,8 +63,7 @@ type TestRouterOptions = { url?: string | string[]; state?: HistoryState };
 
 /**
  * A router with the app's options that renders `ui` at any URL, under one
- * root route with the app's search params. It also validates the editor's
- * `?renderer=`, which the app validates on the editor route alone.
+ * root route with the app's search params.
  */
 export const createTestRouter = (
   ui: React.ReactElement,
@@ -74,12 +72,8 @@ export const createTestRouter = (
   createRouter({
     ...ROUTER_OPTIONS,
     routeTree: createRootRoute({
-      validateSearch: lenientSearch({
-        ...rootSearchFields,
-        ...rendererSearchFields,
-      }),
+      validateSearch: lenientSearch(rootSearchFields),
       component: () => ui,
-      notFoundComponent: () => null,
     }),
     history: memoryHistory(url, state),
   });

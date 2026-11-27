@@ -14,7 +14,6 @@ type CloseUrlLayerOptions = {
   params: readonly (keyof SearchPatch)[];
   /** History-state keys the layer owns, dropped when it closes in place. */
   stateKeys: readonly (keyof HistoryState)[];
-  /** The caller's layer location, and its still-open ref. */
   location: ReturnType<typeof useUrlLayerLocation>;
   stillOpen: RefObject<boolean>;
 };

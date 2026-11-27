@@ -13,9 +13,9 @@ type SetSearchOptions = {
 };
 
 /**
- * Edits the current URL's search params, keeping its path, hash, history state
- * and scroll position. The one way the app edits the current URL's search
- * params: a bare `navigate` drops the hash and the state.
+ * The app's one way to edit the current URL's search params. Keeps the path,
+ * hash, history state and scroll position; a bare `navigate` drops the hash
+ * and the state.
  */
 export const useSetSearch = () => {
   const navigate = useNavigate();

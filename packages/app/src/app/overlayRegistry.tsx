@@ -13,8 +13,8 @@ import ScenesListPage from "./pages/ScenesList/ScenesListPage";
  * `Popup`, and only what `Root` itself needs — around a content component
  * inside `Popup` that holds everything else. Content exists only while the
  * overlay is open or closing, so its queries never run while it is closed, and
- * its effects need no `open` check. Content reads the URL through
- * `useUrlLayerLocation`, which holds still while it closes.
+ * its effects need no `open` check. Content reads search params and history
+ * state through `useUrlLayerLocation`, which holds still while it closes.
  * `useAuthStatus` may sit in a shell: it is session state every route already
  * loads, not overlay data.
  */

@@ -117,7 +117,7 @@ export default defineConfig({
       // Serve the app against @math3d/mock-api instead of a real backend.
       VITE_USE_MSW: Schema.string.optional(),
     }),
-    // Options live in tsr.config.json, shared with `yarn generate-routes`.
+    // Options live in tsr.config.json, shared with `yarn workspace app generate-routes`.
     // Must precede react().
     tanstackRouter(),
     react(),

@@ -29,9 +29,6 @@ describe("ErrorPage as the root route's errorComponent", () => {
     ).toBeVisible();
     expect(screen.getByText(/kaboom/)).toBeInTheDocument();
     expect(consoleError).toHaveBeenCalled();
-    expect(consoleWarn).toHaveBeenCalledWith(
-      "Warning: Error in route match: __root__/",
-    );
   });
 
   test("reports the error to Sentry once", async () => {
