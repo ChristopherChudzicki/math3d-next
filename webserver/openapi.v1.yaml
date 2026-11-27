@@ -1826,18 +1826,16 @@ paths:
       - Scenes
   /v1/scenes/{key}/meta/:
     get:
-      description: 'Read-only title lookup for the edge OG Worker.
+      description: 'Title lookup for the edge OG Worker. Unlike ``get_scene``, it never
+
+        increments ``times_accessed`` or migrates a legacy key.
 
 
-        Serves only migrated (``Scene``) scenes, and does so with no side effects:
+        200 for every scene ``get_scene`` serves and 404 for every key it 404s. A
 
-        unlike ``get_scene`` it never increments ``times_accessed`` and never
+        legacy scene whose migration fails (``get_scene`` 500s) may get either. An
 
-        migrates a legacy key. An un-migrated legacy key 404s here — the Worker
-
-        then serves the branded default card, and the scene picks up per-scene
-
-        metadata once it''s opened in-app (which migrates it).'
+        un-migrated legacy scene gets the title its migration would give it.'
       operationId: scenes_api_get_scene_meta
       parameters:
       - in: path

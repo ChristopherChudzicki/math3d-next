@@ -1,14 +1,16 @@
 import logging
+import re
 
 from django.db.models import F
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from ninja import Query, Router, Status
 from ninja.errors import HttpError
 from ninja.pagination import LimitOffsetPagination, paginate
 
 from main.ninja_auth import session_auth
-from scenes.legacy_scene_utils.migrate_scene import migrate_scene
-from scenes.models import LegacyScene, Scene
+from scenes.legacy_scene_utils.migrate_scene import legacy_title, migrate_scene
+from scenes.models import SCENE_KEY_PATTERN, LegacyScene, Scene
 from scenes.schemas import (
     LegacySceneInSchema,
     LegacySceneOutSchema,
@@ -70,16 +72,29 @@ def create_scene(request, payload: SceneCreateSchema):
 
 @scenes_router.get("/{key}/meta/", response=SceneMetaSchema, auth=None)
 def get_scene_meta(request, key: str):
-    """Read-only title lookup for the edge OG Worker.
+    """Title lookup for the edge OG Worker. Unlike ``get_scene``, it never
+    increments ``times_accessed`` or migrates a legacy key.
 
-    Serves only migrated (``Scene``) scenes, and does so with no side effects:
-    unlike ``get_scene`` it never increments ``times_accessed`` and never
-    migrates a legacy key. An un-migrated legacy key 404s here — the Worker
-    then serves the branded default card, and the scene picks up per-scene
-    metadata once it's opened in-app (which migrates it).
+    200 for every scene ``get_scene`` serves and 404 for every key it 404s. A
+    legacy scene whose migration fails (``get_scene`` 500s) may get either. An
+    un-migrated legacy scene gets the title its migration would give it.
     """
-    scene = get_object_or_404(Scene.objects.only("title"), key=key)
-    return {"title": scene.title}
+    # A legacy key outside the pattern never migrates, so get_scene 404s it.
+    if not re.match(SCENE_KEY_PATTERN, key):
+        raise Http404
+    scene = Scene.objects.filter(key=key).only("title").first()
+    if scene is not None:
+        return {"title": scene.title}
+    # Reads the title only: checking that migration succeeds means migrating.
+    legacy = (
+        LegacyScene.objects.filter(key=key)
+        .values("dehydrated__metadata__title")
+        .first()
+    )
+    if legacy is None:
+        raise Http404
+    title = legacy["dehydrated__metadata__title"]
+    return {"title": legacy_title({} if title is None else {"title": title})}
 
 
 @scenes_router.get("/{key}/", response=SceneSchema, auth=None, by_alias=True)
