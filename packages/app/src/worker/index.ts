@@ -8,12 +8,11 @@
  * (plus their alt text) to point at a per-scene render, gated on the
  * SCREENSHOTS_ORIGIN env var — unset, the shell's static default card is left
  * untouched. It is also the SPA fallback: any other path gets the shell, with
- * status 404 where the SPA renders not-found (no route matches, an invalid
- * key, or a key the API doesn't know), and /assets/ misses get a plain 404. The SPA never reads
- * anything this injects — it's crawler-facing metadata only (abandonability
- * invariant).
- * Dropping the Worker means setting `not_found_handling` back to
- * "single-page-application".
+ * status 404 where the SPA renders not-found (no route matches, an invalid key,
+ * or a key the API doesn't know), and /assets/ misses get a plain 404. The SPA
+ * never reads anything this injects — it's crawler-facing metadata only
+ * (abandonability invariant). Dropping the Worker means setting
+ * `not_found_handling` back to "single-page-application".
  *
  * Design: docs/superpowers/specs/2026-07-11-og-metadata-worker-design.md
  */

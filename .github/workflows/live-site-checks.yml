@@ -1,0 +1,42 @@
+name: Live site checks
+
+# After each production release, check what only the live site can show. They
+# run apart from the deploy: by then the release is live, so a failing check
+# can't stop it, only report it.
+on:
+  workflow_run: # zizmor: ignore[dangerous-triggers] runs no code or artifacts from the release, only curl
+    workflows: ["Release (Production)"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-26.04
+    environment: production # VITE_SITE_ORIGIN is a production-environment variable
+    env:
+      SITE_ORIGIN: ${{ vars.VITE_SITE_ORIGIN }}
+    steps:
+      - name: Wait for the release to reach every edge
+        run: sleep 120
+      # vite preview can't tell whether Cloudflare sends the policy. `/` is a
+      # static asset; `/app/nope` runs the Worker. The query string bypasses a
+      # cached copy from before the release.
+      - name: The site sends its Content-Security-Policy
+        run: |
+          for _ in 1 2 3 4 5; do
+            curl -fsSI "$SITE_ORIGIN/?check=$GITHUB_RUN_ID" | grep -qi '^content-security-policy:' && exit 0
+            sleep 30
+          done
+          echo "::error::$SITE_ORIGIN/ sends no Content-Security-Policy header"; exit 1
+      - name: An unknown path is a 404 with the policy
+        run: |
+          for _ in 1 2 3 4 5; do
+            headers=$(curl -sSI "$SITE_ORIGIN/app/nope?check=$GITHUB_RUN_ID")
+            echo "$headers" | head -1 | grep -q ' 404' &&
+              echo "$headers" | grep -qi '^content-security-policy:' && exit 0
+            sleep 30
+          done
+          echo "::error::$SITE_ORIGIN/app/nope is not a 404 with a Content-Security-Policy header"; exit 1

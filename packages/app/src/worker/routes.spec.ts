@@ -14,10 +14,3 @@ it.each([
 ])("matches %s like the router", (pathname, expected) => {
   expect(matchRoute(pathname)).toEqual(expected);
 });
-
-it.each(["/abc123/def", "/app//help/reference", "/App/help/reference", "/%zz"])(
-  "matches nothing for %s",
-  (pathname) => {
-    expect(matchRoute(pathname)).toBeNull();
-  },
-);

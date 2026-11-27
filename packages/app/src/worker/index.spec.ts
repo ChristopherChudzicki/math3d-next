@@ -19,6 +19,9 @@ const SHELL_HTML = `<!doctype html><html><head>
 </head><body></body></html>`;
 
 const SHELL_ETAG = '"shell"';
+// The _headers file adds the policy to the shell; responses built from it must
+// keep it.
+const SHELL_CSP = "default-src 'self'";
 
 const makeEnv = () => ({
   ASSETS: {
@@ -32,7 +35,11 @@ const makeEnv = () => ({
         return new Response(null, { status: 304 });
       }
       return new Response(SHELL_HTML, {
-        headers: { "content-type": "text/html", ETag: SHELL_ETAG },
+        headers: {
+          "content-type": "text/html",
+          ETag: SHELL_ETAG,
+          "Content-Security-Policy": SHELL_CSP,
+        },
       });
     }),
   },
@@ -326,3 +333,16 @@ it("leaves og:image AND both alts at the static defaults for a titled scene when
   // Title tags still rewrite — those are pass-1 behavior, ungated by the origin.
   expect(t.ogTitle).toBe("My Scene");
 });
+
+it.each([
+  ["a path no route matches", "/app/nope", undefined],
+  ["a missing scene", "/abc123", { detail: "Not Found" }],
+  ["a rewritten scene", "/abc123", { title: "My Torus" }],
+])(
+  "keeps the shell's Content-Security-Policy on %s",
+  async (_label, path, body) => {
+    stubMeta({ status: body && "detail" in body ? 404 : 200 }, body);
+    const res = await call(path, makeEnv());
+    expect(res.headers.get("content-security-policy")).toBe(SHELL_CSP);
+  },
+);
