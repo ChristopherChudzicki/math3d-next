@@ -1,7 +1,9 @@
-import { useSearchParams } from "react-router";
+import { useRootSearch } from "@/services/navigation/urlState";
+import { string } from "yup";
 
-/** Query param that, when present on any route, throws a synchronous render error. */
-export const TEST_SYNC_ERROR_PARAM = "test-sync-error";
+export const errorTriggerSearchFields = {
+  "test-sync-error": string(),
+};
 
 /**
  * Intentional, harmless test hook. Append `?test-sync-error` to ANY page to
@@ -12,11 +14,10 @@ export const TEST_SYNC_ERROR_PARAM = "test-sync-error";
  * error page, which is exactly its job.
  */
 const ErrorTrigger: React.FC = () => {
-  const [params] = useSearchParams();
-  if (params.has(TEST_SYNC_ERROR_PARAM)) {
+  const message = useRootSearch()["test-sync-error"];
+  if (message !== undefined) {
     throw new Error(
-      params.get(TEST_SYNC_ERROR_PARAM) ||
-        "Intentional error triggered via ?test-sync-error",
+      message || "Intentional error triggered via ?test-sync-error",
     );
   }
   return null;

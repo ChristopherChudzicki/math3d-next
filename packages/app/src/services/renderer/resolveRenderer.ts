@@ -6,7 +6,7 @@ const resolveRenderer = ({
   param,
   preference,
 }: {
-  param: string | null;
+  param: unknown;
   preference: Renderer | null;
 }): Renderer => (isRenderer(param) ? param : preference) ?? DEFAULT_RENDERER;
 

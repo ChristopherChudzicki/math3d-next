@@ -1,12 +1,13 @@
 import React from "react";
 import { expect, test } from "vitest";
-import { act, render } from "@testing-library/react";
-import { createMemoryRouter, RouterProvider } from "react-router";
-import type { InitialEntry } from "react-router";
+import { act } from "@testing-library/react";
+import { renderWithRouter } from "@/test_util/routerTesting";
 import { useRendererPreference } from "./rendererPreference";
 import { useRenderer } from "./useRenderer";
 
-const renderUseRenderer = (initialEntry: InitialEntry) => {
+const renderUseRenderer = async (
+  options: Parameters<typeof renderWithRouter>[1],
+) => {
   const api: {
     current: {
       hook: ReturnType<typeof useRenderer>;
@@ -20,38 +21,36 @@ const renderUseRenderer = (initialEntry: InitialEntry) => {
     };
     return null;
   };
-  const router = createMemoryRouter([{ path: "*", element: <Probe /> }], {
-    initialEntries: [initialEntry],
-  });
-  render(<RouterProvider router={router} />);
-  return { router, api };
+  const { router, location } = await renderWithRouter(<Probe />, options);
+  return { router, location, api };
 };
 
 test("chooseRenderer stores the choice and drops only ?renderer", async () => {
-  const { router, api } = renderUseRenderer({
-    pathname: "/abc",
-    search: "?renderer=mathbox&controls=0&overlay=scenes&list=examples",
-    hash: "#h",
-    state: { x: 1 },
+  const { location, api } = await renderUseRenderer({
+    url: "/abc?renderer=mathbox&controls=0&overlay=scenes&list=examples#h",
+    state: { overlayPushed: true },
   });
+  const entry = location.current.state.__TSR_index;
 
   await act(async () => api.current?.hook.chooseRenderer("threejs"));
 
   expect(api.current?.preference).toBe("threejs");
-  const { location } = router.state;
-  expect(location.pathname).toBe("/abc");
-  expect(location.search).toBe("?controls=0&overlay=scenes&list=examples");
-  expect(location.hash).toBe("#h");
-  expect(location.state).toEqual({ x: 1 });
-  expect(router.state.historyAction).toBe("REPLACE");
+  expect(location.current).toMatchObject({
+    pathname: "/abc",
+    search: "?controls=0&overlay=scenes&list=examples",
+    hash: "#h",
+    state: { overlayPushed: true },
+  });
+  // Replaced, not pushed.
+  expect(location.current.state.__TSR_index).toBe(entry);
 });
 
 test("chooseRenderer doesn't navigate without ?renderer", async () => {
-  const { router, api } = renderUseRenderer("/abc");
-  const { key } = router.state.location;
+  const { location, api } = await renderUseRenderer({ url: "/abc" });
+  const key = location.current.state.__TSR_key;
 
   await act(async () => api.current?.hook.chooseRenderer("mathbox"));
 
   expect(api.current?.preference).toBe("mathbox");
-  expect(router.state.location.key).toBe(key);
+  expect(location.current.state.__TSR_key).toBe(key);
 });

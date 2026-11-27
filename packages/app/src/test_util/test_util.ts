@@ -27,10 +27,10 @@ const nodeId =
   (propName: keyof T["properties"] & string) =>
     mathScopeId(item.id, propName);
 
-const pasteText = (element: HTMLElement, text: string) => {
-  user.clear(element);
-  user.click(element);
-  return user.paste(text);
+const pasteText = async (element: HTMLElement, text: string) => {
+  await user.clear(element);
+  await user.click(element);
+  await user.paste(text);
 };
 
 const sleep = (ms: number): Promise<void> =>

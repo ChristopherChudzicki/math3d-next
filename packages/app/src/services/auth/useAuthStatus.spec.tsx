@@ -75,7 +75,7 @@ test("A failed me-query stays unauthenticated while it refetches", async () => {
   // A refetch on focus resets a query with no data to pending; reading that as
   // "loading" would unmount the sign-in affordances for the round trip.
   act(() => {
-    queryClient.refetchQueries({ queryKey: ["me"] });
+    void queryClient.refetchQueries({ queryKey: ["me"] });
   });
   await waitFor(() => expect(calls).toBe(2));
   expect(result.current).toBe("unauthenticated");

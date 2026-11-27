@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { isApiError, sceneQueryOptions } from "@math3d/api";
 import { useAppDispatch } from "@/store/hooks";
 import sceneSlice from "@/store/scene/state/scene.slice";
@@ -11,7 +11,7 @@ import {
 } from "@/store/scene/drafts/storage";
 import type { DraftRecord } from "@/store/scene/drafts/storage";
 import { showToast } from "@/ui/Toast/toasts";
-import { ListType } from "./constants";
+import { ListType } from "@/services/overlays/search";
 import useSceneLinks from "./useSceneLinks";
 
 const UNOPENABLE_TOAST =
@@ -27,11 +27,10 @@ const useOpenDraft = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const links = useSceneLinks(ListType.Unsaved);
-  // The router's location, read after an await. (The overlay layer's location
-  // freezes on close.)
-  const location = useLocation();
-  const locationRef = useRef(location);
-  locationRef.current = location;
+  // Read after an await, so from the router: `latestLocation` follows history
+  // at once, where `state.location` waits for the load. (The overlay layer's
+  // location freezes on close.)
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [openingId, setOpeningId] = useState<string | null>(null);
   const opening = useRef(false);
@@ -75,14 +74,16 @@ const useOpenDraft = () => {
 
   /** The opened copy, or null if the draft wasn't opened. */
   const open = async (record: DraftRecord): Promise<DraftRecord | null> => {
-    const from = locationRef.current.key;
+    const from = router.latestLocation.state.__TSR_key;
     const base = record.key
       ? await checkBase(record.key, record.baseModifiedDate)
       : { exists: false, isLegacy: false, savedSince: false };
     // While the fetch ran, the user closed the list, went elsewhere, or
     // deleted the draft. Another tab may have written it, so read it again.
     const latest = readDraft(record.id);
-    if (locationRef.current.key !== from || !latest) return null;
+    if (router.latestLocation.state.__TSR_key !== from || !latest) {
+      return null;
+    }
     // A draft of a deleted scene opens as a new scene, so Save creates one.
     const key = base.exists ? record.key : null;
     const author = key ? record.author : null;
@@ -120,8 +121,11 @@ const useOpenDraft = () => {
     writeDraft(copy);
     // Same path: a push would add a duplicate history entry. It closes the
     // drawer where a card for the open scene would.
-    if (locationRef.current.pathname !== `/${key ?? ""}`) {
-      navigate(links.href(key ?? ""));
+    const link = links.link(key ?? undefined);
+    if (
+      router.latestLocation.pathname !== router.buildLocation(link).pathname
+    ) {
+      navigate(link);
     } else {
       links.onCurrentClick?.();
     }

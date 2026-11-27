@@ -8,7 +8,7 @@ test("left-hand parse errors are indicated on left-hand side", async () => {
     value: { lhs: "a+", rhs: "123", type: "assignment" },
   });
   const scene = seedDb.withSceneFromItems([variable]);
-  const { store } = renderTestApp(`/${scene.key}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   const lhs = await screen.findByLabelText("left-hand side", { exact: false });
   const rhs = await screen.findByLabelText("right-hand side", { exact: false });
@@ -23,7 +23,7 @@ test("right-hand parse errors are indicated on right-hand side", async () => {
     value: { lhs: "a", rhs: "123 + ", type: "assignment" },
   });
   const scene = seedDb.withSceneFromItems([variable]);
-  const { store } = renderTestApp(`/${scene.key}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   const lhs = await screen.findByLabelText("left-hand side", { exact: false });
   const rhs = await screen.findByLabelText("right-hand side", { exact: false });

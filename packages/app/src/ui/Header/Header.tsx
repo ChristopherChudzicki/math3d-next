@@ -1,5 +1,6 @@
 import React from "react";
 import Anchor from "@/ui/Anchor";
+import type { AnchorComponent, AnchorProps } from "@/ui/Anchor";
 import styles from "./Header.module.css";
 
 /** The "Math3d" text, for a control that carries the brand. */
@@ -8,14 +9,15 @@ const Wordmark: React.FC = () => (
 );
 
 /**
- * A mouse-only link home, for `Header`'s `brand`. Pair it with a visible "Back
- * to Math3d" link, which keyboard and screen-reader users get instead.
+ * A mouse-only link home, for `Header`'s `brand`; pass it the home link's
+ * target (`homeLink`). Pair it with a visible "Back to Math3d" link, which
+ * keyboard and screen-reader users get instead.
  */
-const HomeLink: React.FC = () => (
-  <Anchor to="/" tabIndex={-1} aria-hidden="true" className={styles.home}>
+const HomeLink = ((props: AnchorProps) => (
+  <Anchor {...props} tabIndex={-1} aria-hidden="true" className={styles.home}>
     <Wordmark />
   </Anchor>
-);
+)) as AnchorComponent;
 
 type HeaderProps = {
   /** The wordmark, or a control containing it, e.g. `HomeLink`. */

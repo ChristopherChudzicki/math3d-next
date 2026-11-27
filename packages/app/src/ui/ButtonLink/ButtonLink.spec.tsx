@@ -1,32 +1,28 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import user from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router";
+import { renderWithRouter } from "@/test_util/routerTesting";
 import ButtonLink from "./ButtonLink";
 
 test("with `to`, is a link that navigates through the router", async () => {
   const ref = React.createRef<HTMLAnchorElement>();
-  render(
-    <MemoryRouter initialEntries={["/start"]}>
-      <Routes>
-        <Route
-          path="/start"
-          element={
-            <ButtonLink to="/next" ref={ref} variant="solid" tone="primary">
-              Next
-            </ButtonLink>
-          }
-        />
-        <Route path="/next" element={<h1>Next page</h1>} />
-      </Routes>
-    </MemoryRouter>,
+  const { location } = await renderWithRouter(
+    <ButtonLink
+      to="/app/help/reference"
+      ref={ref}
+      variant="solid"
+      tone="primary"
+    >
+      Next
+    </ButtonLink>,
+    { url: "/start" },
   );
 
   const link = screen.getByRole("link", { name: "Next" });
   expect(ref.current).toBe(link);
-  expect(link).toHaveAttribute("href", "/next");
+  expect(link).toHaveAttribute("href", "/app/help/reference");
   await user.click(link);
-  expect(screen.getByRole("heading", { name: "Next page" })).toBeVisible();
+  expect(location.current.pathname).toBe("/app/help/reference");
 });
 
 test("with `href`, is a plain link that works outside a router", () => {

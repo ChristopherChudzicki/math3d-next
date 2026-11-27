@@ -1,31 +1,22 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import user from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router";
+import { renderWithRouter } from "@/test_util/routerTesting";
 import TextLink, { TextButton } from ".";
 
 test("TextLink with `to` navigates through the router", async () => {
   const ref = React.createRef<HTMLAnchorElement>();
-  render(
-    <MemoryRouter initialEntries={["/start"]}>
-      <Routes>
-        <Route
-          path="/start"
-          element={
-            <TextLink to="/app/help" ref={ref}>
-              Help
-            </TextLink>
-          }
-        />
-        <Route path="/app/help" element={<h1>Help page</h1>} />
-      </Routes>
-    </MemoryRouter>,
+  const { location } = await renderWithRouter(
+    <TextLink to="/app/help/reference" ref={ref}>
+      Help
+    </TextLink>,
+    { url: "/start" },
   );
 
   const link = screen.getByRole("link", { name: "Help" });
   expect(ref.current).toBe(link);
   await user.click(link);
-  expect(screen.getByRole("heading", { name: "Help page" })).toBeVisible();
+  expect(location.current.pathname).toBe("/app/help/reference");
 });
 
 test("TextLink with `href` is a plain anchor that works outside a router", () => {

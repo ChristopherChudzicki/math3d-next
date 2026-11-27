@@ -1,36 +1,36 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router";
-import { SIGN_IN_PARAM } from "@/services/overlays/useSignInDialog";
-import type { SignInHistoryState } from "@/services/overlays/useSignInDialog";
+import { useLocation } from "@tanstack/react-router";
+import { useRootSearch } from "@/services/navigation/urlState";
+import { useSetSearch } from "@/services/navigation/useSetSearch";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { SIGN_IN_ERROR_PATH } from "@/config/paths";
 import { toSignInError } from "@/services/auth/signInErrorCodes";
 
 /** Turns allauth's `?error=` return into the sign-in dialog showing it. */
 const SignInErrorHandler: React.FC = () => {
-  const [search] = useSearchParams();
-  const { pathname, hash } = useLocation();
-  const navigate = useNavigate();
+  const onSignInErrorPage = useLocation({
+    select: (location) => location.pathname === SIGN_IN_ERROR_PATH,
+  });
+  const { error: code, error_process: errorProcess } = useRootSearch();
+  const setSearch = useSetSearch();
   const authStatus = useAuthStatus();
 
   useEffect(() => {
     // SignInErrorPage forwards its error to the draft's page first.
-    if (pathname === SIGN_IN_ERROR_PATH) return;
-    const code = search.get("error");
-    if (code === null || !search.has("error_process")) return;
+    if (onSignInErrorPage) return;
+    if (code === undefined || errorProcess === undefined) return;
     if (authStatus === "loading") return;
-    const next = new URLSearchParams(search);
-    next.delete("error");
-    next.delete("error_process");
+    const cleared = { error: undefined, error_process: undefined };
     // Already signed in, e.g. after Back to Google replayed a used state.
     if (authStatus === "authenticated") {
-      navigate({ search: next.toString(), hash }, { replace: true });
+      setSearch(cleared, { replace: true });
       return;
     }
-    next.set(SIGN_IN_PARAM, "");
-    const state: SignInHistoryState = { signInError: toSignInError(code) };
-    navigate({ search: next.toString(), hash }, { replace: true, state });
-  }, [search, pathname, hash, navigate, authStatus]);
+    setSearch(
+      { ...cleared, signin: "" },
+      { replace: true, state: () => ({ signInError: toSignInError(code) }) },
+    );
+  }, [code, errorProcess, onSignInErrorPage, setSearch, authStatus]);
 
   return null;
 };

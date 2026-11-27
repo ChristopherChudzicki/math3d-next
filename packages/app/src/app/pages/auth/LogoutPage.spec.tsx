@@ -14,7 +14,7 @@ import { seedDb, urls } from "@math3d/mock-api";
 test("Sign out closes the overlay and signs the user out", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const logouts = countRequests("DELETE", "/auth/session");
-  const { location } = renderTestApp(`/${scene.key}?overlay=logout`, {
+  const { location } = await renderTestApp(`/${scene.key}?overlay=logout`, {
     isAuthenticated: true,
   });
   const dialog = await screen.findByRole("alertdialog", { name: "Sign out" });
@@ -31,7 +31,7 @@ test("Sign out closes the overlay and signs the user out", async () => {
 test("Cancel closes the overlay without signing the user out", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const logouts = countRequests("DELETE", "/auth/session");
-  const { location } = renderTestApp(`/${scene.key}?overlay=logout`, {
+  const { location } = await renderTestApp(`/${scene.key}?overlay=logout`, {
     isAuthenticated: true,
   });
   const dialog = await screen.findByRole("alertdialog", { name: "Sign out" });
@@ -44,7 +44,7 @@ test("Cancel closes the overlay without signing the user out", async () => {
 });
 
 test("If not authenticated, closes the overlay", async () => {
-  const { location } = renderTestApp("/?overlay=logout", {
+  const { location } = await renderTestApp("/?overlay=logout", {
     isAuthenticated: false,
   });
   await waitFor(() =>
@@ -58,7 +58,7 @@ test("a failed sign-out says so in the dialog, which stays open", async () => {
       HttpResponse.json({}, { status: 500 }),
     ),
   );
-  renderTestApp("/?overlay=logout", { isAuthenticated: true });
+  await renderTestApp("/?overlay=logout", { isAuthenticated: true });
   const dialog = await screen.findByRole("alertdialog", { name: "Sign out" });
 
   await user.click(

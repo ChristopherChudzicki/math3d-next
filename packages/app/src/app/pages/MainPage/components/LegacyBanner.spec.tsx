@@ -1,6 +1,7 @@
 import React from "react";
 import { test, expect, vi } from "vitest";
-import { act, renderTestApp, screen, user } from "@/test_util";
+import { renderTestApp, screen, user } from "@/test_util";
+import { navigateTo } from "@/test_util/routerTesting";
 import { render } from "@testing-library/react";
 import { makeItem, seedDb } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
@@ -19,7 +20,7 @@ test.each([
   async ({ isLegacy }) => {
     const item = makeItem(MIT.Point);
     const scene = seedDb.withSceneFromItems([item], { isLegacy });
-    renderTestApp(`/${scene.key}`);
+    await renderTestApp(`/${scene.key}`);
 
     await findItemByTestId(item.id);
     const banner = screen.queryByText(
@@ -33,7 +34,7 @@ test("banner is not shown once permanently dismissed", async () => {
   localStorage.setItem(DISMISSED_KEY, "true");
   const item = makeItem(MIT.Point);
   const scene = seedDb.withSceneFromItems([item], { isLegacy: true });
-  renderTestApp(`/${scene.key}`);
+  await renderTestApp(`/${scene.key}`);
 
   await findItemByTestId(item.id);
   expect(
@@ -47,7 +48,7 @@ test("banner is not shown once permanently dismissed", async () => {
 test("View details in the banner opens the legacy dialog", async () => {
   const item = makeItem(MIT.Point);
   const scene = seedDb.withSceneFromItems([item], { isLegacy: true });
-  renderTestApp(`/${scene.key}`);
+  await renderTestApp(`/${scene.key}`);
 
   await findItemByTestId(item.id);
   const viewDetails = await screen.findByRole("button", {
@@ -66,7 +67,7 @@ test("dismissing the banner on one legacy scene does not suppress it on a differ
   const itemB = makeItem(MIT.Point);
   const sceneB = seedDb.withSceneFromItems([itemB], { isLegacy: true });
 
-  const { router } = renderTestApp(`/${sceneA.key}`);
+  const { router } = await renderTestApp(`/${sceneA.key}`);
   await findItemByTestId(itemA.id);
 
   const dismiss = await screen.findByRole("button", {
@@ -77,9 +78,7 @@ test("dismissing the banner on one legacy scene does not suppress it on a differ
     screen.queryByText(/This scene was created with an older version/),
   ).not.toBeInTheDocument();
 
-  await act(async () => {
-    await router.navigate(`/${sceneB.key}`);
-  });
+  await navigateTo(router, `/${sceneB.key}`);
   await findItemByTestId(itemB.id);
 
   expect(

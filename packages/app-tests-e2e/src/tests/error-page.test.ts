@@ -2,10 +2,10 @@ import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 
 /**
- * The fallback error page is wired into the app's real router as the top-level
- * `errorElement`. We exercise it via the `?test-sync-error` hook, which is
- * mounted on every route (see ErrorTrigger), so this also pins that the wiring
- * actually catches render errors in a real browser.
+ * The fallback error page is wired into the app's real router as the root
+ * route's `errorComponent`. We exercise it via the `?test-sync-error` hook,
+ * which is mounted on every route (see ErrorTrigger), so this also pins that
+ * the wiring actually catches render errors in a real browser.
  */
 test.describe("Fallback error page", () => {
   test("renders the branded fallback when a route throws", async ({ page }) => {

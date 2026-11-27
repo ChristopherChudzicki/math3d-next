@@ -1,7 +1,5 @@
-import { render, waitFor } from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
 import React from "react";
-import { createMemoryRouter, parsePath } from "react-router";
-import type { InitialEntry } from "react-router";
 import { getStore } from "@/store/store";
 import { takeSignInDraft } from "@/services/auth/signInDraft";
 
@@ -9,8 +7,9 @@ import type { QueryClient } from "@tanstack/react-query";
 import { mockAuth, seedDb } from "@math3d/mock-api";
 import type { User } from "@math3d/api";
 import AppProviders from "@/app/AppProviders";
-import routes from "@/app/routes";
+import { createAppRouter } from "@/app/router";
 import { createQueryClient } from "@/services/react-query/react-query";
+import { memoryHistory, renderRouter, testLocation } from "./routerTesting";
 
 /**
  * Wait until the app has settled: no `[aria-busy="true"]` element remains and
@@ -50,16 +49,16 @@ export const waitForAppReady = async (queryClient: QueryClient) => {
 };
 
 /**
- * Render the app using a MemoryRouter instead of a BrowserRouter.
- * Optionally, provide an initial route.
+ * Render the app on a memory history at `url`.
  *
- * Returns synchronously: waiting is co-located with assertions (`findBy*` /
+ * Resolves once the router's first load is done, which is before any data
+ * arrives: waiting for data is co-located with assertions (`findBy*` /
  * explicit `waitFor`), not hoisted into setup. See {@link waitForAppReady} for
  * the one case (async-gated negative assertions) where an explicit settle is
  * still the right tool.
  */
-const renderTestApp = (
-  initialRoute: InitialEntry = "/",
+const renderTestApp = async (
+  url = "/",
   {
     isAuthenticated = false,
     user: seededUser,
@@ -69,10 +68,8 @@ const renderTestApp = (
     user?: User;
   } = {},
 ) => {
-  const initialEntries: InitialEntry[] = [initialRoute];
   // As main.tsx boots: a draft saved before a sign-in redirect is restored here.
-  const { pathname = "/" } =
-    typeof initialRoute === "string" ? parsePath(initialRoute) : initialRoute;
+  const { pathname } = new URL(url, window.location.origin);
   const store = getStore({ preloadedState: takeSignInDraft(pathname) });
   // Disable retries so error-state behavior (e.g. a 404 surfacing) settles
   // immediately; the production client retries some statuses with backoff, which
@@ -90,8 +87,9 @@ const renderTestApp = (
     mockAuth.setCurrentUser(user.id);
   }
 
-  const router = createMemoryRouter(routes, { initialEntries });
-  const result = render(
+  const router = createAppRouter({ history: memoryHistory(url) });
+  const result = await renderRouter(
+    router,
     <React.StrictMode>
       <AppProviders queryClient={queryClient} store={store} router={router} />
     </React.StrictMode>,
@@ -99,7 +97,7 @@ const renderTestApp = (
 
   const location = {
     get current() {
-      return router.state.location;
+      return testLocation(router.state.location);
     },
   };
 

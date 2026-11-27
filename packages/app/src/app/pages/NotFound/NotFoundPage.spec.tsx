@@ -1,31 +1,31 @@
 import { test, expect } from "vitest";
-import { renderTestApp, screen, within } from "@/test_util";
+import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
 
-test("unmatched /app path renders soft-404", async () => {
-  renderTestApp("/app/does-not-exist");
+test.each([
+  ["an unmatched /app path", "/app/does-not-exist"],
+  ["/app, which can't be a scene key", "/app"],
+  ["a key Django would never issue", "/a"],
+  ["a path in the wrong case", "/APP/help/reference"],
+  ["a multi-segment path", "/.well-known/foo"],
+])("%s renders the soft-404", async (_, url) => {
+  await renderTestApp(url);
   expect(
     await screen.findByRole("heading", { name: /not found/i }),
   ).toBeVisible();
 });
 
-test("bare /app renders soft-404", async () => {
-  renderTestApp("/app");
-  expect(
-    await screen.findByRole("heading", { name: /not found/i }),
-  ).toBeVisible();
-});
+test("a dialog opened on the soft-404 closes without leaving it", async () => {
+  const { location } = await renderTestApp("/app/does-not-exist?signin");
+  await screen.findByRole("dialog", { name: "Sign in" });
 
-test("unmatched non-app multi-segment path renders soft-404, not a crash", async () => {
-  // R1: a reserved-web-infra-shaped path that reaches the router must NOT hit React
-  // Router's default error boundary. Requires the ROOT-level "*" catch-all below.
-  renderTestApp("/.well-known/foo");
-  expect(
-    await screen.findByRole("heading", { name: /not found/i }),
-  ).toBeVisible();
+  await user.keyboard("{Escape}");
+
+  await waitFor(() => expect(location.current.search).toBe(""));
+  expect(location.current.pathname).toBe("/app/does-not-exist");
 });
 
 test("the soft-404 links back to the editor", async () => {
-  renderTestApp("/app/does-not-exist");
+  await renderTestApp("/app/does-not-exist");
   const main = await screen.findByRole("main");
   expect(
     within(main).getByRole("link", { name: "Back to Math3d" }),
@@ -33,7 +33,7 @@ test("the soft-404 links back to the editor", async () => {
 });
 
 test("the header's wordmark links home for the mouse only", async () => {
-  renderTestApp("/app/does-not-exist");
+  await renderTestApp("/app/does-not-exist");
   const banner = await screen.findByRole("banner");
   expect(
     within(banner)

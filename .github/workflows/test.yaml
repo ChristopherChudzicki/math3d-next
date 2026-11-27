@@ -29,6 +29,11 @@ jobs:
       - run: yarn fmt-check
       - run: yarn workspace app css-types --list-different
       - run: yarn typecheck
+      # typecheck regenerates the route tree; a diff means it was committed stale.
+      - name: Check the committed route tree is up-to-date
+        run: |
+          git diff --exit-code -- packages/app/src/app/routeTree.gen.ts \
+          || { echo "routeTree.gen.ts is out of date. Run: yarn workspace app generate-routes, and commit it"; exit 1; }
 
   frontend-tests:
     runs-on: ubuntu-26.04

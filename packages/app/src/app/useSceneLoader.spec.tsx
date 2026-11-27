@@ -5,6 +5,7 @@ import { seedDb, urls } from "@math3d/mock-api";
 import type { Scene } from "@math3d/api";
 import { focusManager } from "@tanstack/react-query";
 import { act, renameScene, renderTestApp, screen, waitFor } from "@/test_util";
+import { navigateTo } from "@/test_util/routerTesting";
 import { createQueryClient } from "@/services/react-query/react-query";
 import { getStore } from "@/store/store";
 import sceneSlice from "@/store/scene/state/scene.slice";
@@ -40,7 +41,7 @@ test("a draft saved on this scene wins over the fetched copy", async () => {
     `${window.location.origin}/${scene.key}`,
   );
 
-  const { store, queryClient } = renderTestApp(`/${scene.key}`);
+  const { store, queryClient } = await renderTestApp(`/${scene.key}`);
 
   await waitFor(() =>
     expect(
@@ -59,7 +60,7 @@ test("a draft saved before its page's scene loaded is not applied", async () => 
     `${window.location.origin}/${scene.key}`,
   );
 
-  const { store } = renderTestApp(`/${scene.key}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
   expect(store.getState().scene.title).toBe(scene.title);
@@ -73,7 +74,7 @@ test("a draft saved on another scene is discarded, not applied", async () => {
     `${window.location.origin}/${elsewhere.key}`,
   );
 
-  const { store } = renderTestApp(`/${here.key}`);
+  const { store } = await renderTestApp(`/${here.key}`);
 
   await waitFor(() => expect(store.getState().scene.key).toBe(here.key));
   expect(store.getState().scene.title).toBe(here.title);
@@ -82,7 +83,7 @@ test("a draft saved on another scene is discarded, not applied", async () => {
 
 test("a refetch of the open scene keeps unsaved edits", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { store, queryClient } = renderTestApp(`/${scene.key}`);
+  const { store, queryClient } = await renderTestApp(`/${scene.key}`);
   const edited = `${scene.title} (unsaved edit)`;
   await renameScene(edited);
   // A changed body, like the GET after a save: an unchanged one comes back as
@@ -107,7 +108,7 @@ test("a refetch of the open scene keeps unsaved edits", async () => {
 
 test("a failed refetch of the open scene keeps the editor", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { store, queryClient } = renderTestApp(`/${scene.key}`);
+  const { store, queryClient } = await renderTestApp(`/${scene.key}`);
   await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
   server.use(
     http.get(urls.scenes.detail, () => new HttpResponse(null, { status: 500 })),
@@ -122,7 +123,7 @@ test("a failed refetch of the open scene keeps the editor", async () => {
 });
 
 test("marking the open scene saved under a new key does not reload the route's scene", async () => {
-  const { store } = renderTestApp("/");
+  const { store } = await renderTestApp("/");
   await waitFor(() => expect(store.getState().scene.loaded).toBe(true));
 
   act(() => {
@@ -159,7 +160,7 @@ test("a route whose GET fails while the store holds its scene never shows the ca
   server.use(
     http.get(urls.scenes.detail, () => new HttpResponse(null, { status: 500 })),
   );
-  const { store, queryClient } = renderTestApp(`/${scene.key}`);
+  const { store, queryClient } = await renderTestApp(`/${scene.key}`);
   await waitFor(() =>
     expect(
       queryClient.getQueryState(["scenes", "detail", scene.key])?.status,
@@ -193,14 +194,14 @@ test("a paused fetch in a background tab while online isn't offline", async () =
   server.use(http.get(urls.scenes.detail, () => HttpResponse.error()));
   focusManager.setFocused(false);
   try {
-    const { queryClient, router } = renderTestApp("/");
+    const { queryClient, router } = await renderTestApp("/");
     // Production retries; a retry waits for focus, so the fetch pauses.
     const { retry } = createQueryClient().getDefaultOptions().queries ?? {};
     queryClient.setQueryDefaults(["scenes", "detail"], {
       retry,
       retryDelay: 0,
     });
-    await act(() => router.navigate(`/${scene.key}`));
+    await navigateTo(router, `/${scene.key}`);
     await waitFor(() =>
       expect(
         queryClient.getQueryState(["scenes", "detail", scene.key])?.fetchStatus,
@@ -215,7 +216,7 @@ test("a paused fetch in a background tab while online isn't offline", async () =
 
 test("loading a scene records its modifiedDate", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { store } = renderTestApp(`/${scene.key}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   await waitFor(() =>
     expect(store.getState().scene.modifiedDate).toBe(scene.modifiedDate),

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { sceneLink } from "@/services/navigation/links";
 import * as Sentry from "@sentry/react";
 import { isApiFailure, useCreateScene } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
@@ -117,7 +118,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
         modifiedDate: result.modifiedDate,
       }),
     );
-    navigate(`/${result.key}`);
+    navigate(sceneLink(result.key));
     setPublishedUrl(sceneUrl(result.key));
   };
 

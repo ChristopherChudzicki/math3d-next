@@ -1,9 +1,10 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { MemoryRouter } from "react-router";
+import { ListType } from "@/services/overlays/search";
 import { Icon } from "@iconify/react/offline";
 import moreVertical from "@iconify-icons/lucide/more-vertical";
 import IconButton from "@/ui/IconButton";
+import { sceneCardLink } from "@/features/library/useSceneLinks";
 import SceneCard from "./SceneCard";
 
 const actions = (title: string) => (
@@ -55,7 +56,7 @@ const cards = [
 ];
 
 const AllSceneCards: React.FC = () => (
-  <MemoryRouter>
+  <>
     <p style={{ margin: "0 0 8px" }}>My Scenes (with meta and actions)</p>
     <ul
       role="list"
@@ -71,7 +72,7 @@ const AllSceneCards: React.FC = () => (
       {cards.map(({ key, ...card }) => (
         <SceneCard
           key={key}
-          to={`/${key}`}
+          link={sceneCardLink(key, { overlay: "scenes", list: ListType.Me })}
           actions={actions(card.title)}
           {...card}
         />
@@ -89,10 +90,23 @@ const AllSceneCards: React.FC = () => (
         listStyle: "none",
       }}
     >
-      <SceneCard to="/sliders_intro" title="Using Variable Sliders" />
-      <SceneCard to="/vectors" title="Vectors and Vector Tails" current />
+      <SceneCard
+        link={sceneCardLink("sliders_intro", {
+          overlay: "scenes",
+          list: ListType.Examples,
+        })}
+        title="Using Variable Sliders"
+      />
+      <SceneCard
+        link={sceneCardLink("vectors", {
+          overlay: "scenes",
+          list: ListType.Examples,
+        })}
+        title="Vectors and Vector Tails"
+        current
+      />
     </ul>
-  </MemoryRouter>
+  </>
 );
 
 const meta: Meta<typeof AllSceneCards> = {

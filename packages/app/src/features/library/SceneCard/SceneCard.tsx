@@ -1,6 +1,7 @@
 import React, { useId, useState } from "react";
 import classNames from "classnames";
-import { Link } from "react-router";
+import Anchor from "@/ui/Anchor";
+import type { sceneCardLink } from "@/features/library/useSceneLinks";
 import { Icon } from "@iconify/react/offline";
 import axis3d from "@iconify-icons/lucide/axis-3d";
 import * as styles from "./SceneCard.module.css";
@@ -9,7 +10,7 @@ const { format } = new Intl.DateTimeFormat(navigator.languages[0]);
 
 type SceneCardProps = {
   title: string;
-  to: string;
+  link: ReturnType<typeof sceneCardLink>;
   /** May 404 (no render yet); the placeholder stays until it loads. */
   imageUrl?: string | null;
   /**
@@ -56,7 +57,7 @@ const isPlainClick = (e: React.MouseEvent) =>
  */
 const SceneCard: React.FC<SceneCardProps> = ({
   title,
-  to,
+  link,
   imageUrl,
   current = false,
   onCurrentClick,
@@ -67,9 +68,9 @@ const SceneCard: React.FC<SceneCardProps> = ({
   const metaId = useId();
   const hasMeta = modifiedDate !== undefined;
   const handleClick = (e: React.MouseEvent) => {
-    // A same-URL link replaces this entry, dropping the history state
-    // useOverlay's close() needs; any other pushes a second entry for the
-    // open scene.
+    // A same-URL link pushes a copy of this entry without its history state,
+    // which useOverlay's close() needs; any other pushes a second entry for
+    // the open scene.
     if (current && isPlainClick(e)) {
       e.preventDefault();
       onCurrentClick?.();
@@ -83,8 +84,8 @@ const SceneCard: React.FC<SceneCardProps> = ({
       </div>
       <div className={styles.text}>
         <h3 className={styles.title}>
-          <Link
-            to={to}
+          <Anchor
+            {...link}
             className={styles.link}
             aria-current={current ? "page" : undefined}
             aria-describedby={hasMeta ? metaId : undefined}
@@ -95,7 +96,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             <span className={styles.titleText} title={title}>
               {title}
             </span>
-          </Link>
+          </Anchor>
         </h3>
         {hasMeta ? (
           <p id={metaId} className={styles.meta}>

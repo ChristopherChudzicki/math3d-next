@@ -17,6 +17,15 @@
     {
       "matchManagers": ["pre-commit"],
       "groupName": "pre-commit hooks"
+    },
+    {
+      "description": "The router's CLI and Vite plugin must pin the same @tanstack/router-generator.",
+      "matchPackageNames": [
+        "@tanstack/react-router",
+        "@tanstack/router-plugin",
+        "@tanstack/router-cli"
+      ],
+      "groupName": "TanStack Router"
     }
   ]
 }

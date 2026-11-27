@@ -20,7 +20,7 @@ const setup = async (initialValue: string) => {
   const point = makeItem(MIT.Point, { labelVisible: initialValue });
   const id = nodeId(point);
   const scene = seedDb.withSceneFromItems([point]);
-  const { store } = renderTestApp(`/${scene.key}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   await user.click(await screen.findByLabelText("More Settings"), {
     pointerEventsCheck: 0,

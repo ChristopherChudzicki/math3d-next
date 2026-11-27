@@ -3,14 +3,14 @@ import {
   screen,
   waitFor,
   user,
-  act,
   within,
   matchMediaQueries,
 } from "@/test_util";
+import { goBack } from "@/test_util/routerTesting";
 import { http, HttpResponse } from "msw";
 import { seedDb } from "@math3d/mock-api";
 import { server } from "@math3d/mock-api/node";
-import { beforeEach, describe, test, expect } from "vitest";
+import { beforeEach, describe, test, expect, vi } from "vitest";
 
 // The drawer's 672px width, spelled out so a wrong unit or width in
 // fillsViewportQuery fails.
@@ -18,7 +18,7 @@ const DRAWER_COVERS_SCENE = "(max-width: 672px)";
 
 test("the scenes dialog opens via ?overlay=scenes&list=examples, focusing the selected tab", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
+  await renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
   expect(
     await screen.findByRole("dialog", { name: "Scenes" }),
   ).toBeInTheDocument();
@@ -30,7 +30,7 @@ test("the scenes dialog opens via ?overlay=scenes&list=examples, focusing the se
 test("Tab goes from the close button straight to the first card", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const example = seedDb.withExampleScene();
-  renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
+  await renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
   await screen.findByRole("link", { name: example.title });
   const close = screen.getByRole("button", { name: "Close" });
   close.focus();
@@ -44,7 +44,7 @@ test("Tab goes from the close button straight to the first card", async () => {
 test("examples are listed in order, as the API returns them", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const examples = [seedDb.withExampleScene(), seedDb.withExampleScene()];
-  renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
+  await renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
   await screen.findByRole("link", { name: examples[1].title });
 
   const titles = within(screen.getByRole("list"))
@@ -63,7 +63,7 @@ test("a failed examples request offers to try again", async () => {
       { once: true },
     ),
   );
-  renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
+  await renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
 
   await user.click(await screen.findByRole("button", { name: "Try again" }));
 
@@ -79,14 +79,14 @@ test("with no examples, the tab says so", async () => {
       HttpResponse.json({ count: 0, items: [] }),
     ),
   );
-  renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
+  await renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
 
   expect(await screen.findByText("No examples yet.")).toBeVisible();
 });
 
 test("signed in, the tabs are My Scenes, Examples, then Unsaved", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  renderTestApp(`/${scene.key}?overlay=scenes&list=examples`, {
+  await renderTestApp(`/${scene.key}?overlay=scenes&list=examples`, {
     isAuthenticated: true,
   });
   await screen.findByRole("tab", { name: "My Scenes" });
@@ -100,7 +100,7 @@ test("signed in, the tabs are My Scenes, Examples, then Unsaved", async () => {
 test("beside the scene, choosing an example opens it, keeping the drawer open with focus on the card", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const example = seedDb.withExampleScene();
-  const { location } = renderTestApp(
+  const { location } = await renderTestApp(
     `/${scene.key}?overlay=scenes&list=examples`,
   );
   const card = await screen.findByRole("link", { name: example.title });
@@ -126,7 +126,7 @@ test.each([
   async ({ from, carried }) => {
     const scene = seedDb.withSceneFromItems([]);
     const example = seedDb.withExampleScene();
-    renderTestApp(`/${scene.key}?${from}&overlay=scenes&list=examples`);
+    await renderTestApp(`/${scene.key}?${from}&overlay=scenes&list=examples`);
 
     expect(
       await screen.findByRole("link", { name: example.title }),
@@ -137,20 +137,24 @@ test.each([
   },
 );
 
-test("an unknown ?list= value self-corrects to list=examples", async () => {
+test("an unknown ?list= value is dropped and shows Examples", async () => {
+  const error = vi.spyOn(console, "error").mockImplementation(() => {});
   const scene = seedDb.withSceneFromItems([]);
-  const { location } = renderTestApp(
+  const { location } = await renderTestApp(
     `/${scene.key}?overlay=scenes&list=garbage`,
   );
-  expect(await screen.findByRole("tab", { name: "Examples" })).toBeVisible();
-  await waitFor(() =>
-    expect(location.current.search).toContain("list=examples"),
+  expect(
+    await screen.findByRole("tab", { name: "Examples", selected: true }),
+  ).toBeVisible();
+  expect(location.current.search).toBe("?overlay=scenes");
+  expect(error).toHaveBeenCalledWith(
+    'Invalid value "garbage" for search parameter list',
   );
 });
 
 test("closing the dialog (Escape) returns to the scene", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { location } = renderTestApp(
+  const { location } = await renderTestApp(
     `/${scene.key}?overlay=scenes&list=examples`,
   );
   await screen.findByRole("tab", { name: "Examples" });
@@ -163,7 +167,7 @@ test("closing the dialog (Escape) returns to the scene", async () => {
 
 test("switching tabs replaces history; Back leaves the dialog entirely", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { location, router } = renderTestApp(`/${scene.key}`);
+  const { location, router } = await renderTestApp(`/${scene.key}`);
   // Open the dialog from the user menu (a push → 2 entries). This scene is
   // viewed signed out, so the trigger is the hamburger.
   await user.click(await screen.findByRole("button", { name: "Open Menu" }));
@@ -173,7 +177,7 @@ test("switching tabs replaces history; Back leaves the dialog entirely", async (
   await user.click(screen.getByRole("tab", { name: "My Scenes" }));
   await screen.findByRole("tab", { name: "My Scenes", selected: true });
 
-  await act(() => router.navigate(-1));
+  await goBack(router);
   await waitFor(() =>
     expect(location.current.search).not.toContain("overlay="),
   );
@@ -186,7 +190,7 @@ describe("where the drawer covers the scene", () => {
   test("choosing an example closes the drawer, and Back reopens it over the previous scene", async () => {
     const scene = seedDb.withSceneFromItems([]);
     const example = seedDb.withExampleScene();
-    const { location, router } = renderTestApp(`/${scene.key}`);
+    const { location, router } = await renderTestApp(`/${scene.key}`);
     const openScenes = await screen.findByRole("button", {
       name: "Math3d, open scenes",
     });
@@ -201,7 +205,7 @@ describe("where the drawer covers the scene", () => {
     expect(location.current.search).toBe("");
     expect(openScenes).toHaveFocus();
 
-    await act(() => router.navigate(-1));
+    await goBack(router);
     expect(
       await screen.findByRole("dialog", { name: "Scenes" }),
     ).toBeInTheDocument();
@@ -211,7 +215,9 @@ describe("where the drawer covers the scene", () => {
   test("a card's link keeps controls=0", async () => {
     const scene = seedDb.withSceneFromItems([]);
     const example = seedDb.withExampleScene();
-    renderTestApp(`/${scene.key}?controls=0&overlay=scenes&list=examples`);
+    await renderTestApp(
+      `/${scene.key}?controls=0&overlay=scenes&list=examples`,
+    );
 
     expect(
       await screen.findByRole("link", { name: example.title }),
@@ -220,7 +226,7 @@ describe("where the drawer covers the scene", () => {
 
   test("choosing the open scene closes the drawer, popping its entry", async () => {
     const example = seedDb.withExampleScene();
-    const { location, router } = renderTestApp(`/${example.key}`);
+    const { location, router } = await renderTestApp(`/${example.key}`);
     await user.click(
       await screen.findByRole("button", { name: "Math3d, open scenes" }),
     );
@@ -232,6 +238,6 @@ describe("where the drawer covers the scene", () => {
     );
     expect(location.current.pathname).toBe(`/${example.key}`);
     expect(location.current.search).toBe("");
-    expect(router.state.historyAction).toBe("POP");
+    expect(router.history.canGoBack()).toBe(false);
   });
 });

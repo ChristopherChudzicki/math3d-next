@@ -12,6 +12,7 @@ import {
   waitForAppReady,
   within,
 } from "@/test_util";
+import { navigateTo } from "@/test_util/routerTesting";
 import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
 import expectToast from "@/test_util/expectToast";
@@ -39,7 +40,7 @@ test.each([
 ])(
   "'controls' URL query parameter controls whether the controls are visible",
   async ({ controlsVisible, url, expectedHidden, expectedInert }) => {
-    const { queryClient } = renderTestApp(url);
+    const { queryClient } = await renderTestApp(url);
     await waitForAppReady(queryClient);
     const expandBtn = screen.queryByRole("button", { name: "Expand Controls" });
     const collapseBtn = screen.queryByRole("button", {
@@ -61,7 +62,7 @@ test.each([
 );
 
 test("Clicking the 'Expand/Collapse Controls' button toggles the controls and preserves hash", async () => {
-  const { location } = renderTestApp("#foo");
+  const { location } = await renderTestApp("#foo");
   const btn = screen.getByRole("button", { name: "Collapse Controls" });
   expect(location.current).toMatchObject({
     hash: "#foo",
@@ -81,7 +82,7 @@ test("Clicking the 'Expand/Collapse Controls' button toggles the controls and pr
 
 test("Sets the document title from the loaded scene's title", async () => {
   const scene = seedDb.withSceneFromItems([], { title: "My Torus" });
-  renderTestApp(`/${scene.key}`);
+  await renderTestApp(`/${scene.key}`);
   await waitFor(() => {
     // Matches the format the OG Worker writes into <title> at the edge, so a
     // deep-linked scene shows the same tab title before and after app boot.
@@ -94,7 +95,7 @@ test("Uses the site default title for an untitled scene", async () => {
   // matching what the OG Worker leaves in <title> at the edge.
   document.title = "Math3d: Online 3d Graphing Calculator";
   const scene = seedDb.withSceneFromItems([], { title: "" });
-  const { queryClient } = renderTestApp(`/${scene.key}`);
+  const { queryClient } = await renderTestApp(`/${scene.key}`);
   await waitForAppReady(queryClient);
   expect(document.title).toBe("Math3d: Online 3d Graphing Calculator");
 });
@@ -103,7 +104,7 @@ test("No-scene default falls back to document.title when default-title meta is a
   // Dev/tests may ship no <meta name="default-title">; the loader then falls
   // back to the static <title> and must not clobber it on the home route.
   document.title = "Static Head Title";
-  const { queryClient } = renderTestApp("/");
+  const { queryClient } = await renderTestApp("/");
   await waitForAppReady(queryClient);
   expect(document.title).toBe("Static Head Title");
 });
@@ -119,7 +120,7 @@ test("No-scene default reads the default-title meta when present", async () => {
   document.head.appendChild(meta);
 
   try {
-    const { queryClient } = renderTestApp("/");
+    const { queryClient } = await renderTestApp("/");
     await waitForAppReady(queryClient);
     expect(document.title).toBe("Math3d: Online 3d Graphing Calculator");
   } finally {
@@ -136,7 +137,7 @@ const answer = (status: number) => () =>
 test("a 500 shows the failed card, not the error page", async () => {
   const scene = seedDb.withSceneFromItems([]);
   server.use(http.get(urls.scenes.detail, answer(500)));
-  renderTestApp(`/${scene.key}`);
+  await renderTestApp(`/${scene.key}`);
 
   expect(
     await screen.findByRole("heading", { name: "Couldn’t load this scene." }),
@@ -151,7 +152,7 @@ test("a 500 shows the failed card, not the error page", async () => {
 test("a network failure shows the unreachable card", async () => {
   const scene = seedDb.withSceneFromItems([]);
   server.use(http.get(urls.scenes.detail, () => HttpResponse.error()));
-  renderTestApp(`/${scene.key}`);
+  await renderTestApp(`/${scene.key}`);
 
   expect(
     await screen.findByRole("heading", { name: "Couldn’t reach Math3d." }),
@@ -159,7 +160,7 @@ test("a network failure shows the unreachable card", async () => {
 });
 
 test("a 404 shows the not-found card at the same URL", async () => {
-  const { location } = renderTestApp("/nonexistent-scene-key");
+  const { location } = await renderTestApp("/nonexistent-scene-key");
 
   expect(
     await screen.findByRole("heading", { name: "This scene doesn’t exist." }),
@@ -189,7 +190,7 @@ test("Try again keeps the card and focus, then focuses the title", async () => {
       return calls <= 2 ? answer(500)() : undefined;
     }),
   );
-  renderTestApp(`/${scene.key}`);
+  await renderTestApp(`/${scene.key}`);
   const heading = () =>
     screen.getByRole("heading", { name: "Couldn’t load this scene." });
   const tryAgain = await screen.findByRole("button", { name: "Try again" });
@@ -220,7 +221,7 @@ test("from the Scenes drawer, a 404 keeps the drawer open and toasts; opening a 
       params.key === missing.key ? answer(404)() : undefined,
     ),
   );
-  renderTestApp(`/${current.key}?overlay=scenes&list=examples`);
+  await renderTestApp(`/${current.key}?overlay=scenes&list=examples`);
   const dialog = await screen.findByRole("dialog", { name: "Scenes" });
 
   await user.click(
@@ -237,7 +238,7 @@ test("from the Scenes drawer, a 404 keeps the drawer open and toasts; opening a 
 });
 
 test("opening the Scenes drawer over the card doesn't toast", async () => {
-  renderTestApp("/nonexistent-scene-key");
+  await renderTestApp("/nonexistent-scene-key");
   await screen.findByRole("heading", { name: "This scene doesn’t exist." });
 
   await user.click(screen.getByRole("button", { name: "Math3d, open scenes" }));
@@ -248,7 +249,7 @@ test("opening the Scenes drawer over the card doesn't toast", async () => {
 
 test("New scene from not-found loads the default scene and resets the tab title", async () => {
   document.title = "Math3d: Online 3d Graphing Calculator";
-  const { location, store } = renderTestApp("/nonexistent-scene-key");
+  const { location, store } = await renderTestApp("/nonexistent-scene-key");
 
   await user.click(await screen.findByRole("link", { name: "New scene" }));
 
@@ -261,7 +262,7 @@ test("Says the scene will load once back online", async () => {
   const scene = seedDb.withSceneFromItems([]);
   onlineManager.setOnline(false);
   try {
-    const { store } = renderTestApp(`/${scene.key}`);
+    const { store } = await renderTestApp(`/${scene.key}`);
     expect(
       await screen.findByRole("heading", { name: "You’re offline." }),
     ).toBeInTheDocument();
@@ -277,13 +278,13 @@ test("Says the scene will load once back online", async () => {
 });
 
 test("from an unsaved scene, the card goes back to it instead of a new scene", async () => {
-  const { store, router, location } = renderTestApp("/");
+  const { store, router, location } = await renderTestApp("/");
   await waitFor(() => expect(store.getState().scene.loaded).toBe(true));
   act(() => {
     store.dispatch(sceneSlice.actions.setTitle({ title: "My edits" }));
   });
 
-  await act(() => router.navigate("/nonexistent-scene-key"));
+  await navigateTo(router, "/nonexistent-scene-key");
   await screen.findByRole("heading", { name: "This scene doesn’t exist." });
   expect(screen.queryByRole("link", { name: "New scene" })).toBeNull();
   await user.click(screen.getByRole("link", { name: "Back to your scene" }));
@@ -296,7 +297,7 @@ test("offline from the Scenes drawer toasts too", async () => {
   const scene = seedDb.withSceneFromItems([]);
   onlineManager.setOnline(false);
   try {
-    renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
+    await renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
     await expectToast("You’re offline.");
   } finally {
     onlineManager.setOnline(true);
@@ -304,15 +305,16 @@ test("offline from the Scenes drawer toasts too", async () => {
 });
 
 describe("renderer", () => {
-  test("an invalid ?renderer is logged and ignored", async () => {
+  test("an invalid ?renderer is logged, ignored and dropped from the URL", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
-    renderTestApp("/?renderer=usegpu");
+    const { location } = await renderTestApp("/?renderer=usegpu");
     expect(await screen.findByTestId("scene")).toHaveAttribute(
       "data-renderer",
       "threejs",
     );
+    expect(location.current.search).toBe("");
     expect(error).toHaveBeenCalledWith(
-      "Invalid value usegpu for search parameter renderer",
+      'Invalid value "usegpu" for search parameter renderer',
     );
   });
 });

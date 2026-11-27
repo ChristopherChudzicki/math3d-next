@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Provider } from "react-redux";
-import { useSearchParams } from "react-router";
+import { useRootSearch } from "@/services/navigation/urlState";
 import { Icon } from "@iconify/react/offline";
 import externalLink from "@iconify-icons/lucide/external-link";
 import type { SceneUnavailableStatus } from "@/app/useSceneLoader";
@@ -12,6 +12,7 @@ import { useAppSelector } from "@/store/hooks";
 import { getStore } from "@/store/store";
 import RetryButton from "@/ui/Button/RetryButton";
 import ButtonLink from "@/ui/ButtonLink";
+import { homeLink } from "@/services/navigation/links";
 import { Spinner } from "@/ui/LoadingSpinner";
 import { dismissToast, showToast } from "@/ui/Toast/toasts";
 import styles from "./SceneUnavailable.module.css";
@@ -103,8 +104,8 @@ const SceneUnavailable: React.FC<SceneUnavailableProps> = ({
   // The Scenes drawer is a modal over the card (and the whole page on a
   // phone), so if the card appears while it's open, a toast repeats the
   // heading. Reopening the drawer later doesn't toast again.
-  const [search] = useSearchParams();
-  const [drawerWasOpen] = useState(() => search.get("overlay") === "scenes");
+  const { overlay } = useRootSearch();
+  const [drawerWasOpen] = useState(() => overlay === "scenes");
   useEffect(() => {
     if (!drawerWasOpen) return undefined;
     showToast(heading);
@@ -145,7 +146,7 @@ const SceneUnavailable: React.FC<SceneUnavailableProps> = ({
                 />
               ) : null}
               <ButtonLink
-                to="/"
+                {...homeLink}
                 variant={canRetry ? "ghost" : "solid"}
                 tone={canRetry ? "neutral" : "primary"}
               >

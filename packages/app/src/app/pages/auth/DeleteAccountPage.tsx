@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import * as yup from "yup";
-import { useNavigate } from "react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { homeLink } from "@/services/navigation/links";
 import { isApiError, useUserMeDelete } from "@math3d/api";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { useOverlay } from "@/services/overlays/useOverlay";
@@ -145,7 +146,7 @@ const DeleteAccountPage: React.FC<OverlayProps> = ({ open, children }) => {
       body: "Your account has been deleted.",
       type: "alert",
     });
-    navigate("/");
+    navigate(homeLink);
   };
 
   // Without a session there is no account to delete, and firing the request

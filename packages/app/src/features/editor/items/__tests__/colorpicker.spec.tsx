@@ -19,7 +19,7 @@ const setup = async <R extends MIT>(
   const user = userEvent.setup();
   const item = makeItem(type, itemProps);
   const scene = seedDb.withSceneFromItems([item]);
-  const { store } = renderTestApp(`/${scene.key}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   const findButton = () =>
     screen.findByRole("button", { name: "Show Graphic" });

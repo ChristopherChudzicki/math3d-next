@@ -53,7 +53,7 @@ test("Updating parameter names updates the lhs and rhs appropriately", async () 
     rhs: rhs.initial,
   });
   const scene = seedDb.withSceneFromItems([item]);
-  const { store } = renderTestApp(`/${scene.key}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
   await screen.findByLabelText("Name for 1st parameter");
   const mathScope = store.mathScope.get();
   const [paramInput] = getParamNameInputs();
@@ -90,7 +90,7 @@ test.each([{ name: "lhs" as const }, { name: "rhs" as const }])(
       [name]: initial,
     });
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = renderTestApp(`/${scene.key}`);
+    const { store } = await renderTestApp(`/${scene.key}`);
 
     const input = (await screen.findByLabelText(
       config.properties[name].label,

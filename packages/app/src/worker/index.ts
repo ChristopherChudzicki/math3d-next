@@ -15,6 +15,7 @@
  *
  * Design: docs/superpowers/specs/2026-07-11-og-metadata-worker-design.md
  */
+import { SCENE_KEY_PATTERN } from "../config/sceneKey";
 import { sceneDisplayName } from "../store/scene/sceneTitle";
 
 interface Env {
@@ -26,19 +27,16 @@ interface Env {
   SCREENSHOTS_ORIGIN?: string;
 }
 
-/** The charset of Django's `SCENE_KEY_PATTERN` (webserver/scenes/models.py), the
- * authority for scene keys. Skips the meta fetch for paths that can't be a scene;
- * not an abuse control, since a well-formed unknown key costs the same fetch. */
-const KEY_RE = /^[A-Za-z0-9_-]{2,80}$/;
 const META_TIMEOUT_MS = 800;
 
-/** A single non-asset path segment that could be a scene key, else null. */
+/**
+ * A single path segment that could be a scene key, else null. Skips the meta
+ * fetch for paths that can't be a scene; not an abuse control, since a
+ * well-formed unknown key costs the same fetch.
+ */
 const sceneKeyFromPath = (pathname: string): string | null => {
   const seg = pathname.replace(/^\/+/, "").replace(/\/+$/, "");
-  if (seg === "" || seg.includes("/") || seg.includes(".") || seg === "app") {
-    return null;
-  }
-  return KEY_RE.test(seg) ? seg : null;
+  return SCENE_KEY_PATTERN.test(seg) ? seg : null;
 };
 
 /**

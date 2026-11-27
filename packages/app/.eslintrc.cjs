@@ -72,14 +72,33 @@ const rendererThree = {
     "@math3d/renderer-three loads only through three/ThreeViewport (React.lazy).",
 };
 
+// A read of route state throws off that route (`getRouteApi`'s hooks, or a
+// hook's `from:`), and shared code and overlays render on every page. See
+// docs/adr/0012.
+const routeReads = {
+  name: "@tanstack/react-router",
+  importNames: [
+    "getRouteApi",
+    "useSearch",
+    "useParams",
+    "useMatch",
+    "useLoaderData",
+    "useLoaderDeps",
+    "useRouteContext",
+  ],
+  message:
+    "Outside MainPage and FramePage, read the URL with useRootSearch or useRouteSceneKey (services/navigation/urlState).",
+};
+
 // ESLint overrides replace a rule's options rather than merging them, so every
 // override builds its pattern list here.
 const restrictedImports = ({
   allowBaseUi = false,
   allowParentImports = false,
+  allowRouteReads = false,
   rendererPackages = mathboxPackages,
 } = {}) => ({
-  paths: [iconifyOnline],
+  paths: [iconifyOnline, ...(allowRouteReads ? [] : [routeReads])],
   patterns: [
     ...(allowBaseUi ? [] : [baseUi]),
     noMui,
@@ -88,6 +107,9 @@ const restrictedImports = ({
     ...(rendererPackages ? [rendererPackages] : []),
   ],
 });
+
+// The route files, the tree generated from them, and the router built on it.
+const ROUTE_MODULES = ["routes", "routeTree.gen.ts", "router.ts"];
 
 const VIEWPORT = "./src/features/viewport";
 const RENDERER_DIRS = ["mathbox", "three"];
@@ -133,9 +155,9 @@ const layoutZones = [
   {
     target: "./src/worker",
     from: "./src",
-    except: ["./worker", "./store/scene/sceneTitle.ts"],
+    except: ["./worker", "./store/scene/sceneTitle.ts", "./config/sceneKey.ts"],
     message:
-      "The edge Worker runs in workerd; it imports only sceneTitle from the app.",
+      "The edge Worker runs in workerd; it imports only sceneTitle and sceneKey from the app.",
   },
   ...RENDERER_DIRS.map((dir) => ({
     target: `${VIEWPORT}/${dir}`,
@@ -165,6 +187,17 @@ const layoutZones = [
     except: ["./spec", "./shared"],
     message:
       "viewport/spec produces renderer-neutral specs and imports no renderer.",
+  },
+  {
+    // Route files import their pages, so the rest of src/app importing one, or
+    // the tree and router built on them, would make an import cycle.
+    target: fs
+      .readdirSync(path.join(__dirname, "src/app"))
+      .filter((name) => !ROUTE_MODULES.includes(name))
+      .map((name) => `./src/app/${name}`),
+    from: ROUTE_MODULES.map((name) => `./src/app/${name}`),
+    message:
+      "src/app imports no route file, route tree or router; a route file imports its page (docs/adr/0012).",
   },
   {
     target: "./src",
@@ -245,6 +278,21 @@ module.exports = {
         ],
       },
     },
+    // The route pages render only on their own routes; urlState is the read
+    // API everything else uses.
+    {
+      files: [
+        "src/app/pages/MainPage/**",
+        "src/app/pages/FramePage/**",
+        "src/services/navigation/urlState.ts",
+      ],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          restrictedImports({ allowRouteReads: true }),
+        ],
+      },
+    },
     // test_util renders the whole app, so production code importing it would
     // reach src/app (and ship test helpers) without crossing a zone.
     {
@@ -272,6 +320,16 @@ module.exports = {
             ],
           },
         ],
+      },
+    },
+    // renderTestApp and the router test helpers are async: a missing `await`
+    // would let a negative assertion pass against an empty page.
+    {
+      files: ["src/**/*.spec.ts?(x)", "src/test_util/**"],
+      rules: {
+        "@typescript-eslint/no-floating-promises": "error",
+        // `void promise` marks a deliberately unawaited one.
+        "no-void": ["error", { allowAsStatement: true }],
       },
     },
     // The edge Worker (src/worker) is typechecked with Workers types via its

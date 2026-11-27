@@ -1,6 +1,6 @@
 import React from "react";
-import { Link } from "react-router";
 import Header, { Wordmark } from "@/ui/Header";
+import Anchor from "@/ui/Anchor";
 
 import lightbulb from "@iconify-icons/lucide/lightbulb";
 import circleHelp from "@iconify-icons/lucide/circle-help";
@@ -82,7 +82,7 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
       </Menu.Item>
       <Menu.LinkItem
         icon={<Icon icon={sigma} aria-hidden="true" />}
-        render={<Link to="/app/help/reference" target="_blank" />}
+        render={<Anchor to="/app/help/reference" target="_blank" />}
       >
         Function Reference
       </Menu.LinkItem>

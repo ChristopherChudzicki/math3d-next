@@ -1,10 +1,5 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router";
+import { getRouteApi } from "@tanstack/react-router";
 import MathboxViewport from "@/features/viewport/mathbox/Viewport";
 import ThreeViewport from "@/features/viewport/three/ThreeViewport";
 import useSceneLoader from "@/app/useSceneLoader";
@@ -12,12 +7,11 @@ import SceneControls from "@/features/editor/sidebar/SceneControls";
 import SliderAnimations from "@/features/editor/items/forms/VariableSlider/SliderAnimations";
 import Sidebar from "@/ui/Sidebar";
 import { useToggle } from "@/util/hooks";
-import { CONTROLS_PARAM } from "@/config/sceneParams";
 import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
-import { isRenderer } from "@/services/renderer/renderers";
 import { useUserId } from "@/services/auth/useUserId";
 import type { Renderer } from "@/services/renderer/renderers";
-import { RENDERER_PARAM, useRenderer } from "@/services/renderer/useRenderer";
+import { useRenderer } from "@/services/renderer/useRenderer";
+import { useSetSearch } from "@/services/navigation/useSetSearch";
 
 import ToggleKeyboardButton from "@/features/editor/virtualKeyboard/KeyboardControls";
 
@@ -34,56 +28,7 @@ import RendererPill from "./components/RendererPill";
 import SceneUnavailable from "./components/SceneUnavailable";
 import useDraftWriter from "./useDraftWriter";
 
-type UseSearchEnumOptions<T extends string = string> = {
-  name: string;
-  values: readonly T[];
-  defaultValue: T;
-};
-
-/** Logs a present search parameter that `isValid` rejects. */
-const useLogInvalidSearchParam = (
-  name: string,
-  isValid: (raw: string) => boolean,
-) => {
-  const [search] = useSearchParams();
-  const raw = search.get(name);
-  const valid = raw === null || isValid(raw);
-  useEffect(() => {
-    if (!valid) {
-      // eslint-disable-next-line no-console
-      console.error(`Invalid value ${raw} for search parameter ${name}`);
-    }
-  }, [valid, name, raw]);
-};
-
-const useSearchEnum = <T extends string>({
-  name,
-  values,
-  defaultValue,
-}: UseSearchEnumOptions<T>) => {
-  const [search] = useSearchParams();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const raw = search.get(name);
-  const isValue = (value: string) => values.includes(value as T);
-  useLogInvalidSearchParam(name, isValue);
-  const value = raw !== null && isValue(raw) ? (raw as T) : defaultValue;
-  const set = useCallback(
-    (v: T) => {
-      const next = new URLSearchParams(search);
-      if (v === defaultValue) {
-        next.delete(name);
-      } else {
-        next.set(name, v);
-      }
-      navigate({ search: next.toString(), hash: location.hash });
-    },
-    [defaultValue, name, navigate, search, location.hash],
-  );
-  return [value, set] as const;
-};
-
-const CONTROLS_VALUES = ["0", "1"] as const;
+const route = getRouteApi("/{-$sceneKey}");
 
 const VIEWPORTS: Record<Renderer, React.FC<{ className?: string }>> = {
   mathbox: MathboxViewport,
@@ -91,7 +36,7 @@ const VIEWPORTS: Record<Renderer, React.FC<{ className?: string }>> = {
 };
 
 const MainPage: React.FC = () => {
-  const { sceneKey } = useParams();
+  const { sceneKey } = route.useParams();
   const sceneLoad = useSceneLoader(sceneKey);
   useDraftWriter(useUserId());
   const unavailable =
@@ -127,24 +72,14 @@ const MainPage: React.FC = () => {
     legacyDialog.off();
   }, [sceneKey, legacyDialog]);
 
-  const [controlsVisibility, setControlsVisibility] = useSearchEnum({
-    name: CONTROLS_PARAM,
-    values: CONTROLS_VALUES,
-    defaultValue: "1",
-  });
-  const controlsOpen = controlsVisibility === "1";
+  const controlsOpen = route.useSearch({ select: (s) => s.controls }) !== 0;
   const { renderer } = useRenderer();
-  useLogInvalidSearchParam(RENDERER_PARAM, isRenderer);
   const SceneViewport = VIEWPORTS[renderer];
+  const setSearch = useSetSearch();
   const handleControlsClick = useCallback(
-    (currentlyOpen: boolean) => {
-      if (currentlyOpen) {
-        setControlsVisibility("0");
-      } else {
-        setControlsVisibility("1");
-      }
-    },
-    [setControlsVisibility],
+    (currentlyOpen: boolean) =>
+      setSearch({ controls: currentlyOpen ? 0 : undefined }),
+    [setSearch],
   );
   return (
     // Banners are scoped to MainPage: BannerDisplay renders inside this grid

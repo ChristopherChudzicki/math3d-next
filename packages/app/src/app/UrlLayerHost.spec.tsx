@@ -1,8 +1,6 @@
 import React from "react";
 import { test, expect } from "vitest";
-import { render } from "@testing-library/react";
 import { QueryClient } from "@tanstack/react-query";
-import { createMemoryRouter } from "react-router";
 import { mockAuth, seedDb } from "@math3d/mock-api";
 import { getStore } from "@/store/store";
 import {
@@ -13,38 +11,33 @@ import {
   waitForAppReady,
   within,
 } from "@/test_util";
+import { createTestRouter, renderRouter } from "@/test_util/routerTesting";
 import AppProviders from "./AppProviders";
 import UrlLayerHost from "./UrlLayerHost";
 
 test("no overlay param renders no dialog", async () => {
-  const { queryClient } = renderTestApp("/");
+  const { queryClient } = await renderTestApp("/");
   await waitForAppReady(queryClient);
   expect(screen.queryByRole("dialog")).toBe(null);
 });
 
-test("unknown overlay value renders nothing and is left in the URL", async () => {
-  const { location, queryClient } = renderTestApp("/?overlay=bogus");
-  await waitForAppReady(queryClient);
-  expect(screen.queryByRole("dialog")).toBe(null);
-  expect(location.current.search).toContain("overlay=bogus");
+// `constructor` is on every object's prototype chain, so `OVERLAYS[name]`
+// would find it.
+test("an unknown overlay value is dropped, leaving sign-in free to open", async () => {
+  const error = vi.spyOn(console, "error").mockImplementation(() => {});
+  const { location } = await renderTestApp("/?overlay=constructor&signin");
+  expect(
+    await screen.findByRole("dialog", { name: "Sign in" }),
+  ).toBeInTheDocument();
+  expect(screen.getAllByRole("dialog")).toHaveLength(1);
+  expect(location.current.search).toBe("?signin=");
+  expect(error).toHaveBeenCalledWith(
+    'Invalid value "constructor" for search parameter overlay',
+  );
 });
-
-// `constructor` and `__proto__` are on every object's prototype chain; an
-// overlay value naming one must still count as unknown, or it would keep the
-// top-level sign-in from opening.
-test.each(["constructor", "__proto__"])(
-  "prototype-chain overlay value %s opens nothing and leaves sign-in free",
-  async (value) => {
-    const { location } = renderTestApp(`/?overlay=${value}&signin`);
-    expect(
-      await screen.findByRole("dialog", { name: "Sign in" }),
-    ).toBeInTheDocument();
-    expect(location.current.search).toContain(`overlay=${value}`);
-  },
-);
 
 test("Sign-in loaded over an overlay hides the overlay and takes focus", async () => {
-  renderTestApp("/?overlay=scenes&list=me&signin");
+  await renderTestApp("/?overlay=scenes&list=me&signin");
 
   const signIn = await screen.findByRole("dialog", { name: "Sign in" });
   await waitFor(() =>
@@ -57,7 +50,7 @@ test("Sign-in loaded over an overlay hides the overlay and takes focus", async (
 });
 
 test("Escape closes sign-in and leaves the overlay beneath it open", async () => {
-  const { location } = renderTestApp("/?overlay=scenes&list=me&signin");
+  const { location } = await renderTestApp("/?overlay=scenes&list=me&signin");
   const signIn = await screen.findByRole("dialog", { name: "Sign in" });
   await waitFor(() =>
     expect(within(signIn).getByRole("button", { name: "Close" })).toHaveFocus(),
@@ -76,8 +69,9 @@ test("Escape closes sign-in and leaves the overlay beneath it open", async () =>
 test("Closed overlays run no queries and render no dialogs", async () => {
   mockAuth.setCurrentUser(seedDb.withUser().id);
   const queryClient = new QueryClient();
-  const router = createMemoryRouter([{ path: "*", element: <UrlLayerHost /> }]);
-  render(
+  const router = createTestRouter(<UrlLayerHost />);
+  await renderRouter(
+    router,
     <AppProviders
       queryClient={queryClient}
       store={getStore()}

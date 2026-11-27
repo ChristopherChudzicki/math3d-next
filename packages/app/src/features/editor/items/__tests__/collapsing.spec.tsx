@@ -39,7 +39,7 @@ test.each([
 ])(
   "When isCollapsed is initially $isCollapsed, items are $adjective",
   async ({ route, expectHidden }) => {
-    renderTestApp(route);
+    await renderTestApp(route);
 
     await findItemByDescription("P2a");
     const els = screen.getAllByLabelText("Description");
@@ -51,7 +51,7 @@ test.each([
 );
 
 test("Collapsing and expanding folders", async () => {
-  renderTestApp("/test_folders");
+  await renderTestApp("/test_folders");
   await user.click(getExpandCollapse(await findItemByDescription("F2")));
 
   const els = screen.getAllByLabelText("Description");
@@ -75,7 +75,7 @@ test("Collapsing and expanding folders", async () => {
 });
 
 test("Inserting into a collapsed folder expands the folder", async () => {
-  renderTestApp("/test_folders");
+  await renderTestApp("/test_folders");
 
   const folder = await findItemByDescription("F2");
   const toggle = getExpandCollapse(folder);

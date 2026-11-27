@@ -29,7 +29,7 @@ test("renders the scene with its data loaded and no editor UI", async () => {
   const scene = new SceneBuilder();
   seedDb.withScene(scene.json());
 
-  const { store } = renderTestApp(`/app/frame/${scene.key}`);
+  const { store } = await renderTestApp(`/app/frame/${scene.key}`);
 
   // Scene data loads into Redux even though SceneControls is never mounted.
   await waitFor(() =>
@@ -56,7 +56,7 @@ test("draws no loading knot, which would show in a capture", async () => {
   const scene = new SceneBuilder();
   seedDb.withScene(scene.json());
 
-  const { store } = renderTestApp(`/app/frame/${scene.key}`);
+  const { store } = await renderTestApp(`/app/frame/${scene.key}`);
 
   await waitFor(() =>
     expect(select.hasItems(REQUIRED_ITEMS)(store.getState())).toBe(true),
@@ -70,7 +70,7 @@ test("draws no loading knot, which would show in a capture", async () => {
 test("does not animate a slider saved mid-animation", async () => {
   const item = makeItem(MIT.VariableSlider, { isAnimating: "true" });
   const scene = seedDb.withSceneFromItems([item]);
-  const { store } = renderTestApp(`/app/frame/${scene.key}`);
+  const { store } = await renderTestApp(`/app/frame/${scene.key}`);
   const getValue = () =>
     store.mathScope.get().results.get(mathScopeId(item.id, "value"));
   await waitFor(() => expect(getValue()).toEqual(expect.any(Number)));
@@ -82,7 +82,9 @@ test("does not animate a slider saved mid-animation", async () => {
 });
 
 test("a missing scene neither alerts nor redirects (silent 404)", async () => {
-  const { location, queryClient } = renderTestApp("/app/frame/does-not-exist");
+  const { location, queryClient } = await renderTestApp(
+    "/app/frame/does-not-exist",
+  );
 
   await waitForAppReady(queryClient);
 
@@ -95,7 +97,7 @@ test("without ?renderer it draws three.js, whatever the stored preference", asyn
   const scene = new SceneBuilder();
   seedDb.withScene(scene.json());
 
-  renderTestApp(`/app/frame/${scene.key}`);
+  await renderTestApp(`/app/frame/${scene.key}`);
 
   expect(await screen.findByTestId("scene")).toHaveAttribute(
     "data-renderer",
@@ -107,7 +109,7 @@ test("?renderer=mathbox draws MathBox", async () => {
   const scene = new SceneBuilder();
   seedDb.withScene(scene.json());
 
-  renderTestApp(`/app/frame/${scene.key}?renderer=mathbox`);
+  await renderTestApp(`/app/frame/${scene.key}?renderer=mathbox`);
 
   expect(await screen.findByTestId("scene")).toHaveAttribute(
     "data-renderer",
@@ -121,7 +123,7 @@ test("a renderer that can't start marks the page failed, with no fallback", asyn
   const scene = new SceneBuilder();
   seedDb.withScene(scene.json());
 
-  renderTestApp(`/app/frame/${scene.key}`);
+  await renderTestApp(`/app/frame/${scene.key}`);
 
   const viewport = await screen.findByTestId("scene");
   await waitFor(() =>
@@ -132,14 +134,17 @@ test("a renderer that can't start marks the page failed, with no fallback", asyn
   expect(localStorage.getItem(RENDERER_PREFERENCE_KEY)).toBeNull();
 });
 
-test("an unknown ?renderer marks the page failed", async () => {
-  const scene = new SceneBuilder();
-  seedDb.withScene(scene.json());
+test.each(["foo", "null"])(
+  "?renderer=%s marks the page failed",
+  async (renderer) => {
+    const scene = new SceneBuilder();
+    seedDb.withScene(scene.json());
 
-  renderTestApp(`/app/frame/${scene.key}?renderer=foo`);
+    await renderTestApp(`/app/frame/${scene.key}?renderer=${renderer}`);
 
-  expect(await screen.findByTestId("scene")).toHaveAttribute(
-    "data-scene-error",
-    "invalid-renderer",
-  );
-});
+    expect(await screen.findByTestId("scene")).toHaveAttribute(
+      "data-scene-error",
+      "invalid-renderer",
+    );
+  },
+);

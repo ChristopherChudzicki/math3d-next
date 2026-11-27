@@ -1,39 +1,29 @@
 import { useCallback } from "react";
-import { useNavigate } from "react-router";
 import type { SignInError } from "@/services/auth/signInErrorCodes";
-import { OVERLAY_PARAMS } from "./useOverlay";
-import type { OverlayHistoryState } from "./useOverlay";
+import { useSetSearch } from "@/services/navigation/useSetSearch";
 import { useCloseUrlLayer } from "./useCloseUrlLayer";
-import {
-  useUrlLayerStillOpenRef,
-  useUrlLayerLocation,
-  useUrlLayerSearchParams,
-} from "./UrlLayer";
+import { useUrlLayerStillOpenRef, useUrlLayerLocation } from "./UrlLayer";
+
+declare module "@tanstack/react-router" {
+  interface HistoryState {
+    /** Like `overlayPushed`, for the `?signin` entry. */
+    signInPushed?: boolean;
+    signInError?: SignInError;
+  }
+}
+
+const PARAMS = ["signin"] as const;
+const STATE_KEYS = ["signInPushed", "signInError"] as const;
 
 /**
  * `?signin` opens the sign-in dialog above any `?overlay=`, so the page it
  * returns to after sign-in still has that overlay open.
  */
-export const SIGN_IN_PARAM = "signin";
-
-export type SignInHistoryState = {
-  /** Like `overlayPushed`, for the `?signin` entry. */
-  signInPushed?: boolean;
-  signInError?: SignInError;
-} | null;
-
-const PARAMS = [SIGN_IN_PARAM] as const;
-const STATE_KEYS = ["signInPushed", "signInError"] as const;
-
 export const useSignInDialog = () => {
-  const search = useUrlLayerSearchParams();
   const location = useUrlLayerLocation();
-  const navigate = useNavigate();
+  const setSearch = useSetSearch();
   const stillOpen = useUrlLayerStillOpenRef();
-  const state = location.state as
-    | (SignInHistoryState & OverlayHistoryState)
-    | null;
-  const pushed = state?.signInPushed ?? false;
+  const pushed = location.state.signInPushed ?? false;
 
   /**
    * `replaceOverlay` closes the overlay instead of stacking on it, for an
@@ -43,24 +33,26 @@ export const useSignInDialog = () => {
     (options?: { replaceOverlay?: boolean }) => {
       // A closed layer's location is stale; see useCloseUrlLayer.
       if (!stillOpen.current) return;
-      const next = new URLSearchParams(search);
-      next.set(SIGN_IN_PARAM, "");
-      if (options?.replaceOverlay) {
-        OVERLAY_PARAMS.forEach((param) => next.delete(param));
-      }
-      const to = { search: next.toString(), hash: location.hash };
       if (!options?.replaceOverlay) {
-        navigate(to, { state: { ...state, signInPushed: true } });
+        setSearch(
+          { signin: "" },
+          { state: (prev) => ({ ...prev, signInPushed: true }) },
+        );
         return;
       }
-      const { overlayPushed, ...rest } = state ?? {};
-      navigate(
-        to,
-        // Replaces the overlay's entry, so closing pops it only if it was ours.
-        { replace: true, state: { ...rest, signInPushed: overlayPushed } },
+      setSearch(
+        { signin: "", overlay: undefined, list: undefined },
+        {
+          // Replaces the overlay's entry, so closing pops it only if it was ours.
+          replace: true,
+          state: ({ overlayPushed, ...rest }) => ({
+            ...rest,
+            signInPushed: overlayPushed,
+          }),
+        },
       );
     },
-    [search, location.hash, state, navigate, stillOpen],
+    [setSearch, stillOpen],
   );
 
   const close = useCloseUrlLayer({
@@ -68,7 +60,6 @@ export const useSignInDialog = () => {
     params: PARAMS,
     stateKeys: STATE_KEYS,
     location,
-    search,
     stillOpen,
   });
 

@@ -1,18 +1,14 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import * as Sentry from "@sentry/react";
-import { useEffect } from "react";
-import {
-  createRoutesFromChildren,
-  matchRoutes,
-  useLocation,
-  useNavigationType,
-} from "react-router";
+import type { AnyRouter } from "@tanstack/react-router";
 
 vi.mock("@sentry/react", () => ({
   init: vi.fn(),
-  reactRouterV7BrowserTracingIntegration: vi.fn(() => ({ name: "mock" })),
-  wrapCreateBrowserRouterV7: vi.fn((create) => create),
+  addIntegration: vi.fn(),
+  tanstackRouterBrowserTracingIntegration: vi.fn(() => ({ name: "mock" })),
 }));
+
+const router = {} as AnyRouter;
 
 describe("Sentry init", () => {
   beforeEach(() => {
@@ -22,10 +18,12 @@ describe("Sentry init", () => {
     vi.unstubAllEnvs();
   });
 
-  test("does not initialize when no DSN is configured", async () => {
+  test("does nothing when no DSN is configured", async () => {
     vi.stubEnv("VITE_SENTRY_DSN", "");
-    await import("./sentry");
+    const { traceRouter } = await import("./sentry");
+    traceRouter(router);
     expect(Sentry.init).not.toHaveBeenCalled();
+    expect(Sentry.addIntegration).not.toHaveBeenCalled();
   });
 
   test("initializes with tracing and no PII when a DSN is configured", async () => {
@@ -39,29 +37,17 @@ describe("Sentry init", () => {
         release: "1.2.3",
         sendDefaultPii: false,
         tracesSampleRate: 1,
-        integrations: [{ name: "mock" }],
       }),
-    );
-    expect(Sentry.reactRouterV7BrowserTracingIntegration).toHaveBeenCalledWith(
-      expect.objectContaining({
-        useEffect,
-        useLocation,
-        useNavigationType,
-        createRoutesFromChildren,
-        matchRoutes,
-      }),
-    );
-    // The wrapper reads state that init() installs, so init must run first.
-    expect(vi.mocked(Sentry.init).mock.invocationCallOrder[0]).toBeLessThan(
-      vi.mocked(Sentry.wrapCreateBrowserRouterV7).mock.invocationCallOrder[0],
     );
   });
 
-  test("wraps the real createBrowserRouter for route instrumentation", async () => {
-    await import("./sentry");
-    const { createBrowserRouter } = await import("react-router");
-    expect(Sentry.wrapCreateBrowserRouterV7).toHaveBeenCalledWith(
-      createBrowserRouter,
+  test("traces the router's navigations once it exists", async () => {
+    vi.stubEnv("VITE_SENTRY_DSN", "https://abc123@o1.ingest.sentry.io/42");
+    const { traceRouter } = await import("./sentry");
+    traceRouter(router);
+    expect(Sentry.tanstackRouterBrowserTracingIntegration).toHaveBeenCalledWith(
+      router,
     );
+    expect(Sentry.addIntegration).toHaveBeenCalledWith({ name: "mock" });
   });
 });

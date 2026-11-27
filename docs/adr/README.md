@@ -29,3 +29,4 @@ ADRs are numbered and committed alongside the code. Statuses:
 | [0008](0008-usegpu-opt-in-renderer.md)            | Use.GPU as an opt-in second renderer              | Rejected by 0010 |
 | [0009](0009-renderer-neutral-viewport-spec.md)    | A renderer-neutral viewport contract              | Accepted         |
 | [0010](0010-three-js-default-renderer.md)         | three.js as the default renderer                  | Accepted         |
+| [0012](0012-tanstack-router.md)                   | TanStack Router instead of React Router           | Accepted         |
