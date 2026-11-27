@@ -7,9 +7,11 @@
  * the SPA shell via HTMLRewriter. It also rewrites og:image/twitter:image
  * (plus their alt text) to point at a per-scene render, gated on the
  * SCREENSHOTS_ORIGIN env var — unset, the shell's static default card is left
- * untouched. It is also the SPA fallback: any other path gets the shell
- * unchanged, except /assets/ misses, which 404. The SPA never reads anything
- * this injects — it's crawler-facing metadata only (abandonability invariant).
+ * untouched. It is also the SPA fallback: any other path gets the shell, with
+ * status 404 for a path no route matches (routes.ts) or a scene key the API
+ * doesn't know, and /assets/ misses get a plain 404. The SPA never reads
+ * anything this injects — it's crawler-facing metadata only (abandonability
+ * invariant).
  * Dropping the Worker means setting `not_found_handling` back to
  * "single-page-application".
  *
@@ -17,6 +19,7 @@
  */
 import { SCENE_KEY_PATTERN } from "../config/sceneKey";
 import { sceneDisplayName } from "../store/scene/sceneTitle";
+import { matchRoute } from "./routes";
 
 interface Env {
   ASSETS: Fetcher;
@@ -29,31 +32,38 @@ interface Env {
 
 const META_TIMEOUT_MS = 800;
 
-/**
- * A single path segment that could be a scene key, else null. Skips the meta
- * fetch for paths that can't be a scene; not an abuse control, since a
- * well-formed unknown key costs the same fetch.
- */
-const sceneKeyFromPath = (pathname: string): string | null => {
-  const seg = pathname.replace(/^\/+/, "").replace(/\/+$/, "");
-  return SCENE_KEY_PATTERN.test(seg) ? seg : null;
+/** django-ninja's JSON 404, which the meta endpoint sends for an unknown key.
+ * Any other 404 (e.g. a wrong API_BASE) says nothing about the scene. */
+const isNinjaNotFound = async (res: Response): Promise<boolean> => {
+  if (res.status !== 404) return false;
+  const body: unknown = await res.json().catch(() => null);
+  return (
+    typeof body === "object" &&
+    body !== null &&
+    typeof (body as { detail?: unknown }).detail === "string"
+  );
 };
 
 /**
- * Read-only title lookup. Returns the title string (possibly "") on a valid
- * 200, or null on any failure — non-2xx, malformed body, missing/non-string
- * title, timeout, or network error. The caller treats null as "passthrough
- * defaults": the page must never block or error on this lookup.
+ * Read-only title lookup. Returns `{ title }` (possibly "") on a valid 200,
+ * "missing" when the endpoint says the scene doesn't exist, or null on any
+ * other result — another status, a malformed body, a timeout, a network error.
+ * The caller serves the default shell with status 200 for null: the page must
+ * never block, error or 404 on a lookup failure.
  *
  * Uses a bare URL string (not the incoming request), so no cookies or headers
  * are forwarded to the public endpoint. API_BASE is the bare API origin; the
  * ninja API is mounted under /v1 (matching the generated client's paths).
  */
-const fetchTitle = async (env: Env, key: string): Promise<string | null> => {
+const fetchTitle = async (
+  env: Env,
+  key: string,
+): Promise<{ title: string } | "missing" | null> => {
   try {
     const res = await fetch(`${env.API_BASE}/v1/scenes/${key}/meta/`, {
       signal: AbortSignal.timeout(META_TIMEOUT_MS),
     });
+    if (await isNinjaNotFound(res)) return "missing";
     if (!res.ok) return null;
     const body: unknown = await res.json();
     if (
@@ -61,7 +71,7 @@ const fetchTitle = async (env: Env, key: string): Promise<string | null> => {
       body !== null &&
       typeof (body as { title?: unknown }).title === "string"
     ) {
-      return (body as { title: string }).title;
+      return { title: (body as { title: string }).title };
     }
     return null;
   } catch {
@@ -161,6 +171,17 @@ const rewriteShell = (
   return new Response(rewritten.body, rewritten);
 };
 
+/** `res` with `status`, kept out of shared caches and stripped of validators:
+ * every Worker response carries the shell's ETag whatever its status or body,
+ * so the ETag can't validate any of them. */
+const asPrivate = (res: Response, status: number): Response => {
+  const out = new Response(res.body, { status, headers: res.headers });
+  out.headers.set("Cache-Control", "private, max-age=0, must-revalidate");
+  out.headers.delete("ETag");
+  out.headers.delete("Last-Modified");
+  return out;
+};
+
 export default {
   // Static Assets invokes the Worker only for requests that match no asset
   // (wrangler.jsonc), so every request here is a miss.
@@ -175,28 +196,32 @@ export default {
       });
     }
 
-    const shellRequest = new Request(new URL("/", url), request);
-    const key = sceneKeyFromPath(url.pathname);
-    if (key === null) return env.ASSETS.fetch(shellRequest);
+    // Other methods get ASSETS's own answer (a 405), not a page.
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return env.ASSETS.fetch(request);
+    }
 
-    // Scene-key path: fetch the shell and the title in parallel so the lookup
-    // never adds its full latency on top of the shell fetch.
-    const [shell, rawTitle] = await Promise.all([
-      env.ASSETS.fetch(shellRequest),
-      fetchTitle(env, key),
-    ]);
+    // By default without the client's conditional headers, so ASSETS never
+    // answers 304 for a response whose status or body differs from the shell's.
+    const shell = (init: RequestInit | Request = { method: request.method }) =>
+      env.ASSETS.fetch(new Request(new URL("/", url), init));
 
-    const response =
-      rawTitle === null
-        ? new Response(shell.body, shell) // fail-open: serve the default shell
-        : rewriteShell(shell, rawTitle, key, env);
+    const route = matchRoute(url.pathname);
+    if (route === null) return asPrivate(await shell(), 404);
+    const key =
+      route.path === "/{-$sceneKey}" ? route.params.sceneKey : undefined;
+    // A page with no scene: the shell as is, so it stays revalidatable.
+    if (key === undefined) return shell(request);
+    // {-$sceneKey}.tsx's params.parse renders not-found for these.
+    if (!SCENE_KEY_PATTERN.test(key)) return asPrivate(await shell(), 404);
 
-    // Anything served under a scene URL — a rewrite or a transient fail-open
-    // shell — is per-scene and must not be cached by shared intermediaries.
-    response.headers.set(
-      "Cache-Control",
-      "private, max-age=0, must-revalidate",
+    // Fetch the shell and the title in parallel so the lookup never adds its
+    // full latency on top of the shell fetch.
+    const [page, meta] = await Promise.all([shell(), fetchTitle(env, key)]);
+    if (meta === "missing") return asPrivate(page, 404);
+    return asPrivate(
+      meta === null ? page : rewriteShell(page, meta.title, key, env),
+      200,
     );
-    return response;
   },
 };

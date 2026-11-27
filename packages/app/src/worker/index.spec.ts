@@ -18,14 +18,26 @@ const SHELL_HTML = `<!doctype html><html><head>
 <meta name="twitter:image:alt" content="${DEFAULT_ALT}" />
 </head><body></body></html>`;
 
+const SHELL_ETAG = '"shell"';
+
 const makeEnv = () => ({
   ASSETS: {
-    // Like Static Assets with not_found_handling "none": only "/" is the shell.
-    fetch: vi.fn(async (req: Request) =>
-      new URL(req.url).pathname === "/"
-        ? new Response(SHELL_HTML, { headers: { "content-type": "text/html" } })
-        : new Response("Not found", { status: 404 }),
-    ),
+    // Like Static Assets with not_found_handling "none": only "/" is the shell,
+    // and a request naming its ETag gets a 304.
+    fetch: vi.fn(async (req: Request) => {
+      if (req.method !== "GET" && req.method !== "HEAD") {
+        return new Response(null, { status: 405 });
+      }
+      if (new URL(req.url).pathname !== "/") {
+        return new Response("Not found", { status: 404 });
+      }
+      if (req.headers.get("If-None-Match") === SHELL_ETAG) {
+        return new Response(null, { status: 304 });
+      }
+      return new Response(SHELL_HTML, {
+        headers: { "content-type": "text/html", ETag: SHELL_ETAG },
+      });
+    }),
   },
   API_BASE: "https://api.example.test",
   // Deliberately distinct from the request host below, so tests pin that og:url
@@ -47,10 +59,18 @@ const stubMeta = (init: ResponseInit, body?: unknown) =>
     ),
   );
 
-const call = (path: string, env: ReturnType<typeof makeEnv>) =>
+const call = (
+  path: string,
+  env: ReturnType<typeof makeEnv>,
+  headers: Record<string, string> = {},
+) =>
   worker.fetch(
     new Request(`https://next.math3d.org${path}`, {
-      headers: { "Sec-Fetch-Mode": "navigate", cookie: "sessionid=secret" },
+      headers: {
+        "Sec-Fetch-Mode": "navigate",
+        cookie: "sessionid=secret",
+        ...headers,
+      },
     }),
     env as unknown as never,
   );
@@ -123,13 +143,27 @@ it("escapes a hostile title (no tag/attribute breakout)", async () => {
   expect(imgElements).toBe(0);
 });
 
-it.each(["/app", "/app/frame/x", "/foo.png", "/x"])(
-  "serves the unchanged shell for non-candidate/invalid paths without touching /meta/ (%s)",
-  async (path) => {
+it("serves a page that isn't a scene unchanged, without a lookup", async () => {
+  const spy = vi.fn();
+  vi.stubGlobal("fetch", spy);
+  const res = await call("/app/frame/x", makeEnv());
+  expect(spy).not.toHaveBeenCalled();
+  expect(res.status).toBe(200);
+  expect(await res.text()).toContain(`<title>${DEFAULT_TITLE}</title>`);
+});
+
+it.each([
+  ["matches no route", "/app/nope"],
+  ["is no scene key", "/app"],
+])(
+  "404s, with the shell, a path that %s, without a lookup",
+  async (_label, path) => {
     const spy = vi.fn();
     vi.stubGlobal("fetch", spy);
     const res = await call(path, makeEnv());
-    expect(spy).not.toHaveBeenCalled(); // no /meta/ fetch
+    expect(spy).not.toHaveBeenCalled();
+    expect(res.status).toBe(404);
+    expect(res.headers.get("cache-control")).toContain("private");
     expect(await res.text()).toContain(`<title>${DEFAULT_TITLE}</title>`);
   },
 );
@@ -143,14 +177,52 @@ it("404s a missing /assets/ file instead of serving the shell", async () => {
 });
 
 it.each([
-  ["404", { status: 404 } as ResponseInit, { title: "ignored" }],
-  ["malformed 200 body", { status: 200 } as ResponseInit, undefined],
-  ["missing title field", { status: 200 } as ResponseInit, { notTitle: 1 }],
-])("serves default tags on %s", async (_label, init, body) => {
-  stubMeta(init, body);
-  const t = await tags(await call("/abc123", makeEnv()));
+  ["the API's own 404", 404, { detail: "Not Found" }, 404],
+  // A wrong API_BASE: a 404 that says nothing about the scene.
+  ["an HTML 404", 404, undefined, 200],
+  ["a JSON 404 that isn't django-ninja's", 404, { error: "x" }, 200],
+  ["a malformed 200 body", 200, undefined, 200],
+  ["a missing title field", 200, { notTitle: 1 }, 200],
+])("serves default tags on %s", async (_label, lookupStatus, body, status) => {
+  stubMeta({ status: lookupStatus }, body);
+  const res = await call("/abc123", makeEnv());
+  expect(res.status).toBe(status);
+  const t = await tags(res);
   expect(t.title).toBe(DEFAULT_TITLE);
   expect(t.ogTitle).toBe(DEFAULT_TITLE);
+});
+
+it("serves a scene titled like the lookup's own sentinel", async () => {
+  stubMeta({ status: 200 }, { title: "missing" });
+  const res = await call("/abc123", makeEnv());
+  expect(res.status).toBe(200);
+  expect((await tags(res)).title).toBe("missing | Math3d");
+});
+
+it("lets a client revalidate a page that isn't a scene", async () => {
+  const res = await call("/app/frame/x", makeEnv(), {
+    "If-None-Match": SHELL_ETAG,
+  });
+  expect(res.status).toBe(304);
+});
+
+it("passes other methods to ASSETS without a lookup", async () => {
+  const spy = vi.fn();
+  vi.stubGlobal("fetch", spy);
+  const res = await worker.fetch(
+    new Request("https://next.math3d.org/abc123", { method: "POST" }),
+    makeEnv() as unknown as never,
+  );
+  expect(res.status).toBe(405);
+  expect(spy).not.toHaveBeenCalled();
+});
+
+it("404s a missing scene for a client revalidating the shell's ETag", async () => {
+  stubMeta({ status: 404 }, { detail: "Not Found" });
+  const res = await call("/abc123", makeEnv(), { "If-None-Match": SHELL_ETAG });
+  expect(res.status).toBe(404);
+  expect(res.headers.get("etag")).toBeNull();
+  expect(await res.text()).toContain(`<title>${DEFAULT_TITLE}</title>`);
 });
 
 it("fails open AND marks the response private when the /meta/ fetch rejects", async () => {
@@ -161,6 +233,7 @@ it("fails open AND marks the response private when the /meta/ fetch rejects", as
     }),
   );
   const res = await call("/abc123", makeEnv());
+  expect(res.status).toBe(200);
   // A transient backend failure must not let a titleless generic shell be
   // cached by a shared intermediary under this scene's URL.
   expect(res.headers.get("cache-control")).toContain("private");
