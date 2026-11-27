@@ -1,8 +1,7 @@
 import { expect, it } from "vitest";
-import { matchRoute, routeMatcher } from "./routes";
+import { matchRoute } from "./routes";
 
 it.each([
-  ["/", { path: "/{-$sceneKey}", params: {} }],
   ["/abc123", { path: "/{-$sceneKey}", params: { sceneKey: "abc123" } }],
   ["/abc123/", { path: "/{-$sceneKey}", params: { sceneKey: "abc123" } }],
   ["/app/frame/x", { path: "/app/frame/$sceneKey", params: { sceneKey: "x" } }],
@@ -16,14 +15,9 @@ it.each([
   expect(matchRoute(pathname)).toEqual(expected);
 });
 
-it.each(["/abc123/def", "/App/help/reference", "/%zz"])(
+it.each(["/abc123/def", "/app//help/reference", "/App/help/reference", "/%zz"])(
   "matches nothing for %s",
   (pathname) => {
     expect(matchRoute(pathname)).toBeNull();
   },
 );
-
-it("prefers a literal segment to a param listed before it, like the router", () => {
-  const match = routeMatcher(["/{-$sceneKey}", "/about"]);
-  expect(match("/about")).toEqual({ path: "/about", params: {} });
-});

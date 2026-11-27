@@ -193,7 +193,8 @@ const layoutZones = [
     // the tree and router built on them, would make an import cycle.
     target: fs
       .readdirSync(path.join(__dirname, "src/app"))
-      .filter((name) => !ROUTE_MODULES.includes(name))
+      // A route module's spec can't close a cycle: nothing imports it.
+      .filter((name) => !ROUTE_MODULES.includes(name.replace(".spec.", ".")))
       .map((name) => `./src/app/${name}`),
     from: ROUTE_MODULES.map((name) => `./src/app/${name}`),
     message:

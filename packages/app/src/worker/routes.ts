@@ -2,18 +2,22 @@
  * The SPA's routes as TanStack path strings; `app/router.ts` checks them against
  * the route tree's `fullPaths`. That check pulls this file into the app's
  * program too, so it imports nothing and uses no runtime-specific globals.
+ *
+ * First match wins, as listed, so a route with a literal segment goes before
+ * one with a param there, as the router prefers it. A spec checks the matcher
+ * against the router.
  */
 export const ROUTE_PATHS = [
-  "/{-$sceneKey}",
   "/app/frame/$sceneKey",
   "/app/help/reference",
   "/app/sign-in-error",
+  "/{-$sceneKey}",
 ] as const;
 
 type Params = Record<string, string | undefined>;
 
-export interface RouteMatch<P extends string = (typeof ROUTE_PATHS)[number]> {
-  path: P;
+export interface RouteMatch {
+  path: (typeof ROUTE_PATHS)[number];
   params: Params;
 }
 
@@ -32,19 +36,6 @@ const parseSegment = (segment: string): Segment => {
   return { kind: "literal", value: segment };
 };
 
-/** Literals before params before optional params, like the router's ranking. */
-const rank = (segment: Segment) => {
-  if (segment.kind === "literal") return 0;
-  return segment.optional ? 2 : 1;
-};
-
-const byRank = (a: Segment[], b: Segment[]): number => {
-  const i = a.findIndex(
-    (segment, j) => rank(segment) !== rank(b[j] ?? segment),
-  );
-  return i === -1 ? 0 : rank(a[i]) - rank(b[i]);
-};
-
 const matchSegments = (
   pattern: Segment[],
   segments: string[],
@@ -60,35 +51,31 @@ const matchSegments = (
   return head.optional ? matchSegments(rest, segments) : null;
 };
 
-/**
- * A function giving the route the router would render a pathname with, and its
- * decoded params, or null for its not-found page. Like the router: case-
- * sensitive, empty segments (trailing or doubled slashes) ignored, segments
- * decoded after splitting, a literal segment preferred over a param.
- */
-export const routeMatcher = <P extends string>(paths: readonly P[]) => {
-  const patterns = paths
-    .map((path) => ({
-      path,
-      segments: path.split("/").filter(Boolean).map(parseSegment),
-    }))
-    .sort((a, b) => byRank(a.segments, b.segments));
-  return (pathname: string): RouteMatch<P> | null => {
-    let segments: string[];
-    try {
-      segments = pathname.split("/").filter(Boolean).map(decodeURIComponent);
-    } catch {
-      return null; // a malformed escape
-    }
-    return patterns.reduce<RouteMatch<P> | null>(
-      (found, { path, segments: p }) => {
-        if (found) return found;
-        const params = matchSegments(p, segments);
-        return params && { path, params };
-      },
-      null,
-    );
-  };
-};
+const PATTERNS = ROUTE_PATHS.map((path) => ({
+  path,
+  segments: path.split("/").filter(Boolean).map(parseSegment),
+}));
 
-export const matchRoute = routeMatcher(ROUTE_PATHS);
+/**
+ * The route the router would render `pathname` with, and its decoded params,
+ * or null where it renders not-found. Like the router: case-sensitive, leading
+ * and trailing slashes ignored, segments decoded after splitting.
+ */
+export const matchRoute = (pathname: string): RouteMatch | null => {
+  const trimmed = pathname.replace(/^\/+|\/+$/g, "");
+  let segments: string[];
+  try {
+    segments = trimmed === "" ? [] : trimmed.split("/").map(decodeURIComponent);
+  } catch {
+    return null; // a malformed escape
+  }
+  if (segments.includes("")) return null; // a doubled slash inside the path
+  return PATTERNS.reduce<RouteMatch | null>(
+    (found, { path, segments: pattern }) => {
+      if (found) return found;
+      const params = matchSegments(pattern, segments);
+      return params && { path, params };
+    },
+    null,
+  );
+};

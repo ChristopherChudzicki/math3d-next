@@ -9,7 +9,10 @@
     // /assets/ misses; SPA mode would skip it for navigations.
     "not_found_handling": "none",
     "binding": "ASSETS"
-  }
+  },
+  // Keeps each response's status in Workers Logs: the Worker 404s any scene the
+  // meta endpoint 404s, so a backend fault would show as a spike of 404s.
+  "observability": { "enabled": true }
   // Runtime vars are deploy-injected (see deploy-reusable.yml); local dev: copy
   // `.dev.vars.example` to `.dev.vars`.
 }

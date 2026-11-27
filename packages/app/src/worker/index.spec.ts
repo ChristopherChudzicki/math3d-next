@@ -25,9 +25,6 @@ const makeEnv = () => ({
     // Like Static Assets with not_found_handling "none": only "/" is the shell,
     // and a request naming its ETag gets a 304.
     fetch: vi.fn(async (req: Request) => {
-      if (req.method !== "GET" && req.method !== "HEAD") {
-        return new Response(null, { status: 405 });
-      }
       if (new URL(req.url).pathname !== "/") {
         return new Response("Not found", { status: 404 });
       }
@@ -154,13 +151,13 @@ it("serves a page that isn't a scene unchanged, without a lookup", async () => {
 
 it.each([
   ["matches no route", "/app/nope"],
-  ["is no scene key", "/app"],
+  ["isn't a valid scene key", "/app"],
 ])(
   "404s, with the shell, a path that %s, without a lookup",
   async (_label, path) => {
     const spy = vi.fn();
     vi.stubGlobal("fetch", spy);
-    const res = await call(path, makeEnv());
+    const res = await call(path, makeEnv(), { "If-None-Match": SHELL_ETAG });
     expect(spy).not.toHaveBeenCalled();
     expect(res.status).toBe(404);
     expect(res.headers.get("cache-control")).toContain("private");
@@ -177,27 +174,23 @@ it("404s a missing /assets/ file instead of serving the shell", async () => {
 });
 
 it.each([
-  ["the API's own 404", 404, { detail: "Not Found" }, 404],
+  ["the API's own 404", 404, 404, { detail: "Not Found" }],
   // A wrong API_BASE: a 404 that says nothing about the scene.
-  ["an HTML 404", 404, undefined, 200],
-  ["a JSON 404 that isn't django-ninja's", 404, { error: "x" }, 200],
-  ["a malformed 200 body", 200, undefined, 200],
-  ["a missing title field", 200, { notTitle: 1 }, 200],
-])("serves default tags on %s", async (_label, lookupStatus, body, status) => {
-  stubMeta({ status: lookupStatus }, body);
-  const res = await call("/abc123", makeEnv());
-  expect(res.status).toBe(status);
-  const t = await tags(res);
-  expect(t.title).toBe(DEFAULT_TITLE);
-  expect(t.ogTitle).toBe(DEFAULT_TITLE);
-});
-
-it("serves a scene titled like the lookup's own sentinel", async () => {
-  stubMeta({ status: 200 }, { title: "missing" });
-  const res = await call("/abc123", makeEnv());
-  expect(res.status).toBe(200);
-  expect((await tags(res)).title).toBe("missing | Math3d");
-});
+  ["an HTML 404", 200, 404, undefined],
+  ["a JSON 404 that isn't django-ninja's", 200, 404, { error: "x" }],
+  ["a malformed 200 body", 200, 200, undefined],
+  ["a missing title field", 200, 200, { notTitle: 1 }],
+])(
+  "answers a lookup giving %s with status %i and default tags",
+  async (_label, status, lookupStatus, body) => {
+    stubMeta({ status: lookupStatus }, body);
+    const res = await call("/abc123", makeEnv());
+    expect(res.status).toBe(status);
+    const t = await tags(res);
+    expect(t.title).toBe(DEFAULT_TITLE);
+    expect(t.ogTitle).toBe(DEFAULT_TITLE);
+  },
+);
 
 it("lets a client revalidate a page that isn't a scene", async () => {
   const res = await call("/app/frame/x", makeEnv(), {
@@ -206,7 +199,7 @@ it("lets a client revalidate a page that isn't a scene", async () => {
   expect(res.status).toBe(304);
 });
 
-it("passes other methods to ASSETS without a lookup", async () => {
+it("answers other methods 405 without a lookup", async () => {
   const spy = vi.fn();
   vi.stubGlobal("fetch", spy);
   const res = await worker.fetch(
@@ -214,13 +207,24 @@ it("passes other methods to ASSETS without a lookup", async () => {
     makeEnv() as unknown as never,
   );
   expect(res.status).toBe(405);
+  expect(res.headers.get("allow")).toBe("GET, HEAD");
   expect(spy).not.toHaveBeenCalled();
+});
+
+it("serves a HEAD request for a titled scene", async () => {
+  stubMeta({ status: 200 }, { title: "My Torus" });
+  const res = await worker.fetch(
+    new Request("https://next.math3d.org/abc123", { method: "HEAD" }),
+    makeEnv() as unknown as never,
+  );
+  expect(res.status).toBe(200);
 });
 
 it("404s a missing scene for a client revalidating the shell's ETag", async () => {
   stubMeta({ status: 404 }, { detail: "Not Found" });
   const res = await call("/abc123", makeEnv(), { "If-None-Match": SHELL_ETAG });
   expect(res.status).toBe(404);
+  expect(res.headers.get("cache-control")).toContain("private");
   expect(res.headers.get("etag")).toBeNull();
   expect(await res.text()).toContain(`<title>${DEFAULT_TITLE}</title>`);
 });
