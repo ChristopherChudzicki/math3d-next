@@ -123,7 +123,7 @@ test.each([
     });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = renderTestApp(`/${scene.key}`);
+    const { store } = await renderTestApp(`/${scene.key}`);
 
     await screen.findByLabelText("Name for 1st parameter");
     const mathScope = store.mathScope.get();
@@ -202,7 +202,7 @@ test.each([
     const item = makeItem(MIT.ParametricSurface, { expr: expression.initial });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = renderTestApp(`/${scene.key}`);
+    const { store } = await renderTestApp(`/${scene.key}`);
 
     await screen.findByLabelText("Name for 1st parameter");
     const mathScope = store.mathScope.get();

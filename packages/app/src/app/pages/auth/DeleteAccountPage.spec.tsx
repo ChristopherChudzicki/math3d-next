@@ -5,7 +5,6 @@ import { UNREACHABLE_COPY } from "@/util/failureCopy";
 import { server } from "@math3d/mock-api/node";
 import { mockAuth } from "@math3d/mock-api";
 import {
-  act,
   expectToast,
   renderTestApp,
   screen,
@@ -13,19 +12,20 @@ import {
   waitFor,
   within,
 } from "@/test_util";
+import { goBack, navigateTo } from "@/test_util/routerTesting";
 
 const FORBIDDEN_TOAST =
   "Your sign-in couldn’t be verified, so nothing was deleted. Try again.";
 
 test("If not authenticated, switches to the sign-in dialog", async () => {
-  const { location } = renderTestApp("/?overlay=delete-account");
+  const { location } = await renderTestApp("/?overlay=delete-account");
   // Not stacked: whoever signs in might be a different account.
   await waitFor(() => expect(location.current.search).toBe("?signin="));
   expect(screen.queryByRole("dialog", { name: "Delete Account" })).toBe(null);
 });
 
 test("deleting your own account does not redirect to login", async () => {
-  const { location } = renderTestApp("/?overlay=delete-account", {
+  const { location } = await renderTestApp("/?overlay=delete-account", {
     isAuthenticated: true,
   });
   const dialog = await screen.findByRole("dialog", {
@@ -44,7 +44,7 @@ test("deleting your own account does not redirect to login", async () => {
 });
 
 test("opens on the confirmation field", async () => {
-  renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
+  await renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
   const dialog = await screen.findByRole("dialog", {
     name: "Delete Account",
   });
@@ -55,7 +55,7 @@ test("opens on the confirmation field", async () => {
 });
 
 test("the wrong confirmation phrase does not delete the account", async () => {
-  renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
+  await renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
   const dialog = await screen.findByRole("dialog", {
     name: "Delete Account",
   });
@@ -78,7 +78,7 @@ test("a failed deletion surfaces the error instead of silently reopening", async
       HttpResponse.json({ detail: "boom" }, { status: 500 }),
     ),
   );
-  renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
+  await renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
   const dialog = await screen.findByRole("dialog", {
     name: "Delete Account",
   });
@@ -105,7 +105,7 @@ test("a failed deletion surfaces the error instead of silently reopening", async
 
 test("a deletion that can't reach the server says so", async () => {
   server.use(http.delete("*/v1/me/", () => HttpResponse.error()));
-  renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
+  await renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
   const dialog = await screen.findByRole("dialog", {
     name: "Delete Account",
   });
@@ -131,7 +131,7 @@ test("a 403 sends the user to sign in again instead of a generic failure", async
       return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
     }),
   );
-  const { location } = renderTestApp("/?overlay=delete-account", {
+  const { location } = await renderTestApp("/?overlay=delete-account", {
     isAuthenticated: true,
   });
   const dialog = await screen.findByRole("dialog", {
@@ -159,7 +159,7 @@ test("a 403 with the session intact keeps the dialog open under the toast", asyn
       HttpResponse.json({ detail: "Forbidden." }, { status: 403 }),
     ),
   );
-  const { location } = renderTestApp("/?overlay=delete-account", {
+  const { location } = await renderTestApp("/?overlay=delete-account", {
     isAuthenticated: true,
   });
   const dialog = await screen.findByRole("dialog", {
@@ -200,7 +200,7 @@ test("a successful retry after a 403 clears the toast", async () => {
       { once: true },
     ),
   );
-  renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
+  await renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
   const dialog = await screen.findByRole("dialog", {
     name: "Delete Account",
   });
@@ -232,7 +232,7 @@ test("while the delete is in flight, the dialog can't be closed", async () => {
       return HttpResponse.json({ detail: "late" }, { status: 500 });
     }),
   );
-  const { location } = renderTestApp("/?overlay=delete-account", {
+  const { location } = await renderTestApp("/?overlay=delete-account", {
     isAuthenticated: true,
   });
   const dialog = await screen.findByRole("dialog", {
@@ -263,7 +263,7 @@ test("while the delete is in flight, the dialog can't be closed", async () => {
 });
 
 test("My Scenes in the warning opens the user's scene list", async () => {
-  const { location } = renderTestApp("/?overlay=delete-account", {
+  const { location } = await renderTestApp("/?overlay=delete-account", {
     isAuthenticated: true,
   });
   const dialog = await screen.findByRole("dialog", {
@@ -276,7 +276,7 @@ test("My Scenes in the warning opens the user's scene list", async () => {
 });
 
 test("reopening starts with an empty confirmation", async () => {
-  const { location, router } = renderTestApp("/?overlay=delete-account", {
+  const { location, router } = await renderTestApp("/?overlay=delete-account", {
     isAuthenticated: true,
   });
   const dialog = await screen.findByRole("dialog", {
@@ -286,7 +286,7 @@ test("reopening starts with an empty confirmation", async () => {
   await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
   await waitFor(() => expect(location.current.search).toBe(""));
 
-  await act(() => router.navigate("/?overlay=delete-account"));
+  await navigateTo(router, "/?overlay=delete-account");
 
   const reopened = await screen.findByRole("dialog", {
     name: "Delete Account",
@@ -295,7 +295,7 @@ test("reopening starts with an empty confirmation", async () => {
 });
 
 test("Back to the dialog after a delete sends the user to sign in", async () => {
-  const { location, router } = renderTestApp("/?overlay=delete-account", {
+  const { location, router } = await renderTestApp("/?overlay=delete-account", {
     isAuthenticated: true,
   });
   const dialog = await screen.findByRole("dialog", {
@@ -311,7 +311,7 @@ test("Back to the dialog after a delete sends the user to sign in", async () => 
   await screen.findByRole("heading", { name: "Account Deleted" });
   await waitFor(() => expect(location.current.search).toBe(""));
 
-  await act(() => router.navigate(-1));
+  await goBack(router);
 
   await waitFor(() => expect(location.current.search).toBe("?signin="));
   expect(screen.queryByRole("dialog", { name: "Delete Account" })).toBe(null);

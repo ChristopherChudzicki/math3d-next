@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useParams } from "react-router";
+import { useRouteSceneKey } from "@/services/navigation/urlState";
 import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
 import { Icon } from "@iconify/react/offline";
@@ -223,7 +223,7 @@ const SceneActions: React.FC = () => {
   }, [dirty]);
   const loaded = useAppSelector((state) => state.scene.loaded);
   const sceneLoad = useAppSelector((state) => state.scene.loadCount);
-  const routeKey = useParams().sceneKey ?? null;
+  const routeKey = useRouteSceneKey() ?? null;
   // Tied to the load it was opened on: loading another scene closes it.
   const [opened, setOpened] = useState<{
     dialog: Dialog;

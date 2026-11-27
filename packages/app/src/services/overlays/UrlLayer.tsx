@@ -6,26 +6,22 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useLocation } from "react-router";
-import type { Location } from "react-router";
+import { useLocation } from "@tanstack/react-router";
+import type { AppLocation } from "@/services/navigation/location";
 
-type UrlLayerContextValue = { open: boolean; location: Location };
+type UrlLayerContextValue = { open: boolean; location: AppLocation };
 
 const UrlLayerContext = createContext<UrlLayerContextValue | null>(null);
 
 /**
  * The location a layer's dialog reads. While it closes, that is the location
  * it last had open, so its content doesn't react to params that already left
- * the URL.
+ * the URL. Layer code reads the URL only through this, never `useSearch`: the
+ * two update a render apart, and the frozen location must agree with `open`.
  */
-export const useUrlLayerLocation = (): Location => {
+export const useUrlLayerLocation = (): AppLocation => {
   const routerLocation = useLocation();
   return useContext(UrlLayerContext)?.location ?? routerLocation;
-};
-
-export const useUrlLayerSearchParams = (): URLSearchParams => {
-  const { search } = useUrlLayerLocation();
-  return useMemo(() => new URLSearchParams(search), [search]);
 };
 
 /** Whether the surrounding layer is open. True outside any layer. */

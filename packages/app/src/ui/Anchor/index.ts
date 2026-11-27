@@ -1,4 +1,4 @@
 import Anchor from "./Anchor";
 
 export default Anchor;
-export type { AnchorProps } from "./Anchor";
+export type { AnchorComponent, AnchorProps } from "./Anchor";

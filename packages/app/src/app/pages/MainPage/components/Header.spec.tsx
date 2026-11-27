@@ -43,7 +43,7 @@ test.each([
 ])(
   "the header offers the items for its auth status (authenticated=$isAuthenticated)",
   async ({ isAuthenticated, trigger, otherTrigger, headerSignIn, items }) => {
-    const { queryClient } = renderTestApp("", { isAuthenticated });
+    const { queryClient } = await renderTestApp("", { isAuthenticated });
     // Item visibility is gated on the ["me"] auth query resolving, and the
     // header has no positive anchor for the absent state (e.g. "Sign in" is
     // simply absent when authenticated). Wait for auth to settle so these
@@ -71,7 +71,7 @@ test("while auth is loading, the menu doesn't offer Sign in", async () => {
   // A signed-in user whose ["me"] query hasn't answered yet: offering to sign
   // in would be the wrong guess.
   server.use(http.get(urls.auth.me, () => delay("infinite")));
-  renderTestApp("", { isAuthenticated: true });
+  await renderTestApp("", { isAuthenticated: true });
   await user.click(await screen.findByRole("button", { name: "Open Menu" }));
   const menu = await screen.findByRole("menu", { name: "Open Menu" });
   expect(
@@ -82,14 +82,14 @@ test("while auth is loading, the menu doesn't offer Sign in", async () => {
 });
 
 test("Login button opens the sign-in dialog", async () => {
-  const { location } = renderTestApp("", { isAuthenticated: false });
+  const { location } = await renderTestApp("", { isAuthenticated: false });
   const signin = await screen.findByRole("button", { name: "Sign in" });
   await user.click(signin);
   expect(location.current.search).toContain("signin");
 });
 
 test("Contact links to the GitHub issues page in a new tab", async () => {
-  renderTestApp("", { isAuthenticated: false });
+  await renderTestApp("", { isAuthenticated: false });
   const button = screen.getByRole("button", { name: "Open Menu" });
   await user.click(button);
   const contact = await screen.findByRole("menuitem", { name: "Contact" });
@@ -106,7 +106,7 @@ test("the menu closes when auth settles and the trigger swaps", async () => {
       await me.promise;
     }),
   );
-  renderTestApp("", { isAuthenticated: true });
+  await renderTestApp("", { isAuthenticated: true });
   await user.click(await screen.findByRole("button", { name: "Open Menu" }));
   const menu = await screen.findByRole("menu", { name: "Open Menu" });
 
@@ -118,7 +118,7 @@ test("the menu closes when auth settles and the trigger swaps", async () => {
 });
 
 test("Function Reference opens the reference page in a new tab", async () => {
-  renderTestApp("", { isAuthenticated: false });
+  await renderTestApp("", { isAuthenticated: false });
   await user.click(screen.getByRole("button", { name: "Open Menu" }));
   const reference = await screen.findByRole("menuitem", {
     name: "Function Reference",
@@ -128,7 +128,7 @@ test("Function Reference opens the reference page in a new tab", async () => {
 });
 
 test("the signed-in menu's items are grouped under the account's email", async () => {
-  const { user: me } = renderTestApp("", { isAuthenticated: true });
+  const { user: me } = await renderTestApp("", { isAuthenticated: true });
   invariant(me);
   await user.click(
     await screen.findByRole("button", { name: "Open User Menu" }),
@@ -142,14 +142,14 @@ test("the signed-in menu's items are grouped under the account's email", async (
 });
 
 test("Sign in in the menu opens the sign-in dialog", async () => {
-  const { location } = renderTestApp("", { isAuthenticated: false });
+  const { location } = await renderTestApp("", { isAuthenticated: false });
   await user.click(screen.getByRole("button", { name: "Open Menu" }));
   await user.click(await screen.findByRole("menuitem", { name: "Sign in" }));
   expect(location.current.search).toContain("signin");
 });
 
 test("Sign out opens logout overlay", async () => {
-  const { location } = renderTestApp("", { isAuthenticated: true });
+  const { location } = await renderTestApp("", { isAuthenticated: true });
   const button = await screen.findByRole("button", { name: "Open User Menu" });
   await user.click(button);
   const signout = await screen.findByRole("menuitem", { name: "Sign out" });
@@ -158,7 +158,7 @@ test("Sign out opens logout overlay", async () => {
 });
 
 test("Delete Account opens the delete-account overlay", async () => {
-  const { location } = renderTestApp("", { isAuthenticated: true });
+  const { location } = await renderTestApp("", { isAuthenticated: true });
   const button = await screen.findByRole("button", { name: "Open User Menu" });
   await user.click(button);
   const deleteAccount = await screen.findByRole("menuitem", {
@@ -174,7 +174,9 @@ test.each([
 ])(
   "the scenes button opens list=$list (authenticated=$isAuthenticated)",
   async ({ isAuthenticated, list }) => {
-    const { location, queryClient } = renderTestApp("", { isAuthenticated });
+    const { location, queryClient } = await renderTestApp("", {
+      isAuthenticated,
+    });
     await waitForAppReady(queryClient);
 
     await user.click(
@@ -202,7 +204,7 @@ test.each([
 ])(
   "the $item menu item opens list=$list",
   async ({ isAuthenticated, trigger, item, list }) => {
-    const { location } = renderTestApp("", { isAuthenticated });
+    const { location } = await renderTestApp("", { isAuthenticated });
     await user.click(await screen.findByRole("button", { name: trigger }));
     await user.click(await screen.findByRole("menuitem", { name: item }));
     expect(location.current.search).toContain("overlay=scenes");
@@ -211,7 +213,7 @@ test.each([
 );
 
 test("closing the scenes dialog returns focus to the scenes button, even when a menu item opened it", async () => {
-  renderTestApp("", { isAuthenticated: true });
+  await renderTestApp("", { isAuthenticated: true });
   await user.click(
     await screen.findByRole("button", { name: "Open User Menu" }),
   );
@@ -248,7 +250,7 @@ describe("the Renderer group", () => {
   ])(
     "the menu offers the renderers, the default chosen ($trigger)",
     async ({ isAuthenticated, trigger }) => {
-      renderTestApp("", { isAuthenticated });
+      await renderTestApp("", { isAuthenticated });
       await user.click(await screen.findByRole("button", { name: trigger }));
 
       const group = await screen.findByRole("group", { name: "Renderer" });
@@ -275,7 +277,7 @@ describe("the Renderer group", () => {
   );
 
   test("choosing a renderer draws it and closes the menu", async () => {
-    renderTestApp("");
+    await renderTestApp("");
     await openMenu();
     await user.click(screen.getByRole("menuitemradio", { name: LEGACY }));
 
@@ -284,7 +286,7 @@ describe("the Renderer group", () => {
   });
 
   test("under ?renderer=mathbox MathBox is chosen, and choosing Default draws three.js", async () => {
-    renderTestApp("/?renderer=mathbox");
+    await renderTestApp("/?renderer=mathbox");
     await openMenu();
     expect(screen.getByRole("menuitemradio", { name: LEGACY })).toHaveAttribute(
       "aria-checked",

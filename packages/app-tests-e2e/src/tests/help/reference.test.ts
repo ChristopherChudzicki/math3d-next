@@ -31,7 +31,39 @@ test("Has expected headers and links", async ({ page }) => {
   const headers = await page.locator("h2").evaluateAll((els) => {
     return els.map((el) => el.id);
   });
-  expect(hrefs).toEqual(headers.map((id) => `#${id}`));
+  expect(hrefs).toEqual(headers.map((id) => `/app/help/reference#${id}`));
+});
+
+test("Contents links scroll to their sections, and Back scrolls back", async ({
+  page,
+}) => {
+  await page.goto("/app/help/reference");
+  const contents = page.getByRole("navigation", { name: "Reference Sections" });
+  const link = (name: string) =>
+    contents.getByRole("link", { name, exact: true });
+  const scrollY = () => page.evaluate(() => window.scrollY);
+
+  await link("Trigonometry").click();
+  await expect.poll(scrollY).toBeGreaterThan(2500);
+  const atTrigonometry = await scrollY();
+  await page.mouse.wheel(0, 800);
+  await expect.poll(scrollY).toBeGreaterThan(atTrigonometry);
+  const leftTrigonometry = await scrollY();
+
+  await link("Algebra").click();
+  await expect.poll(scrollY).toBeLessThan(500);
+  const atAlgebra = await scrollY();
+  // A second visit lands on the section, not where the first one was left.
+  await link("Trigonometry").click();
+  await expect.poll(scrollY).toBe(atTrigonometry);
+  await page.mouse.wheel(0, -300);
+  await expect.poll(scrollY).toBeLessThan(atTrigonometry);
+
+  // Each visit keeps its own position, though both have the same URL.
+  await page.goBack();
+  await expect.poll(scrollY).toBe(atAlgebra);
+  await page.goBack();
+  await expect.poll(scrollY).toBe(leftTrigonometry);
 });
 
 test("Fits a phone-width viewport with every entry expanded", async ({

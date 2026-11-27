@@ -23,28 +23,31 @@ one feature: the scene. Its seams were in the wrong places.
 three tiers — shared → features → app — imported one way, enforced by its
 `import/no-restricted-paths` zones plus a few of our own.**
 
-| Bulletproof            | here                            |
-| ---------------------- | ------------------------------- |
-| `app/`, `app/routes/`  | `app/`, `app/pages/`            |
-| `features/<name>/`     | `features/<name>/`              |
-| `components/ui`        | `ui/`                           |
-| `lib/`                 | `services/`                     |
-| `stores/`              | `store/` (incl. `store/scene/`) |
-| `config/`              | `config/`                       |
-| `utils/`, `hooks/`     | `util/`                         |
-| `testing/`             | `test_util/` (tests only)       |
-| feature `api/`, `api/` | `packages/api`                  |
+| Bulletproof            | here                                |
+| ---------------------- | ----------------------------------- |
+| `app/`, `app/routes/`  | `app/`, `app/routes/`, `app/pages/` |
+| `features/<name>/`     | `features/<name>/`                  |
+| `components/ui`        | `ui/`                               |
+| `lib/`                 | `services/`                         |
+| `stores/`              | `store/` (incl. `store/scene/`)     |
+| `config/`              | `config/`                           |
+| `utils/`, `hooks/`     | `util/`                             |
+| `testing/`             | `test_util/` (tests only)           |
+| feature `api/`, `api/` | `packages/api`                      |
 
 - **Features:** `viewport`, `editor`, `sceneActions`, `library`, `auth`. No
   feature imports another.
 - **Pages are routes:** `app/pages` holds everything with a route or an
-  `?overlay=` name, along with its page-local logic and styles.
+  `?overlay=` name, along with its page-local logic and styles. A route's
+  file in `app/routes/` imports its page, never the reverse
+  ([ADR-0012](0012-tanstack-router.md)).
 - **The scene model is shared**, in `store/scene/` (`state/`, `evaluation/`,
   `sceneTitle`, `defaultScene`). It imports no `ui`; `ui`, `util`,
   `services`, `config` and `types` don't import it; `state/` doesn't import
   `evaluation/`.
 - **Imports leaving a module's folder use `@/`;** lint bans `../`. The Worker
-  is exempt (its tsconfig has no alias) and imports only `sceneTitle`.
+  is exempt (its tsconfig has no alias) and imports only `sceneTitle` and
+  `config/sceneKey`, which import nothing.
 
 ## Consequences
 

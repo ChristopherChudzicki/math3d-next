@@ -2,6 +2,7 @@ import React from "react";
 
 import Header, { HeaderTitle, HomeLink } from "@/ui/Header";
 import TextLink from "@/ui/TextLink";
+import { homeLink } from "@/services/navigation/links";
 import ReferencePanel from "./ReferencePanel";
 import { docs } from "./docs";
 import { groupDocs } from "./util";
@@ -12,16 +13,18 @@ const HelpPage: React.FC = () => {
   return (
     <>
       <Header
-        brand={<HomeLink />}
+        brand={<HomeLink {...homeLink} />}
         title={<HeaderTitle>Function Reference</HeaderTitle>}
-        nav={<TextLink to="/">Back to Math3d</TextLink>}
+        nav={<TextLink {...homeLink}>Back to Math3d</TextLink>}
       />
       <div className={styles.layout}>
         <nav className={styles.sidebar} aria-label="Reference Sections">
           <ul>
             {groups.map((group) => (
               <li key={group.id}>
-                <TextLink href={`#${group.id}`}>{group.label}</TextLink>
+                <TextLink to="/app/help/reference" hash={group.id}>
+                  {group.label}
+                </TextLink>
               </li>
             ))}
           </ul>

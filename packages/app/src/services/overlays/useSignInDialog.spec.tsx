@@ -1,11 +1,11 @@
 import React from "react";
 import { test, expect } from "vitest";
-import { render, act } from "@testing-library/react";
-import { createMemoryRouter, RouterProvider } from "react-router";
+import { act } from "@testing-library/react";
+import { goBack, renderWithRouter } from "@/test_util/routerTesting";
 import { useOverlay } from "./useOverlay";
 import { useSignInDialog } from "./useSignInDialog";
 
-const renderOverlayAndSignIn = (initialEntries: string[]) => {
+const renderOverlayAndSignIn = async (url: string | string[]) => {
   const api: {
     overlay: ReturnType<typeof useOverlay> | null;
     signIn: ReturnType<typeof useSignInDialog> | null;
@@ -15,36 +15,36 @@ const renderOverlayAndSignIn = (initialEntries: string[]) => {
     api.signIn = useSignInDialog();
     return null;
   };
-  const router = createMemoryRouter([{ path: "*", element: <Probe /> }], {
-    initialEntries,
-  });
-  render(<RouterProvider router={router} />);
-  return { router, api };
+  const { router, location } = await renderWithRouter(<Probe />, { url });
+  return { router, location, api };
 };
 
 test("Sign-in that replaced a pushed overlay closes back to the page beneath", async () => {
-  const { router, api } = renderOverlayAndSignIn(["/first", "/second"]);
+  const { router, location, api } = await renderOverlayAndSignIn([
+    "/first",
+    "/second",
+  ]);
   await act(async () => api.overlay?.open("delete-account"));
 
   await act(async () => api.signIn?.open({ replaceOverlay: true }));
-  expect(router.state.location.search).toBe("?signin=");
+  expect(location.current.search).toBe("?signin=");
   await act(async () => api.signIn?.close());
 
-  expect(router.state.location.pathname).toBe("/second");
-  expect(router.state.location.search).toBe("");
+  expect(location.current.pathname).toBe("/second");
+  expect(location.current.search).toBe("");
   // The overlay's entry was popped, not left behind as a duplicate of /second.
-  await act(async () => router.navigate(-1));
-  expect(router.state.location.pathname).toBe("/first");
+  await goBack(router);
+  expect(location.current.pathname).toBe("/first");
 });
 
 test("Sign-in that replaced a deep-linked overlay closes in place", async () => {
-  const { router, api } = renderOverlayAndSignIn([
+  const { location, api } = await renderOverlayAndSignIn(
     "/first?overlay=delete-account",
-  ]);
+  );
 
   await act(async () => api.signIn?.open({ replaceOverlay: true }));
   await act(async () => api.signIn?.close());
 
-  expect(router.state.location.pathname).toBe("/first");
-  expect(router.state.location.search).toBe("");
+  expect(location.current.pathname).toBe("/first");
+  expect(location.current.search).toBe("");
 });

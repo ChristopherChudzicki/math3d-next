@@ -1,12 +1,5 @@
 import * as Sentry from "@sentry/react";
-import { useEffect } from "react";
-import {
-  createBrowserRouter,
-  createRoutesFromChildren,
-  matchRoutes,
-  useLocation,
-  useNavigationType,
-} from "react-router";
+import type { AnyRouter } from "@tanstack/react-router";
 import { APP_VERSION } from "@/config/version";
 
 const dsn = import.meta.env.VITE_SENTRY_DSN;
@@ -19,19 +12,14 @@ if (dsn) {
     release: APP_VERSION,
     sendDefaultPii: false,
     tracesSampleRate: 1,
-    integrations: [
-      Sentry.reactRouterV7BrowserTracingIntegration({
-        useEffect,
-        useLocation,
-        useNavigationType,
-        createRoutesFromChildren,
-        matchRoutes,
-      }),
-    ],
   });
 }
 
-// Scene URLs are `/:sceneKey`; the wrapper names transactions by matched route
-// pattern. Must stay below init(), or it returns createBrowserRouter unwrapped.
-export const createRouter =
-  Sentry.wrapCreateBrowserRouterV7(createBrowserRouter);
+/**
+ * Traces page loads and navigations, named by route id (`/{-$sceneKey}`).
+ * Call before the router's first load, which names the page-load span.
+ */
+export const traceRouter = (router: AnyRouter) => {
+  if (!dsn) return;
+  Sentry.addIntegration(Sentry.tanstackRouterBrowserTracingIntegration(router));
+};

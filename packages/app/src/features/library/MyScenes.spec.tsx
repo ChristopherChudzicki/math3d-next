@@ -12,6 +12,7 @@ import {
   waitFor,
   within,
 } from "@/test_util";
+import { navigateTo } from "@/test_util/routerTesting";
 
 const ME_LIST = "*/v1/me/scenes/";
 // The drawer's 672px width, spelled out so a wrong unit or width in
@@ -35,7 +36,7 @@ const openMyScenes = async (
   owner: ReturnType<typeof seedDb.withUser>,
   path = "/",
 ) => {
-  const { location } = renderTestApp(`${path}?overlay=scenes&list=me`, {
+  const { location } = await renderTestApp(`${path}?overlay=scenes&list=me`, {
     user: owner,
   });
   const dialog = await screen.findByRole("dialog", { name: "Scenes" });
@@ -116,7 +117,7 @@ test("where the drawer covers the scene, choosing the open scene closes the draw
   matchMediaQueries([DRAWER_COVERS_SCENE]);
   const { owner, scenes } = seedScenes(["Alpha"]);
   const [{ key }] = scenes;
-  const { router, location } = renderTestApp(`/${key}`, { user: owner });
+  const { router, location } = await renderTestApp(`/${key}`, { user: owner });
   await user.click(
     await screen.findByRole("button", { name: "Math3d, open scenes" }),
   );
@@ -128,7 +129,7 @@ test("where the drawer covers the scene, choosing the open scene closes the draw
   );
   expect(location.current.pathname).toBe(`/${key}`);
   expect(location.current.search).toBe("");
-  expect(router.state.historyAction).toBe("POP");
+  expect(router.history.canGoBack()).toBe(false);
 });
 
 test("where the drawer covers the scene, cards link to scenes without the drawer, and archiving focuses the next card", async () => {
@@ -213,7 +214,7 @@ test("deleting the only card focuses the filter field", async () => {
 
 test("deleting the open scene replaces its URL with the scenes list, keeping controls=0", async () => {
   const { owner, scenes } = seedScenes(["Alpha"]);
-  const { location } = renderTestApp(
+  const { location } = await renderTestApp(
     `/${scenes[0].key}?controls=0&overlay=scenes&list=me`,
     { user: owner },
   );
@@ -230,14 +231,11 @@ test("deleting the open scene replaces its URL with the scenes list, keeping con
 test("beside the scene, clicking the open scene's card does nothing, so Close still pops the drawer's entry", async () => {
   const { owner, scenes } = seedScenes(["Alpha"]);
   const [{ key }] = scenes;
-  const { router, location } = renderTestApp(`/${key}`, { user: owner });
+  const { router, location } = await renderTestApp(`/${key}`, { user: owner });
   // As useOverlay's open(): a pushed entry, marked so close() pops it.
-  await act(() =>
-    router.navigate(
-      { pathname: `/${key}`, search: "?overlay=scenes&list=me" },
-      { state: { overlayPushed: true } },
-    ),
-  );
+  await navigateTo(router, `/${key}?overlay=scenes&list=me`, {
+    state: { overlayPushed: true },
+  });
 
   await user.click(await screen.findByRole("link", { name: "Alpha" }));
   expect(screen.getByRole("dialog", { name: "Scenes" })).toBeInTheDocument();
@@ -249,7 +247,7 @@ test("beside the scene, clicking the open scene's card does nothing, so Close st
   expect(location.current.search).toBe("");
   // Popped, not replaced: a replace would leave a duplicate entry behind, and
   // the next Back would appear to do nothing.
-  expect(router.state.historyAction).toBe("POP");
+  expect(router.state.location.state.__TSR_index).toBe(0);
 });
 
 test("cancelling a delete returns focus to the card's menu button", async () => {
@@ -412,7 +410,7 @@ test("an untitled scene's card reads Untitled", async () => {
 });
 
 test("signed out, the panel offers sign-in and points to Unsaved", async () => {
-  const { location } = renderTestApp("/?overlay=scenes&list=me");
+  const { location } = await renderTestApp("/?overlay=scenes&list=me");
 
   expect(
     await screen.findByText(/^Sign in to keep scenes in your account\./),

@@ -26,7 +26,7 @@ describe("Visible and calculatedVisibility", () => {
       initialItems.boolean,
       initialItems.point,
     ]);
-    const { store } = renderTestApp(`/${scene.key}`);
+    const { store } = await renderTestApp(`/${scene.key}`);
 
     const getPointData = () =>
       store.getState().scene.items[initialItems.point.id];
@@ -160,7 +160,7 @@ describe("Visible and calculatedVisibility", () => {
         [setupFolder.id]: [axis.id],
       },
     });
-    const { store } = renderTestApp(`/${key}`);
+    const { store } = await renderTestApp(`/${key}`);
 
     const ui = await findItemByTestId(boolean.id);
     await user.click(within(ui).getByRole("switch", { name: "Value" }));

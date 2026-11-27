@@ -1,5 +1,6 @@
 import type React from "react";
-import type { OverlayName, OverlayProps } from "@/services/overlays/useOverlay";
+import type { OverlayName } from "@/services/overlays/search";
+import type { OverlayProps } from "@/services/overlays/useOverlay";
 import LogoutPage from "./pages/auth/LogoutPage";
 import DeleteAccountPage from "./pages/auth/DeleteAccountPage";
 import ScenesListPage from "./pages/ScenesList/ScenesListPage";
@@ -13,7 +14,7 @@ import ScenesListPage from "./pages/ScenesList/ScenesListPage";
  * inside `Popup` that holds everything else. Content exists only while the
  * overlay is open or closing, so its queries never run while it is closed, and
  * its effects need no `open` check. Content reads the URL through
- * `useUrlLayerSearchParams`/`useUrlLayerLocation`, which hold still while it closes.
+ * `useUrlLayerLocation`, which holds still while it closes.
  * `useAuthStatus` may sit in a shell: it is session state every route already
  * loads, not overlay data.
  */

@@ -4,7 +4,6 @@ import { server } from "@math3d/mock-api/node";
 import { seedDb, urls } from "@math3d/mock-api";
 import type { Scene } from "@math3d/api";
 import {
-  act,
   renameScene,
   renderTestApp,
   screen,
@@ -12,10 +11,11 @@ import {
   waitFor,
   within,
 } from "@/test_util";
+import { navigateTo } from "@/test_util/routerTesting";
 
-const renderScene = (overrides: Partial<Scene> = {}) => {
+const renderScene = async (overrides: Partial<Scene> = {}) => {
   const scene = seedDb.withSceneFromItems([], overrides);
-  return { scene, ...renderTestApp(`/${scene.key}`) };
+  return { scene, ...(await renderTestApp(`/${scene.key}`)) };
 };
 
 const openRenameDialog = async () => {
@@ -24,7 +24,7 @@ const openRenameDialog = async () => {
 };
 
 test("an untitled scene's heading reads Untitled", async () => {
-  renderScene({ title: "" });
+  await renderScene({ title: "" });
 
   expect(
     await screen.findByRole("heading", { level: 1, name: "Untitled" }),
@@ -32,7 +32,7 @@ test("an untitled scene's heading reads Untitled", async () => {
 });
 
 test("renaming changes the heading and leaves the scene unsaved", async () => {
-  const { scene, store } = renderScene();
+  const { scene, store } = await renderScene();
   await screen.findByRole("heading", { level: 1, name: scene.title ?? "" });
 
   await renameScene("Renamed");
@@ -47,7 +47,7 @@ test("renaming changes the heading and leaves the scene unsaved", async () => {
 });
 
 test("confirming the rename dialog unchanged leaves the scene clean", async () => {
-  const { store } = renderScene();
+  const { store } = await renderScene();
 
   const dialog = await openRenameDialog();
   await user.click(within(dialog).getByRole("button", { name: "Rename" }));
@@ -58,10 +58,10 @@ test("confirming the rename dialog unchanged leaves the scene clean", async () =
 
 test("loading another scene closes the rename dialog", async () => {
   const other = seedDb.withSceneFromItems([]);
-  const { router } = renderScene();
+  const { router } = await renderScene();
 
   const dialog = await openRenameDialog();
-  await act(() => router.navigate(`/${other.key}`));
+  await navigateTo(router, `/${other.key}`);
 
   await screen.findByRole("heading", { level: 1, name: other.title ?? "" });
   expect(dialog).not.toBeInTheDocument();
@@ -69,7 +69,7 @@ test("loading another scene closes the rename dialog", async () => {
 
 test("the heading and rename control wait for the route's scene to load", async () => {
   const other = seedDb.withSceneFromItems([]);
-  const { scene, router } = renderScene();
+  const { scene, router } = await renderScene();
   await screen.findByRole("heading", { level: 1, name: scene.title ?? "" });
   const gate = Promise.withResolvers<void>();
   // Returning nothing falls through to the mock API's GET handler.
@@ -79,7 +79,7 @@ test("the heading and rename control wait for the route's scene to load", async 
     }),
   );
 
-  await act(() => router.navigate(`/${other.key}`));
+  await navigateTo(router, `/${other.key}`);
 
   expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
   expect(screen.queryByRole("button", { name: "Rename scene" })).toBeNull();
@@ -92,7 +92,7 @@ test("the heading and rename control wait for the route's scene to load", async 
 test("publishing keeps the heading in place", async () => {
   const me = seedDb.withUser();
   const scene = seedDb.withSceneFromItems([], { author: me.id });
-  renderTestApp(`/${scene.key}`, { user: me });
+  await renderTestApp(`/${scene.key}`, { user: me });
   const heading = await screen.findByRole("heading", {
     level: 1,
     name: scene.title ?? "",

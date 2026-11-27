@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useSearchParams } from "react-router";
+import { useRootSearch } from "@/services/navigation/urlState";
 import { peekSignInDraftUrl } from "@/services/auth/signInDraft";
 import { replaceLocation } from "@/util/replaceLocation";
 
@@ -9,13 +9,13 @@ import { replaceLocation } from "@/util/replaceLocation";
  * allauth had returned there; that load restores the draft.
  */
 const SignInErrorPage: React.FC = () => {
-  const [search] = useSearchParams();
+  const { error } = useRootSearch();
   useEffect(() => {
     const next = new URL(peekSignInDraftUrl() ?? "/", window.location.origin);
-    next.searchParams.set("error", search.get("error") ?? "unknown");
+    next.searchParams.set("error", error ?? "unknown");
     next.searchParams.set("error_process", "login");
     replaceLocation(next.href);
-  }, [search]);
+  }, [error]);
   return null;
 };
 

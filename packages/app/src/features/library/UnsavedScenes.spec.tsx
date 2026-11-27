@@ -20,6 +20,7 @@ import {
   writeDraft,
 } from "@/store/scene/drafts/storage";
 import type { DraftRecord } from "@/store/scene/drafts/storage";
+import { navigateTo } from "@/test_util/routerTesting";
 
 type SavedScene = ReturnType<typeof seedDb.withSceneFromItems>;
 
@@ -48,7 +49,7 @@ const newSceneDraft = (updatedAt?: number): DraftRecord => ({
 const DRAWER_COVERS_SCENE = "(max-width: 672px)";
 
 const openUnsaved = async (options?: Parameters<typeof renderTestApp>[1]) => {
-  const view = renderTestApp("/?overlay=scenes&list=unsaved", options);
+  const view = await renderTestApp("/?overlay=scenes&list=unsaved", options);
   const dialog = await screen.findByRole("dialog", { name: "Scenes" });
   return { ...view, dialog };
 };
@@ -102,12 +103,12 @@ test("rows are newest first, and this tab's own session is marked current", asyn
 
 test("behind \"Scene not found\", the editor's session isn't current and can be reopened", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { store, router, location } = renderTestApp(`/${scene.key}`);
+  const { store, router, location } = await renderTestApp(`/${scene.key}`);
   await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
   const own = { ...draftOf(scene), id: store.getState().scene.draftId };
   writeDraft(own);
 
-  await act(() => router.navigate("/missing?overlay=scenes&list=unsaved"));
+  await navigateTo(router, "/missing?overlay=scenes&list=unsaved");
   await expectToast("This scene doesn’t exist.");
   const row = await screen.findByRole("button", {
     name: `Changes to ${own.title}`,
@@ -309,7 +310,7 @@ test("opening a draft keeps controls=0", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const draft = draftOf(scene);
   writeDraft(draft);
-  const { location } = renderTestApp(
+  const { location } = await renderTestApp(
     "/?controls=0&overlay=scenes&list=unsaved",
   );
 
@@ -393,7 +394,7 @@ test("a draft whose scene was deleted opens as a new scene", async () => {
   const draft = { ...draftOf(seedDb.withSceneFromItems([])), key: "deleted" };
   writeDraft(draft);
   const { store, location } = await openUnsaved();
-  const entry = location.current.key;
+  const entry = location.current.state.__TSR_key;
 
   await user.click(
     await screen.findByRole("button", { name: `Changes to ${draft.title}` }),
@@ -401,7 +402,7 @@ test("a draft whose scene was deleted opens as a new scene", async () => {
 
   await waitFor(() => expect(store.getState().scene.title).toBe(draft.title));
   // Already at "/", so no history entry is added.
-  expect(location.current.key).toBe(entry);
+  expect(location.current.state.__TSR_key).toBe(entry);
   expect(store.getState().scene).toMatchObject({
     key: null,
     author: null,

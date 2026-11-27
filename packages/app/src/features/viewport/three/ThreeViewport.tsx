@@ -9,7 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useSearchParams } from "react-router";
+import { useRootSearch } from "@/services/navigation/urlState";
 import * as Sentry from "@sentry/react";
 import type { ViewportHooks } from "@math3d/viewport-spec";
 import ViewportShell from "@/features/viewport/shared/ViewportShell";
@@ -32,19 +32,6 @@ const OnMount: React.FC<{ onMount: () => void }> = ({ onMount }) => {
 
 const HOST_STYLE = { width: "100%", height: "100%" };
 
-/**
- * `?gloss=0` lights shaded surfaces as MathBox does, for comparison captures;
- * otherwise they are glossy.
- */
-const GLOSS_PARAM = "gloss";
-
-/**
- * `?oit=0` draws translucent items in MathBox's order, for comparing the two
- * renderers. Without it they blend order-independently where the browser
- * can.
- */
-const TRANSPARENCY_PARAM = "oit";
-
 type ContentProps = Pick<
   ViewportHooks,
   "onUnsupported" | "onDrawn" | "onReady"
@@ -58,9 +45,7 @@ const ThreeViewportContent: React.FC<ContentProps> = ({
 }) => {
   const host = useRef<HTMLDivElement>(null);
   const { spec, reporters, onCameraMove } = useViewportSpec(host);
-  const [searchParams] = useSearchParams();
-  const transparency =
-    searchParams.get(TRANSPARENCY_PARAM) === "0" ? "ordered" : undefined;
+  const { oit, gloss } = useRootSearch();
   const hooks = useMemo<ViewportHooks>(
     () => ({
       onUnsupported,
@@ -78,8 +63,8 @@ const ThreeViewportContent: React.FC<ContentProps> = ({
         <RendererViewport
           spec={spec}
           hooks={hooks}
-          transparency={transparency}
-          shading={searchParams.get(GLOSS_PARAM) === "0" ? "matte" : undefined}
+          transparency={oit === 0 ? "ordered" : undefined}
+          shading={gloss === 0 ? "matte" : undefined}
         />
       </div>
     </>

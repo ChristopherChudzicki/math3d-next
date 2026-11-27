@@ -2,7 +2,7 @@ import "./globals.css";
 // Import `@/services/sentry` here: its Sentry.init() side effect then runs before the
 // rest of the app's modules evaluate, and before the first render.
 // eslint-disable-next-line import/order
-import { createRouter } from "@/services/sentry";
+import { traceRouter } from "@/services/sentry";
 
 import React from "react";
 import { createRoot } from "react-dom/client";
@@ -11,7 +11,7 @@ import { createQueryClient } from "@/services/react-query/react-query";
 
 import AppRoutes from "@/app/AppProviders";
 import { getStore } from "@/store/store";
-import routes from "@/app/routes";
+import { createAppRouter } from "@/app/router";
 import { DISPLAY_AUTH_FLOWS } from "@/config/displayAuthFlows";
 import {
   discardSignInDraftOnPageRestore,
@@ -49,7 +49,8 @@ prepare().then(() => {
   }
   const queryClient = createQueryClient();
 
-  const router = createRouter(routes);
+  const router = createAppRouter();
+  traceRouter(router);
 
   root.render(
     <React.StrictMode>

@@ -1,12 +1,12 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { Provider } from "react-redux";
-import { MemoryRouter } from "react-router";
 import user from "@testing-library/user-event";
 import { SceneBuilder } from "@math3d/mock-api";
 import { getStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
 import { RENDERER_PREFERENCE_KEY } from "@/services/renderer/rendererPreference";
+import { renderWithRouter } from "@/test_util/routerTesting";
 import Viewport from "./Viewport";
 
 vi.mock("mathbox-react", async () => ({
@@ -21,11 +21,9 @@ test("a MathBox that throws offers the default renderer", async () => {
   const store = getStore();
   const scene = new SceneBuilder();
   store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
-  render(
+  await renderWithRouter(
     <Provider store={store}>
-      <MemoryRouter>
-        <Viewport />
-      </MemoryRouter>
+      <Viewport />
     </Provider>,
   );
 

@@ -41,7 +41,7 @@ test.each([
     const item = makeItem(MIT.Point, { coords: coordsString });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = renderTestApp(`/${scene.key}`);
+    const { store } = await renderTestApp(`/${scene.key}`);
 
     await findItemByDescription(item.properties.description);
     const mathScope = store.mathScope.get();
@@ -78,12 +78,12 @@ test.each([
     const item = makeItem(MIT.Point);
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = renderTestApp(`/${scene.key}`);
+    const { store } = await renderTestApp(`/${scene.key}`);
 
     const coordsInput = await screen.findByLabelText("Coordinates");
     const mathScope = store.mathScope.get();
 
-    pasteText(coordsInput, coordsString);
+    await pasteText(coordsInput, coordsString);
     expect(itemEntries(mathScope.errors).size).toBe(
       numEvalErrors + numParseErrors,
     );
@@ -93,7 +93,7 @@ test.each([
 
 test("Adding items adds to mathScope", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { store } = renderTestApp(`/${scene.key}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   await user.click(await screen.findByRole("button", { name: "Add Object" }));
   const menu = await screen.findByRole("menu");
@@ -122,7 +122,7 @@ test("Deleting items removes them from mathScope", async () => {
     opacity: "2^[1,2,3]",
   });
   const scene = seedDb.withSceneFromItems([point]);
-  const { store } = renderTestApp(`/${scene.key}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   const item = await findItemByDescription(point.properties.description);
   const mathScope = store.mathScope.get();

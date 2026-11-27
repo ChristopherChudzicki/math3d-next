@@ -1,17 +1,18 @@
 import React from "react";
-import { useParams, useSearchParams } from "react-router";
+import { getRouteApi } from "@tanstack/react-router";
 
 import MathboxViewport from "@/features/viewport/mathbox/Viewport";
 import ThreeViewport from "@/features/viewport/three/ThreeViewport";
 import { DEFAULT_RENDERER, isRenderer } from "@/services/renderer/renderers";
 import type { Renderer } from "@/services/renderer/renderers";
-import { RENDERER_PARAM } from "@/services/renderer/useRenderer";
 import useSceneLoader from "@/app/useSceneLoader";
 
 const VIEWPORTS: Record<Renderer, React.ReactElement> = {
   mathbox: <MathboxViewport still />,
   threejs: <ThreeViewport loader={false} />,
 };
+
+const route = getRouteApi("/app/frame/$sceneKey");
 
 /**
  * A bare, scene-only view for headless screenshots — no editor UI (no header,
@@ -23,9 +24,10 @@ const VIEWPORTS: Record<Renderer, React.ReactElement> = {
  * fallback.
  */
 const FramePage: React.FC = () => {
-  const { sceneKey } = useParams();
+  const { sceneKey } = route.useParams();
   useSceneLoader(sceneKey);
-  const param = useSearchParams()[0].get(RENDERER_PARAM) ?? DEFAULT_RENDERER;
+  const { renderer } = route.useSearch();
+  const param = renderer === undefined ? DEFAULT_RENDERER : renderer;
   return (
     <div style={{ position: "fixed", inset: 0 }}>
       {isRenderer(param) ? (

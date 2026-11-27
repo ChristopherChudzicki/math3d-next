@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
 import { onTestFinished } from "vitest";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
-import { MemoryRouter } from "react-router";
 import user from "@testing-library/user-event";
 import { SceneBuilder } from "@math3d/mock-api";
 import type { ViewportHooks } from "@math3d/viewport-spec";
@@ -11,6 +10,7 @@ import { getStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
 import { RENDERER_PREFERENCE_KEY } from "@/services/renderer/rendererPreference";
 import { threeViewport } from "@/test_util/threeViewport";
+import { renderWithRouter } from "@/test_util/routerTesting";
 import { stubKnotLoaderSupport } from "@/test_util/knotLoaderSupport";
 import type { ThreeViewportProps } from "@/test_util/threeViewport";
 import ThreeViewport from "./ThreeViewport";
@@ -20,15 +20,14 @@ const loadScene = (store: ReturnType<typeof getStore>) => {
   store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
 };
 
-const renderViewport = (url = "/") => {
+const renderViewport = async (url = "/") => {
   const store = getStore();
   loadScene(store);
-  render(
+  await renderWithRouter(
     <Provider store={store}>
-      <MemoryRouter initialEntries={[url]}>
-        <ThreeViewport />
-      </MemoryRouter>
+      <ThreeViewport />
     </Provider>,
+    { url },
   );
   return { store };
 };
@@ -42,7 +41,7 @@ test("ready holds only for the scene load whose renderer settled", async () => {
     return null;
   };
   threeViewport.Component = Records;
-  const { store } = renderViewport();
+  const { store } = await renderViewport();
   const scene = screen.getByTestId("scene");
   await waitFor(() => expect(mounted).toHaveLength(1));
   const [first] = mounted;
@@ -74,7 +73,7 @@ test("shows the loading knot until the first draw, then closes it and stops its 
     return null;
   };
   threeViewport.Component = Records;
-  renderViewport();
+  await renderViewport();
   await waitFor(() => expect(mounted).toHaveLength(1));
   expect(screen.queryByRole("progressbar")).toBeNull();
 
@@ -107,7 +106,7 @@ test("a scene drawn within 400 ms never shows the loading knot", async () => {
     return null;
   };
   threeViewport.Component = Records;
-  renderViewport();
+  await renderViewport();
   await waitFor(() => expect(mounted).toHaveLength(1));
   act(() => mounted[0].onDrawn());
 
@@ -122,7 +121,7 @@ test("a render error marks the scene failed", async () => {
   threeViewport.Component = () => {
     throw new Error("lost the device");
   };
-  renderViewport();
+  await renderViewport();
 
   expect(
     await screen.findByText("This scene couldn't be drawn."),
@@ -141,7 +140,7 @@ test("an unsupported browser gets a way to the legacy renderer", async () => {
     return null;
   };
   threeViewport.Component = Unsupported;
-  renderViewport();
+  await renderViewport();
 
   expect(
     await screen.findByText("This browser can't run the default 3D renderer."),
@@ -170,7 +169,7 @@ test.each([
   async ({ url, transparency }) => {
     const Renderer = vi.fn((_props: ThreeViewportProps) => null);
     threeViewport.Component = Renderer;
-    renderViewport(url);
+    await renderViewport(url);
     await waitFor(() => expect(Renderer).toHaveBeenCalled());
     expect(Renderer.mock.lastCall?.[0].transparency).toBe(transparency);
   },
@@ -182,7 +181,7 @@ test.each([
 ])("$url asks the renderer for shading $shading", async ({ url, shading }) => {
   const Renderer = vi.fn((_props: ThreeViewportProps) => null);
   threeViewport.Component = Renderer;
-  renderViewport(url);
+  await renderViewport(url);
   await waitFor(() => expect(Renderer).toHaveBeenCalled());
   expect(Renderer.mock.lastCall?.[0].shading).toBe(shading);
 });

@@ -25,6 +25,7 @@ import {
   within,
   writeSessionDraft,
 } from "@/test_util";
+import { navigateTo } from "@/test_util/routerTesting";
 import { actions } from "@/store/scene/state/scene.slice";
 import { readDraft } from "@/store/scene/drafts/storage";
 import { PHONE_QUERY } from "@/config/breakpoints";
@@ -101,22 +102,22 @@ const noMenu = () =>
   expect(
     screen.queryByRole("button", { name: "More scene actions" }),
   ).toBeNull();
-const renderOwnedScene = () => {
+const renderOwnedScene = async () => {
   const me = seedDb.withUser();
   const scene = seedDb.withSceneFromItems([], { author: me.id });
-  return { scene, ...renderTestApp(`/${scene.key}`, { user: me }) };
+  return { scene, ...(await renderTestApp(`/${scene.key}`, { user: me })) };
 };
 
 test("a signed-out visitor gets Share and no menu", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  renderTestApp(`/${scene.key}`);
+  await renderTestApp(`/${scene.key}`);
 
   expect(await primary()).toHaveTextContent(/^Share$/);
   noMenu();
 });
 
 test("an unsaved scene offers Save once edited, and no menu", async () => {
-  renderTestApp("/", { isAuthenticated: true });
+  await renderTestApp("/", { isAuthenticated: true });
 
   expect(await primary()).toHaveTextContent(/^Save$/);
   expectInert(await primary());
@@ -128,7 +129,7 @@ test("an unsaved scene offers Save once edited, and no menu", async () => {
 });
 
 test("an owned scene with edits saves in place", async () => {
-  const { scene, store } = renderOwnedScene();
+  const { scene, store } = await renderOwnedScene();
   const patches = capturePatches(scene.key);
   await renameScene(`${scene.title} edited`);
 
@@ -161,7 +162,7 @@ test("an edit made while saving survives the save and stays unsaved", async () =
       await gate.promise;
     }),
   );
-  const { scene, store } = renderOwnedScene();
+  const { scene, store } = await renderOwnedScene();
   const patches = capturePatches(scene.key);
   await renameScene(`${scene.title} saved`);
 
@@ -197,7 +198,7 @@ test("a save that lands after another scene loads removes the draft it saved", a
       await gate.promise;
     }),
   );
-  const { scene, store } = renderOwnedScene();
+  const { scene, store } = await renderOwnedScene();
   await renameScene(`${scene.title} saved`);
   const draftId = writeSessionDraft(store);
   await user.click(await primary());
@@ -227,7 +228,7 @@ test("a failed save frees the button and leaves the edit unsaved", async () => {
       HttpResponse.json({ detail: "boom" }, { status: 500 }),
     ),
   );
-  const { scene, store } = renderOwnedScene();
+  const { scene, store } = await renderOwnedScene();
   await renameScene(`${scene.title} edited`);
 
   await user.click(await primary());
@@ -252,13 +253,13 @@ test("a failed save's toast closes once another scene loads", async () => {
       HttpResponse.json({ detail: "boom" }, { status: 500 }),
     ),
   );
-  const { scene, router } = renderOwnedScene();
+  const { scene, router } = await renderOwnedScene();
   const other = seedDb.withSceneFromItems([]);
   await renameScene(`${scene.title} edited`);
   await user.click(await primary());
   await expectToast("Couldn’t save your changes. Try again.");
 
-  await act(() => router.navigate(`/${other.key}`));
+  await navigateTo(router, `/${other.key}`);
 
   const region = screen.getByRole("region", { name: "Notifications" });
   await waitFor(() =>
@@ -269,7 +270,7 @@ test("a failed save's toast closes once another scene loads", async () => {
 });
 
 test("an owned scene without edits copies its link", async () => {
-  const { scene } = renderOwnedScene();
+  const { scene } = await renderOwnedScene();
 
   expect(await primary()).toHaveTextContent(/^Copy link$/);
   expect(await menuEntries()).toEqual(["Duplicate"]);
@@ -282,7 +283,7 @@ test("an owned scene without edits copies its link", async () => {
 });
 
 test("copying the link with unsaved edits says the link omits them", async () => {
-  const { scene } = renderOwnedScene();
+  const { scene } = await renderOwnedScene();
   await renameScene(`${scene.title} edited`);
 
   await user.click(
@@ -304,7 +305,7 @@ test("a refused copy shows the link instead", async () => {
   vi.mocked(navigator.clipboard.writeText).mockRejectedValueOnce(
     new Error("denied"),
   );
-  const { scene } = renderOwnedScene();
+  const { scene } = await renderOwnedScene();
 
   await user.click(await primary());
 
@@ -323,7 +324,7 @@ test("a refused copy shows the link instead", async () => {
 
 test("the link step copies the link and announces it", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  renderTestApp(`/${scene.key}`);
+  await renderTestApp(`/${scene.key}`);
 
   await user.click(await primary());
   const dialog = await screen.findByRole("dialog", { name: "Share scene" });
@@ -338,7 +339,9 @@ test("the link step copies the link and announces it", async () => {
 test("someone else's scene offers Save a copy, saved as Copy of …", async () => {
   const author = seedDb.withUser();
   const scene = seedDb.withSceneFromItems([], { author: author.id });
-  const { store } = renderTestApp(`/${scene.key}`, { isAuthenticated: true });
+  const { store } = await renderTestApp(`/${scene.key}`, {
+    isAuthenticated: true,
+  });
 
   expect(await primary()).toHaveTextContent(/^Save a copy$/);
   expect(await menuEntries()).toEqual(["Copy link"]);
@@ -352,7 +355,9 @@ test("Save a copy of an anonymous scene keeps its title", async () => {
   // Seeded scenes are author-less, like a visitor's own anonymous scene
   // after signing in.
   const scene = seedDb.withSceneFromItems([]);
-  const { store } = renderTestApp(`/${scene.key}`, { isAuthenticated: true });
+  const { store } = await renderTestApp(`/${scene.key}`, {
+    isAuthenticated: true,
+  });
 
   await user.click(await primary());
 
@@ -362,7 +367,7 @@ test("Save a copy of an anonymous scene keeps its title", async () => {
 
 test("a signed-out re-share of an unedited published scene reuses its link", async () => {
   const posts = countRequests("POST", "/v1/scenes/");
-  renderTestApp("/");
+  await renderTestApp("/");
 
   await user.click(await primary());
   const titleStep = await screen.findByRole("dialog", { name: "Share scene" });
@@ -387,7 +392,7 @@ test("a signed-out re-share of an unedited published scene reuses its link", asy
 test("a signed-out share of an edited scene mints a new link under its title", async () => {
   const item = makeItem(MIT.Point);
   const scene = seedDb.withSceneFromItems([item]);
-  const { location, store } = renderTestApp(`/${scene.key}`);
+  const { location, store } = await renderTestApp(`/${scene.key}`);
   await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
   act(() => {
     store.dispatch(
@@ -410,7 +415,7 @@ test("a signed-out share of an edited scene mints a new link under its title", a
 
 test("the signed-out link step offers sign-in", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { location } = renderTestApp(`/${scene.key}`);
+  const { location } = await renderTestApp(`/${scene.key}`);
 
   await user.click(await primary());
   const dialog = await screen.findByRole("dialog", { name: "Share scene" });
@@ -423,7 +428,7 @@ test("the signed-out link step offers sign-in", async () => {
 test("no scene action is offered until the route's scene has loaded", async () => {
   server.use(http.get(urls.scenes.detail, () => delay("infinite")));
   const scene = seedDb.withSceneFromItems([]);
-  const { queryClient } = renderTestApp(`/${scene.key}`);
+  const { queryClient } = await renderTestApp(`/${scene.key}`);
 
   // Auth has settled, so only the scene load holds the action back.
   await waitFor(() =>
@@ -434,7 +439,7 @@ test("no scene action is offered until the route's scene has loaded", async () =
 
 test("no scene action is offered while auth is still loading", async () => {
   server.use(http.get(urls.auth.me, () => delay("infinite")));
-  renderTestApp("/");
+  await renderTestApp("/");
 
   await screen.findByRole("heading", { level: 1 });
   expect(screen.queryByTestId("scene-action")).toBeNull();
@@ -442,7 +447,7 @@ test("no scene action is offered while auth is still loading", async () => {
 
 describe("an opened draft whose scene was saved since", () => {
   const openAsDraft = (
-    store: ReturnType<typeof renderTestApp>["store"],
+    store: Awaited<ReturnType<typeof renderTestApp>>["store"],
     scene: ReturnType<typeof seedDb.withSceneFromItems>,
   ) =>
     act(() => {
@@ -461,7 +466,7 @@ describe("an opened draft whose scene was saved since", () => {
     });
 
   test("warns its author, and Save a copy saves it as a new scene", async () => {
-    const { scene, store } = renderOwnedScene();
+    const { scene, store } = await renderOwnedScene();
     await primary();
     expect(screen.queryByText(SAVED_SINCE)).toBeNull();
     openAsDraft(store, scene);
@@ -478,7 +483,7 @@ describe("an opened draft whose scene was saved since", () => {
   });
 
   test("goes away once the author saves over the newer version, as does the draft", async () => {
-    const { scene, store } = renderOwnedScene();
+    const { scene, store } = await renderOwnedScene();
     await primary();
     openAsDraft(store, scene);
     await screen.findByText(SAVED_SINCE);
@@ -493,7 +498,7 @@ describe("an opened draft whose scene was saved since", () => {
   test("doesn't warn anyone else, whose Save makes a copy anyway", async () => {
     const author = seedDb.withUser();
     const scene = seedDb.withSceneFromItems([], { author: author.id });
-    const { store } = renderTestApp(`/${scene.key}`, {
+    const { store } = await renderTestApp(`/${scene.key}`, {
       isAuthenticated: true,
     });
     await primary();
@@ -505,7 +510,7 @@ describe("an opened draft whose scene was saved since", () => {
 });
 
 test("a dialog opened from the menu returns focus to the menu button", async () => {
-  const { scene } = renderOwnedScene();
+  const { scene } = await renderOwnedScene();
   await renameScene(`${scene.title} edited`);
   await user.click(
     await screen.findByRole("button", { name: "More scene actions" }),
@@ -531,7 +536,7 @@ describe("on a phone", () => {
 
   test("a lone action is an icon button named for it", async () => {
     const scene = seedDb.withSceneFromItems([]);
-    renderTestApp(`/${scene.key}`);
+    await renderTestApp(`/${scene.key}`);
 
     const share = await screen.findByRole("button", { name: "Share" });
     expect(share).toHaveTextContent(/^$/);
@@ -543,7 +548,7 @@ describe("on a phone", () => {
   });
 
   test("an unsaved scene's Save icon is inert before any edit", async () => {
-    renderTestApp("/", { isAuthenticated: true });
+    await renderTestApp("/", { isAuthenticated: true });
 
     const save = await screen.findByRole("button", { name: "Save" });
     expect(save).toHaveTextContent(/^$/);
@@ -553,7 +558,7 @@ describe("on a phone", () => {
   });
 
   test("several actions are one menu button, the primary listed first", async () => {
-    const { scene } = renderOwnedScene();
+    const { scene } = await renderOwnedScene();
 
     await openMenu();
     expect(
@@ -576,7 +581,7 @@ describe("on a phone", () => {
         await gate.promise;
       }),
     );
-    const { scene } = renderOwnedScene();
+    const { scene } = await renderOwnedScene();
     await renameScene(`${scene.title} edited`);
 
     await openMenu();
@@ -591,7 +596,7 @@ describe("on a phone", () => {
   });
 
   test("Save from the menu saves in place and announces each step", async () => {
-    const { scene, store } = renderOwnedScene();
+    const { scene, store } = await renderOwnedScene();
     await renameScene(`${scene.title} edited`);
 
     await openMenu();
@@ -607,7 +612,7 @@ describe("on a phone", () => {
   });
 
   test("closing a dialog opened from the menu returns focus to the menu button", async () => {
-    const { scene } = renderOwnedScene();
+    const { scene } = await renderOwnedScene();
     await renameScene(`${scene.title} edited`);
 
     await openMenu();
@@ -625,7 +630,7 @@ describe("on a phone", () => {
   });
 
   test("focus follows the control across the breakpoint", async () => {
-    renderOwnedScene();
+    await renderOwnedScene();
     const trigger = await screen.findByRole("button", {
       name: "Scene actions",
     });
@@ -638,7 +643,7 @@ describe("on a phone", () => {
   });
 
   test("focus follows the control across the breakpoint from its open menu", async () => {
-    renderOwnedScene();
+    await renderOwnedScene();
     const trigger = await screen.findByRole("button", {
       name: "Scene actions",
     });
@@ -658,7 +663,7 @@ describe("on a phone", () => {
   test("a dialog opened from a lone button and closed after crossing the breakpoint returns focus to the new button", async () => {
     setPhone(false);
     const scene = seedDb.withSceneFromItems([]);
-    renderTestApp(`/${scene.key}`);
+    await renderTestApp(`/${scene.key}`);
     await user.click(await primary());
     const dialog = await screen.findByRole("dialog", { name: "Share scene" });
 
@@ -671,7 +676,7 @@ describe("on a phone", () => {
   });
 
   test("focus elsewhere stays put across the breakpoint", async () => {
-    renderOwnedScene();
+    await renderOwnedScene();
     await primary();
     const rename = screen.getByRole("button", { name: "Rename scene" });
     act(() => rename.focus());
@@ -683,7 +688,7 @@ describe("on a phone", () => {
   });
 
   test("a dialog closed after crossing the breakpoint and back returns focus to the new menu button", async () => {
-    const { scene } = renderOwnedScene();
+    const { scene } = await renderOwnedScene();
     await renameScene(`${scene.title} edited`);
     await openMenu();
     await user.click(

@@ -77,6 +77,13 @@ vi.stubGlobal("ResizeObserver", ResizeObserverMock);
 vi.stubGlobal("PointerEvent", MouseEvent);
 
 /**
+ * JSDOM implements neither; the router calls `scrollTo` to restore scroll and
+ * `scrollIntoView` for a URL's hash.
+ */
+vi.stubGlobal("scrollTo", () => {});
+Element.prototype.scrollIntoView ??= () => {};
+
+/**
  * API mocking for our tests.
  * Reset any test-specific handlers between tests.
  */

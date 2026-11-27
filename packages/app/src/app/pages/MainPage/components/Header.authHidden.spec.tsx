@@ -6,14 +6,14 @@ vi.mock("@/config/displayAuthFlows", () => ({
 }));
 
 test("Sign in header button is hidden when DISPLAY_AUTH_FLOWS is false", async () => {
-  renderTestApp("", { isAuthenticated: false });
+  await renderTestApp("", { isAuthenticated: false });
   await screen.findByRole("button", { name: "Open Menu" });
 
   expect(screen.queryByRole("button", { name: "Sign in" })).toBeNull();
 });
 
 test("Sign in and My Scenes menu items are hidden when DISPLAY_AUTH_FLOWS is false", async () => {
-  const { queryClient } = renderTestApp("", { isAuthenticated: false });
+  const { queryClient } = await renderTestApp("", { isAuthenticated: false });
   // While auth is pending the menu never offers Sign in, so wait it out or the
   // absence below holds whatever the flag says.
   await waitForAppReady(queryClient);
@@ -28,7 +28,7 @@ test("Sign in and My Scenes menu items are hidden when DISPLAY_AUTH_FLOWS is fal
 test("Logged-in users still get account menu items when DISPLAY_AUTH_FLOWS is false", async () => {
   // The flag is presentation-only: it hides the sign-in affordances, so a
   // session that already exists still gets the authenticated view.
-  renderTestApp("", { isAuthenticated: true });
+  await renderTestApp("", { isAuthenticated: true });
   // The trigger swaps from a hamburger ("Open Menu") to the user avatar
   // ("Open User Menu") once the ["me"] query resolves. Anchoring on the
   // avatar's name waits past the transient hamburger to the stable node.

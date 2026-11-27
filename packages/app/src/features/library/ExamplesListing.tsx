@@ -1,12 +1,13 @@
 import React from "react";
-import { useParams } from "react-router";
+import { useRouteSceneKey } from "@/services/navigation/urlState";
 import { useExampleScenes } from "@math3d/api";
 import { Drawer } from "@/ui/Drawer";
 import LoadingSpinner from "@/ui/LoadingSpinner";
 import { useKeptFailure } from "@/util/hooks";
+import { ListType } from "@/services/overlays/search";
 import LoadFailed from "./LoadFailed";
 import SceneCard from "./SceneCard/SceneCard";
-import { ListType, cardTitle } from "./constants";
+import { cardTitle } from "./constants";
 import useSceneLinks from "./useSceneLinks";
 import styles from "./ScenesList.module.css";
 
@@ -14,7 +15,7 @@ import styles from "./ScenesList.module.css";
 const EXAMPLES_LIMIT = 100;
 
 const ExamplesListing: React.FC = () => {
-  const { sceneKey } = useParams();
+  const sceneKey = useRouteSceneKey();
   const links = useSceneLinks(ListType.Examples);
   const query = useExampleScenes({ limit: EXAMPLES_LIMIT });
   const { failure, retrying, failedAttempts, retry } = useKeptFailure(query, {
@@ -36,7 +37,7 @@ const ExamplesListing: React.FC = () => {
           {query.data.items.map((scene) => (
             <SceneCard
               key={scene.key}
-              to={links.href(scene.key)}
+              link={links.link(scene.key)}
               title={cardTitle(scene.title)}
               imageUrl={scene.imageUrl}
               current={scene.key === sceneKey}

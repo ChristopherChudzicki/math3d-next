@@ -1,6 +1,5 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { MemoryRouter } from "react-router";
 import { Icon } from "@iconify/react/offline";
 import externalLink from "@iconify-icons/lucide/external-link";
 import type { ButtonVariant, ButtonTone, ButtonSize } from "@/ui/Button";
@@ -20,78 +19,76 @@ const heading: React.CSSProperties = {
 };
 
 const AllButtonLinks: React.FC = () => (
-  <MemoryRouter>
-    <div style={{ display: "grid", gap: 32 }}>
-      <table style={{ borderCollapse: "collapse" }}>
-        <caption style={{ ...heading, textAlign: "left" }}>
-          States (router mode, size md)
-        </caption>
-        <thead>
-          <tr>
-            <th style={heading}>variant / tone</th>
-            {states.map((state) => (
-              <th key={state} style={heading}>
-                {state}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {variants.flatMap((variant) =>
-            tones.map((tone) => (
-              <tr key={`${variant}-${tone}`}>
-                <th style={heading}>
-                  {variant} / {tone}
-                </th>
-                {states.map((state) => (
-                  <td key={state} style={cell}>
-                    <ButtonLink
-                      to="/"
-                      variant={variant}
-                      tone={tone}
-                      data-pseudo={state}
-                    >
-                      Link
-                    </ButtonLink>
-                  </td>
-                ))}
-              </tr>
-            )),
-          )}
-        </tbody>
-      </table>
-      <table style={{ borderCollapse: "collapse" }}>
-        <caption style={{ ...heading, textAlign: "left" }}>
-          Sizes; plain href mode with an icon
-        </caption>
-        <tbody>
-          {sizes.map((size) => (
-            <tr key={size}>
-              <th style={heading}>{size}</th>
-              <td style={cell}>
-                <ButtonLink to="/" size={size}>
-                  Back to Math3d
-                </ButtonLink>
-              </td>
-              <td style={cell}>
-                <ButtonLink
-                  href="https://example.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  size={size}
-                  variant="ghost"
-                  tone="primary"
-                >
-                  Open site
-                  <Icon icon={externalLink} aria-hidden="true" />
-                </ButtonLink>
-              </td>
-            </tr>
+  <div style={{ display: "grid", gap: 32 }}>
+    <table style={{ borderCollapse: "collapse" }}>
+      <caption style={{ ...heading, textAlign: "left" }}>
+        States (router mode, size md)
+      </caption>
+      <thead>
+        <tr>
+          <th style={heading}>variant / tone</th>
+          {states.map((state) => (
+            <th key={state} style={heading}>
+              {state}
+            </th>
           ))}
-        </tbody>
-      </table>
-    </div>
-  </MemoryRouter>
+        </tr>
+      </thead>
+      <tbody>
+        {variants.flatMap((variant) =>
+          tones.map((tone) => (
+            <tr key={`${variant}-${tone}`}>
+              <th style={heading}>
+                {variant} / {tone}
+              </th>
+              {states.map((state) => (
+                <td key={state} style={cell}>
+                  <ButtonLink
+                    to="/app/help/reference"
+                    variant={variant}
+                    tone={tone}
+                    data-pseudo={state}
+                  >
+                    Link
+                  </ButtonLink>
+                </td>
+              ))}
+            </tr>
+          )),
+        )}
+      </tbody>
+    </table>
+    <table style={{ borderCollapse: "collapse" }}>
+      <caption style={{ ...heading, textAlign: "left" }}>
+        Sizes; plain href mode with an icon
+      </caption>
+      <tbody>
+        {sizes.map((size) => (
+          <tr key={size}>
+            <th style={heading}>{size}</th>
+            <td style={cell}>
+              <ButtonLink to="/app/help/reference" size={size}>
+                Function Reference
+              </ButtonLink>
+            </td>
+            <td style={cell}>
+              <ButtonLink
+                href="https://example.com"
+                target="_blank"
+                rel="noreferrer"
+                size={size}
+                variant="ghost"
+                tone="primary"
+              >
+                Open site
+                <Icon icon={externalLink} aria-hidden="true" />
+              </ButtonLink>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 );
 
 const meta: Meta<typeof AllButtonLinks> = {

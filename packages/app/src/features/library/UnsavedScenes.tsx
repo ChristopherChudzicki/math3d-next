@@ -1,6 +1,5 @@
 import React, { useId, useLayoutEffect, useRef, useState } from "react";
 import classNames from "classnames";
-import { useParams } from "react-router";
 import { Icon } from "@iconify/react/offline";
 import trash2 from "@iconify-icons/lucide/trash-2";
 import { MathItemType } from "@math3d/mathitem-configs";
@@ -17,9 +16,11 @@ import {
 } from "@/store/scene/drafts/storage";
 import type { DraftRecord } from "@/store/scene/drafts/storage";
 import { MAIN_FOLDER } from "@/store/scene/state/util";
+import { ListType } from "@/services/overlays/search";
+import { useRouteSceneKey } from "@/services/navigation/urlState";
 import useDrafts from "./useDrafts";
 import useOpenDraft from "./useOpenDraft";
-import { ListType, cardTitle } from "./constants";
+import { cardTitle } from "./constants";
 import listStyles from "./ScenesList.module.css";
 import styles from "./UnsavedScenes.module.css";
 
@@ -168,7 +169,7 @@ const DeletedRow: React.FC<{
 /** The Unsaved tab's panel. */
 const UnsavedScenes: React.FC<{ className?: string }> = ({ className }) => {
   const drafts = useDrafts();
-  const { sceneKey } = useParams();
+  const sceneKey = useRouteSceneKey();
   // Only while the editor shows the URL's scene: behind "Scene not found",
   // the editor's session can be reopened like any other.
   const currentId = useAppSelector(({ scene }) =>

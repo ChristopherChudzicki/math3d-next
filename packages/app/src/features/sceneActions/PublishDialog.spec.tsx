@@ -15,11 +15,12 @@ import {
   within,
   writeSessionDraft,
 } from "@/test_util";
+import { navigateTo } from "@/test_util/routerTesting";
 
-const renderOwnedScene = (overrides: Partial<Scene> = {}) => {
+const renderOwnedScene = async (overrides: Partial<Scene> = {}) => {
   const me = seedDb.withUser();
   const scene = seedDb.withSceneFromItems([], { author: me.id, ...overrides });
-  return { scene, ...renderTestApp(`/${scene.key}`, { user: me }) };
+  return { scene, ...(await renderTestApp(`/${scene.key}`, { user: me })) };
 };
 
 const openDuplicate = async () => {
@@ -43,7 +44,7 @@ const holdPosts = () => {
 };
 
 test("a titled scene publishes without asking for a title", async () => {
-  const { scene, store } = renderOwnedScene();
+  const { scene, store } = await renderOwnedScene();
 
   await openDuplicate();
 
@@ -52,7 +53,7 @@ test("a titled scene publishes without asking for a title", async () => {
 });
 
 test("publishing an edited scene removes its draft", async () => {
-  const { store } = renderOwnedScene();
+  const { store } = await renderOwnedScene();
   await screen.findByRole("button", { name: "More scene actions" });
   act(() => {
     store.dispatch(actions.setTitle({ title: "Edited" }));
@@ -72,7 +73,7 @@ test("a failed publish offers the title step to retry, leaving the scene as it w
       HttpResponse.json({ detail: "boom" }, { status: 500 }),
     ),
   );
-  const { scene, store } = renderOwnedScene();
+  const { scene, store } = await renderOwnedScene();
 
   const dialog = await openDuplicate();
 
@@ -91,7 +92,7 @@ test("a failed publish offers the title step to retry, leaving the scene as it w
 test("while the publish is in flight, the dialog can't be closed", async () => {
   const release = holdPosts();
   const posts = countRequests("POST", "/v1/scenes/");
-  renderOwnedScene();
+  await renderOwnedScene();
 
   const dialog = await openDuplicate();
 
@@ -108,7 +109,7 @@ test("while the publish is in flight, the dialog can't be closed", async () => {
 });
 
 test("a copy of an untitled scene asks for a title, starting untitled", async () => {
-  renderOwnedScene({ title: "" });
+  await renderOwnedScene({ title: "" });
 
   const dialog = await openDuplicate();
 
@@ -121,7 +122,7 @@ test("a copy of an untitled scene asks for a title, starting untitled", async ()
 test("while a titled publish is in flight, the title step can be neither resubmitted nor closed", async () => {
   const release = holdPosts();
   const posts = countRequests("POST", "/v1/scenes/");
-  renderOwnedScene({ title: "" });
+  await renderOwnedScene({ title: "" });
 
   const dialog = await openDuplicate();
   const save = within(dialog).getByRole("button", { name: "Save" });
@@ -143,7 +144,7 @@ test("while a titled publish is in flight, the title step can be neither resubmi
 });
 
 test("a blank title publishes the scene untitled", async () => {
-  const { store } = renderOwnedScene({ title: "" });
+  const { store } = await renderOwnedScene({ title: "" });
 
   const dialog = await openDuplicate();
   await user.type(within(dialog).getByLabelText("Title"), "   ");
@@ -154,7 +155,7 @@ test("a blank title publishes the scene untitled", async () => {
 });
 
 test("publishing from the title step keeps one dialog and moves focus to Copy link", async () => {
-  renderOwnedScene({ title: "" });
+  await renderOwnedScene({ title: "" });
 
   const dialog = await openDuplicate();
   await user.type(within(dialog).getByLabelText("Title"), "{Enter}");
@@ -168,7 +169,7 @@ test("publishing from the title step keeps one dialog and moves focus to Copy li
 });
 
 test("a padded title is published trimmed", async () => {
-  const { store } = renderOwnedScene({ title: "" });
+  const { store } = await renderOwnedScene({ title: "" });
 
   const dialog = await openDuplicate();
   await user.type(within(dialog).getByLabelText("Title"), "  Spaced  ");
@@ -179,7 +180,7 @@ test("a padded title is published trimmed", async () => {
 });
 
 test("a copy of a legacy scene is not legacy", async () => {
-  const { store } = renderOwnedScene({ isLegacy: true });
+  const { store } = await renderOwnedScene({ isLegacy: true });
   await waitFor(() => expect(store.getState().scene.isLegacy).toBe(true));
 
   await openDuplicate();
@@ -190,10 +191,10 @@ test("a copy of a legacy scene is not legacy", async () => {
 
 test("loading another scene closes the dialog", async () => {
   const other = seedDb.withSceneFromItems([]);
-  const { router } = renderOwnedScene({ title: "" });
+  const { router } = await renderOwnedScene({ title: "" });
 
   const dialog = await openDuplicate();
-  await act(() => router.navigate(`/${other.key}`));
+  await navigateTo(router, `/${other.key}`);
 
   await waitFor(() => expect(dialog).not.toBeInTheDocument());
 });
@@ -214,7 +215,7 @@ test("a publish that lands after another scene loads leaves the user there, and 
     server.events.removeListener("response:mocked", onResponse);
   });
   const other = seedDb.withSceneFromItems([]);
-  const { router, store, location } = renderOwnedScene();
+  const { router, store, location } = await renderOwnedScene();
 
   await screen.findByRole("button", { name: "More scene actions" });
   act(() => {
@@ -222,7 +223,7 @@ test("a publish that lands after another scene loads leaves the user there, and 
   });
 
   await openDuplicate();
-  await act(() => router.navigate(`/${other.key}`));
+  await navigateTo(router, `/${other.key}`);
   await waitFor(() => expect(store.getState().scene.key).toBe(other.key));
   // Loading the other scene wrote the edited session's draft.
   expect(listDrafts()).toHaveLength(1);

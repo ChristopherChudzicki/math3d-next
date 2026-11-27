@@ -5,30 +5,23 @@ import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { DISPLAY_AUTH_FLOWS } from "@/config/displayAuthFlows";
 import { useOverlay } from "@/services/overlays/useOverlay";
 import type { OverlayProps } from "@/services/overlays/useOverlay";
-import { useUrlLayerSearchParams } from "@/services/overlays/UrlLayer";
+import { useUrlLayerLocation } from "@/services/overlays/UrlLayer";
+import { ListType } from "@/services/overlays/search";
 import ExamplesListing from "@/features/library/ExamplesListing";
 import MyScenes from "@/features/library/MyScenes";
 import UnsavedScenes from "@/features/library/UnsavedScenes";
 import useDrafts from "@/features/library/useDrafts";
 import {
-  ListType,
   OPEN_SCENES_BUTTON_ID,
   SCENES_DRAWER_SIZE,
 } from "@/features/library/constants";
 import styles from "./ScenesListPage.module.css";
 
 const normalizeListType = (
-  listType: string,
+  listType: ListType,
   showMyScenes: boolean,
-): ListType => {
-  if (!showMyScenes && listType === ListType.Me) {
-    return ListType.Examples;
-  }
-  if (Object.values(ListType).includes(listType as ListType)) {
-    return listType as ListType;
-  }
-  return ListType.Examples;
-};
+): ListType =>
+  !showMyScenes && listType === ListType.Me ? ListType.Examples : listType;
 
 // Whatever opened the drawer (a menu item, a deep link) may be gone by the
 // time it closes, so focus always returns to the header's scenes button.
@@ -38,12 +31,12 @@ const focusOpenScenesButton = () =>
 const ScenesListContent: React.FC<{ children?: React.ReactNode }> = ({
   children,
 }) => {
-  const search = useUrlLayerSearchParams();
+  const { search } = useUrlLayerLocation();
   const { open } = useOverlay();
   const isAuthenticated = useAuthStatus();
   const showMyScenes =
     DISPLAY_AUTH_FLOWS || isAuthenticated === "authenticated";
-  const rawList = search.get("list") ?? ListType.Examples;
+  const rawList = search.list ?? ListType.Examples;
   const listType = normalizeListType(rawList, showMyScenes);
   const unsavedCount = useDrafts()?.length ?? 0;
 

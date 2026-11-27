@@ -1,11 +1,10 @@
 import React from "react";
-import { useSearchParams } from "react-router";
-import { SIGN_IN_PARAM } from "@/services/overlays/useSignInDialog";
-import type { OverlayName } from "@/services/overlays/useOverlay";
+import { useLocation } from "@tanstack/react-router";
+import type { OverlayName } from "@/services/overlays/search";
 import {
   UrlLayer,
+  useUrlLayerLocation,
   useUrlLayerOpen,
-  useUrlLayerSearchParams,
 } from "@/services/overlays/UrlLayer";
 import { OVERLAYS } from "./overlayRegistry";
 import LoginPage from "./pages/auth/LoginPage";
@@ -21,7 +20,7 @@ const NestedSignIn: React.FC = () => {
   const overlayOpen = useUrlLayerOpen();
   return (
     <SignInUrlLayer
-      open={useUrlLayerSearchParams().has(SIGN_IN_PARAM) && overlayOpen}
+      open={useUrlLayerLocation().search.signin !== undefined && overlayOpen}
     />
   );
 };
@@ -36,11 +35,8 @@ const OVERLAY_ENTRIES = Object.entries(OVERLAYS) as [
  * only if it is mounted on both sides of the change.
  */
 const UrlLayerHost: React.FC = () => {
-  const [search] = useSearchParams();
-  const name = search.get("overlay");
-  // Own-property check, so `?overlay=constructor` counts as unknown: it opens
-  // nothing and leaves top-level sign-in free to open.
-  const activeOverlay = name && Object.hasOwn(OVERLAYS, name) ? name : null;
+  const { search } = useLocation();
+  const activeOverlay = search.overlay ?? null;
   return (
     <>
       {OVERLAY_ENTRIES.map(([key, Overlay]) => (
@@ -50,7 +46,7 @@ const UrlLayerHost: React.FC = () => {
           </Overlay>
         </UrlLayer>
       ))}
-      <SignInUrlLayer open={search.has(SIGN_IN_PARAM) && !activeOverlay} />
+      <SignInUrlLayer open={search.signin !== undefined && !activeOverlay} />
     </>
   );
 };

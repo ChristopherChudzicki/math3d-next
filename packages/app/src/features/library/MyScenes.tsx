@@ -7,7 +7,8 @@ import {
   usePatchScene,
 } from "@math3d/api";
 import { debounce } from "lodash-es";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useRouteSceneKey } from "@/services/navigation/urlState";
 import { Icon } from "@iconify/react/offline";
 import moreVertical from "@iconify-icons/lucide/more-vertical";
 import archiveIcon from "@iconify-icons/lucide/archive";
@@ -26,12 +27,14 @@ import { useKeptFailure } from "@/util/hooks";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { useSignInDialog } from "@/services/overlays/useSignInDialog";
 import { useOverlay } from "@/services/overlays/useOverlay";
+import { homeLink } from "@/services/navigation/links";
 import { dismissToast, showToast } from "@/ui/Toast/toasts";
+import { ListType } from "@/services/overlays/search";
 import DeleteSceneDialog from "./DeleteSceneDialog";
 import LoadFailed from "./LoadFailed";
 import SceneCard from "./SceneCard/SceneCard";
-import { ListType, cardTitle } from "./constants";
-import useSceneLinks, { scenePath } from "./useSceneLinks";
+import { cardTitle } from "./constants";
+import useSceneLinks from "./useSceneLinks";
 import styles from "./ScenesList.module.css";
 
 const SCROLL_ID = "my-scenes-scroll";
@@ -52,13 +55,16 @@ const cardLink = (href: string) =>
   document
     .getElementById(SCROLL_ID)
     ?.querySelector<HTMLAnchorElement>(`a[href="${href}"]`) ?? null;
-const cardMenuButton = (href: string) =>
-  cardLink(href)?.closest("li")?.querySelector("button") ?? null;
 
 const MyScenesList: React.FC = () => {
-  const { sceneKey } = useParams();
+  const sceneKey = useRouteSceneKey();
   const links = useSceneLinks(ListType.Me);
   const navigate = useNavigate();
+  const router = useRouter();
+  const cardFor = (key: string) =>
+    cardLink(router.buildLocation(links.link(key)).publicHref);
+  const cardMenuButton = (key: string) =>
+    cardFor(key)?.closest("li")?.querySelector("button") ?? null;
   const [filterText, setFilterText] = useState("");
   const [filterValue, setFilterValue] = useState("");
   const [includeArchived, setIncludeArchived] = useState(false);
@@ -140,7 +146,7 @@ const MyScenesList: React.FC = () => {
     return (items[i + 1] ?? items[i - 1])?.key ?? null;
   };
   const elementFor = (key: string | null) =>
-    (key && cardLink(links.href(key))) || filterRef.current;
+    (key && cardFor(key)) || filterRef.current;
 
   const toggleArchived = async (scene: MiniScene) => {
     const archiving = !scene.archived;
@@ -185,20 +191,17 @@ const MyScenesList: React.FC = () => {
     if (scene.key === sceneKey) {
       // The deleted scene's URL must not stay the current entry. (If the
       // dialog was opened by a push, the entry below still holds it.)
-      navigate(
-        scenePath("", {
-          overlay: "scenes",
-          list: ListType.Me,
-          ...links.carried,
-        }),
-        { replace: true },
-      );
+      navigate({
+        ...homeLink,
+        search: { overlay: "scenes", list: ListType.Me, ...links.carried },
+        replace: true,
+      });
     }
   };
   const deleteDialogFinalFocus = () => {
     const { deleted, key } = deleteFocus.current;
     if (deleted) return elementFor(key);
-    return key ? cardMenuButton(links.href(key)) : null;
+    return key ? cardMenuButton(key) : null;
   };
 
   const renderBody = () => {
@@ -246,7 +249,7 @@ const MyScenesList: React.FC = () => {
           {items.map((item) => (
             <SceneCard
               key={item.key}
-              to={links.href(item.key)}
+              link={links.link(item.key)}
               title={titleOf(item)}
               imageUrl={item.imageUrl}
               modifiedDate={item.modifiedDate}

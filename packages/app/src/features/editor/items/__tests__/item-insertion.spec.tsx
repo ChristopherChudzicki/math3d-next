@@ -13,7 +13,7 @@ import {
 } from "@/test_util/mathItems";
 
 test("setup renders 9 points in 3 folders", async () => {
-  renderTestApp("/test_folders");
+  await renderTestApp("/test_folders");
 
   await findItemByDescription("F1");
   const descriptions = screen
@@ -71,7 +71,7 @@ test.each([
     description: "[Active Item = Folder] folders are inserted after it",
   },
 ])("$description", async ({ itemToAdd, expected, beforeAdd }) => {
-  renderTestApp("/test_folders");
+  await renderTestApp("/test_folders");
 
   await findItemByDescription("F1");
   await beforeAdd();
@@ -86,7 +86,7 @@ test.each([
 });
 
 test("Newly inserted item is activated", async () => {
-  renderTestApp("/test_folders");
+  await renderTestApp("/test_folders");
 
   /**
    * The behaviors associated with "being active item" are
@@ -111,7 +111,7 @@ test("Newly inserted item is activated", async () => {
 });
 
 test("Inserting items after deletion---active item resets", async () => {
-  renderTestApp("/test_folders");
+  await renderTestApp("/test_folders");
   const p2b = await findItemByDescription("P2b");
   const description = within(p2b).getByLabelText("Description");
   await user.click(description);
@@ -146,7 +146,7 @@ test.each(permanentItems)(
   "Cannot insert items into permanent folders",
   async ({ itemId }) => {
     // insertion should be allowed but should be into default folder and refocus tab
-    const { store } = renderTestApp("/");
+    const { store } = await renderTestApp("/");
     await findItemByDescription("Explicit Surface");
     await user.click(screen.getByRole("tab", { name: "Setup" }));
     const item = getItemByTestId(itemId);
@@ -164,7 +164,7 @@ test.each(permanentItems)(
 );
 
 test.each(permanentItems)("Removing items", async ({ itemId }) => {
-  renderTestApp("/");
+  await renderTestApp("/");
   const removeBtnLabel = "Remove Item";
   within(await findItemByDescription("Explicit Surface")).getByRole("button", {
     name: removeBtnLabel,
@@ -181,7 +181,7 @@ test.each(permanentItems)("Removing items", async ({ itemId }) => {
 test.each(permanentItems)(
   "Cannot move permanent folders or their items",
   async ({ itemId }) => {
-    renderTestApp("/");
+    await renderTestApp("/");
     const surface = await findItemByDescription("Explicit Surface");
     expect(
       surface.closest('[aria-roledescription="sortable"]'),
@@ -204,7 +204,7 @@ test.each([
   },
 ])("Cannot delete non-empty folders", async ({ items, isRemoveDisabled }) => {
   const scene = seedDb.withSceneFromItems(items);
-  renderTestApp(`/${scene.key}`);
+  await renderTestApp(`/${scene.key}`);
   const folder = await findItemByDescription("Folder");
   const removeBtn = within(folder).getByRole("button", {
     name: "Remove Item",
@@ -216,7 +216,7 @@ test("Inserted item id is not already used", async () => {
   const count = faker.number.int({ min: 1, max: 10 });
   const items = _.times(count, () => makeItem(MIT.Point));
   const scene = seedDb.withSceneFromItems(items);
-  const { store } = renderTestApp(`/${scene.key}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
   await findItemByDescription("Folder");
   const idsA = Object.keys(store.getState().scene.items).map((x) => +x);
 

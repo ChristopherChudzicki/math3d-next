@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams } from "react-router";
+import { useRouteSceneKey } from "@/services/navigation/urlState";
 import classNames from "classnames";
 import { Icon } from "@iconify/react/offline";
 import pencil from "@iconify-icons/lucide/pencil";
@@ -18,7 +18,7 @@ const SceneTitle: React.FC = () => {
   const key = useAppSelector(select.key);
   const loaded = useAppSelector((state) => state.scene.loaded);
   const loadCount = useAppSelector((state) => state.scene.loadCount);
-  const routeKey = useParams().sceneKey ?? null;
+  const routeKey = useRouteSceneKey() ?? null;
   // The load the dialog was opened on: loading another scene closes it.
   const [renamingLoad, setRenamingLoad] = useState<number | null>(null);
   const ready = loaded && key === routeKey;

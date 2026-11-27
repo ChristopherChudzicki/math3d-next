@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { renderTestApp, screen, user, within } from "@/test_util";
 
 test("Add Object offers every addable type, in order", async () => {
-  renderTestApp("/");
+  await renderTestApp("/");
   await user.click(await screen.findByRole("button", { name: "Add Object" }));
   const menu = await screen.findByRole("menu", { name: "Add Object" });
   expect(

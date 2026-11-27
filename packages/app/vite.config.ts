@@ -2,6 +2,7 @@ import path from "node:path";
 import { defineConfig } from "vitest/config";
 import { visualizer } from "rollup-plugin-visualizer";
 import react from "@vitejs/plugin-react";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import viteTsconfigPaths from "vite-tsconfig-paths";
 import { Schema, ValidateEnv } from "@julr/vite-plugin-validate-env";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
@@ -116,6 +117,9 @@ export default defineConfig({
       // Serve the app against @math3d/mock-api instead of a real backend.
       VITE_USE_MSW: Schema.string.optional(),
     }),
+    // Options live in tsr.config.json, shared with `yarn generate-routes`.
+    // Must precede react().
+    tanstackRouter(),
     react(),
     viteTsconfigPaths(),
     visualizer({

@@ -2,7 +2,8 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { delay, http } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { seedDb, urls } from "@math3d/mock-api";
-import { act, renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import { goBack } from "@/test_util/routerTesting";
 import { getStore } from "@/store/store";
 import {
   SIGN_IN_DRAFT_KEY,
@@ -21,11 +22,13 @@ afterEach(() => {
 });
 
 test("Google sign-in posts allauth's redirect form, returning to this page and its overlay", async () => {
-  renderTestApp("/?controls=0&overlay=scenes&list=me&signin#h");
+  await renderTestApp("/?controls=0&overlay=scenes&list=me&signin#h");
 
   const button = await screen.findByRole("button", {
     name: "Sign in with Google",
   });
+  await waitFor(() => expect(button).toBeEnabled());
+  await user.click(button);
   const form = button.closest("form");
 
   expect(form).toHaveAttribute("method", "post");
@@ -42,7 +45,7 @@ test("Google sign-in posts allauth's redirect form, returning to this page and i
 
 test("Submitting saves a draft and sends the CSRF token current at submit", async () => {
   document.cookie = "csrftoken=token-at-render";
-  renderTestApp("/?signin");
+  await renderTestApp("/?signin");
 
   const button = await screen.findByRole("button", {
     name: "Sign in with Google",
@@ -62,7 +65,7 @@ test("Submitting saves a draft and sends the CSRF token current at submit", asyn
 
 test("Sign-in waits for the session check that seeds the CSRF cookie", async () => {
   server.use(http.get(urls.auth.me, () => delay("infinite")));
-  renderTestApp("/?signin");
+  await renderTestApp("/?signin");
 
   expect(
     await screen.findByRole("button", { name: "Sign in with Google" }),
@@ -70,7 +73,7 @@ test("Sign-in waits for the session check that seeds the CSRF cookie", async () 
 });
 
 test("A returned error opens the dialog over the page it left, with fixed text", async () => {
-  const { location } = renderTestApp(
+  const { location } = await renderTestApp(
     "/?overlay=scenes&list=me&error=signup_closed&error_process=login",
   );
 
@@ -82,7 +85,7 @@ test("A returned error opens the dialog over the page it left, with fixed text",
 });
 
 test("A cancelled sign-in is reported as information, not an error", async () => {
-  renderTestApp("/?error=cancelled&error_process=login");
+  await renderTestApp("/?error=cancelled&error_process=login");
 
   const dialog = await screen.findByRole("dialog", { name: "Sign in" });
   expect(within(dialog).getByRole("status")).toHaveTextContent(
@@ -92,9 +95,12 @@ test("A cancelled sign-in is reported as information, not an error", async () =>
 });
 
 test("A returned error opens no dialog for someone already signed in", async () => {
-  const { location } = renderTestApp("/?error=unknown&error_process=login", {
-    isAuthenticated: true,
-  });
+  const { location } = await renderTestApp(
+    "/?error=unknown&error_process=login",
+    {
+      isAuthenticated: true,
+    },
+  );
 
   await expect(
     screen.findByRole("dialog", { name: "Sign in" }, { timeout: 500 }),
@@ -103,7 +109,7 @@ test("A returned error opens no dialog for someone already signed in", async () 
 });
 
 test("An unrecognized error is never echoed", async () => {
-  renderTestApp("/?error=%3Cb%3Eowned%3C%2Fb%3E&error_process=login");
+  await renderTestApp("/?error=%3Cb%3Eowned%3C%2Fb%3E&error_process=login");
 
   const dialog = await screen.findByRole("dialog", { name: "Sign in" });
   expect(dialog).not.toHaveTextContent("owned");
@@ -119,7 +125,9 @@ test("The sign-in error page loads the draft's page, query kept, with its error"
     `${window.location.origin}/abc?controls=0`,
   );
 
-  renderTestApp("/app/sign-in-error?error=signup_closed&error_process=login");
+  await renderTestApp(
+    "/app/sign-in-error?error=signup_closed&error_process=login",
+  );
 
   // A full load, so the draft restores the way any return from sign-in does.
   await waitFor(() =>
@@ -130,7 +138,9 @@ test("The sign-in error page loads the draft's page, query kept, with its error"
 });
 
 test("The sign-in error page returns home when no draft names a page", async () => {
-  renderTestApp("/app/sign-in-error?error=signup_closed&error_process=login");
+  await renderTestApp(
+    "/app/sign-in-error?error=signup_closed&error_process=login",
+  );
 
   await waitFor(() =>
     expect(replaceLocation).toHaveBeenCalledWith(
@@ -140,19 +150,19 @@ test("The sign-in error page returns home when no draft names a page", async () 
 });
 
 test("If authenticated already, closes the dialog", async () => {
-  const { location } = renderTestApp("/?signin", {
+  const { location } = await renderTestApp("/?signin", {
     isAuthenticated: true,
   });
   await waitFor(() => expect(location.current.search).toBe(""));
 });
 
 test("Back from the sign-in dialog returns to the overlay beneath it", async () => {
-  const { location, router } = renderTestApp("/?overlay=scenes&list=me");
+  const { location, router } = await renderTestApp("/?overlay=scenes&list=me");
   await user.click(await screen.findByRole("button", { name: "Sign in" }));
   await screen.findByRole("dialog", { name: "Sign in" });
   expect(location.current.search).toBe("?overlay=scenes&list=me&signin=");
 
-  await act(() => router.navigate(-1));
+  await goBack(router);
 
   await waitFor(() =>
     expect(screen.queryByRole("dialog", { name: "Sign in" })).toBeNull(),
@@ -163,7 +173,7 @@ test("Back from the sign-in dialog returns to the overlay beneath it", async () 
 });
 
 test("Closing a returned error's dialog keeps the overlay and forgets the error", async () => {
-  const { location } = renderTestApp(
+  const { location } = await renderTestApp(
     "/?overlay=scenes&list=me&error=signup_closed&error_process=login#h",
   );
   const dialog = await screen.findByRole("dialog", { name: "Sign in" });
@@ -182,7 +192,7 @@ test("Closing a returned error's dialog keeps the overlay and forgets the error"
 
 test("opening/closing the dialog preserves other params and the hash", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { location } = renderTestApp(`/${scene.key}?controls=0#frag`);
+  const { location } = await renderTestApp(`/${scene.key}?controls=0#frag`);
   await user.click(
     await screen.findByRole("button", { name: "Sign in", hidden: true }),
   );

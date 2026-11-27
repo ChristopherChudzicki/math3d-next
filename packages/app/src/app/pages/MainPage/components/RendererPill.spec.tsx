@@ -14,7 +14,7 @@ test.each([
   "the pill explains the renderer and switches back, focusing the menu trigger ($trigger)",
   async ({ isAuthenticated, trigger }) => {
     storeRendererPreference("mathbox");
-    renderTestApp("/", { isAuthenticated });
+    await renderTestApp("/", { isAuthenticated });
     const menuTrigger = await screen.findByRole("button", { name: trigger });
 
     await user.click(
@@ -47,7 +47,7 @@ test.each([
 
 test("no pill on the scene-unavailable card", async () => {
   storeRendererPreference("mathbox");
-  renderTestApp("/nonexistent-scene-key");
+  await renderTestApp("/nonexistent-scene-key");
 
   expect(
     await screen.findByRole("heading", { name: "This scene doesn’t exist." }),
