@@ -27,7 +27,8 @@ const useOpenDraft = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const links = useSceneLinks(ListType.Unsaved);
-  // Read after an await, so from the router's state. (The overlay layer's
+  // Read after an await, so from the router: `latestLocation` follows history
+  // at once, where `state.location` waits for the load. (The overlay layer's
   // location freezes on close.)
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -73,14 +74,14 @@ const useOpenDraft = () => {
 
   /** The opened copy, or null if the draft wasn't opened. */
   const open = async (record: DraftRecord): Promise<DraftRecord | null> => {
-    const from = router.state.location.state.__TSR_key;
+    const from = router.latestLocation.state.__TSR_key;
     const base = record.key
       ? await checkBase(record.key, record.baseModifiedDate)
       : { exists: false, isLegacy: false, savedSince: false };
     // While the fetch ran, the user closed the list, went elsewhere, or
     // deleted the draft. Another tab may have written it, so read it again.
     const latest = readDraft(record.id);
-    if (router.state.location.state.__TSR_key !== from || !latest) {
+    if (router.latestLocation.state.__TSR_key !== from || !latest) {
       return null;
     }
     // A draft of a deleted scene opens as a new scene, so Save creates one.
@@ -122,7 +123,7 @@ const useOpenDraft = () => {
     // drawer where a card for the open scene would.
     const link = links.link(key ?? undefined);
     if (
-      router.state.location.pathname !== router.buildLocation(link).pathname
+      router.latestLocation.pathname !== router.buildLocation(link).pathname
     ) {
       navigate(link);
     } else {
