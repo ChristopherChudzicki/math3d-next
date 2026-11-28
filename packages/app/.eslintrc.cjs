@@ -155,9 +155,14 @@ const layoutZones = [
   {
     target: "./src/worker",
     from: "./src",
-    except: ["./worker", "./store/scene/sceneTitle.ts", "./config/sceneKey.ts"],
+    except: [
+      "./worker",
+      "./store/scene/sceneTitle.ts",
+      "./config/sceneKey.ts",
+      "./config/pageTitle.ts",
+    ],
     message:
-      "The edge Worker runs in workerd; it imports only sceneTitle and sceneKey from the app.",
+      "The edge Worker runs in workerd; it imports only sceneTitle, sceneKey and pageTitle from the app.",
   },
   ...RENDERER_DIRS.map((dir) => ({
     target: `${VIEWPORT}/${dir}`,

@@ -10,6 +10,7 @@ const SHELL_HTML = `<!doctype html><html><head>
 <meta property="og:title" content="${DEFAULT_TITLE}" />
 <meta name="twitter:title" content="${DEFAULT_TITLE}" />
 <meta property="og:url" content="https://next.math3d.org/" />
+<link rel="canonical" href="https://next.math3d.org/" />
 <meta property="og:description" content="site tagline" />
 <meta name="default-title" content="${DEFAULT_TITLE}" />
 <meta property="og:image" content="${DEFAULT_OG_IMAGE}" />
@@ -88,6 +89,7 @@ const tags = async (res: Response) => {
     ogTitle: g(/property="og:title" content="([^"]*)"/),
     twitterTitle: g(/name="twitter:title" content="([^"]*)"/),
     ogUrl: g(/property="og:url" content="([^"]*)"/),
+    canonical: g(/rel="canonical" href="([^"]*)"/),
     ogDesc: g(/property="og:description" content="([^"]*)"/),
     defaultTitle: g(/name="default-title" content="([^"]*)"/),
     ogImage: g(/property="og:image" content="([^"]*)"/),
@@ -106,6 +108,7 @@ it("rewrites the title tags on a titled scene", async () => {
   expect(t.ogTitle).toBe("My Torus");
   expect(t.twitterTitle).toBe("My Torus");
   expect(t.ogUrl).toBe("https://og.math3d.test/abc123");
+  expect(t.canonical).toBe("https://og.math3d.test/abc123");
   // left at their index.html defaults:
   expect(t.ogDesc).toBe("site tagline");
   expect(t.defaultTitle).toBe(DEFAULT_TITLE);
@@ -126,6 +129,7 @@ it("keeps the shell's default title for an untitled scene but still rewrites og:
   expect(t.title).toBe(DEFAULT_TITLE);
   expect(t.ogTitle).toBe(DEFAULT_TITLE);
   expect(t.ogUrl).toBe("https://og.math3d.test/abc123");
+  expect(t.canonical).toBe("https://og.math3d.test/abc123");
 });
 
 it("escapes a hostile title (no tag/attribute breakout)", async () => {
@@ -147,14 +151,44 @@ it("escapes a hostile title (no tag/attribute breakout)", async () => {
   expect(imgElements).toBe(0);
 });
 
-it("serves a page that isn't a scene unchanged, without a lookup", async () => {
-  const spy = vi.fn();
-  vi.stubGlobal("fetch", spy);
-  const res = await call("/app/frame/x", makeEnv());
-  expect(spy).not.toHaveBeenCalled();
+it("names the help page and points its canonical link at it", async () => {
+  const res = await call("/app/help/reference/?overlay=scenes", makeEnv(), {
+    "If-None-Match": SHELL_ETAG,
+  });
   expect(res.status).toBe(200);
-  expect(await res.text()).toContain(`<title>${DEFAULT_TITLE}</title>`);
+  expect(res.headers.get("x-robots-tag")).toBeNull();
+  const t = await tags(res);
+  expect(t.title).toBe("Function Reference | Math3d");
+  expect(t.ogTitle).toBe("Function Reference");
+  expect(t.twitterTitle).toBe("Function Reference");
+  expect(t.ogUrl).toBe("https://og.math3d.test/app/help/reference");
+  expect(t.canonical).toBe("https://og.math3d.test/app/help/reference");
+  expect(res.headers.get("etag")).toBeNull();
 });
+
+it("points a scene's canonical link at its key alone, with no trailing slash or query", async () => {
+  stubMeta({ status: 200 }, { title: "My Torus" });
+  const t = await tags(await call("/abc123/?controls=0", makeEnv()));
+  expect(t.canonical).toBe("https://og.math3d.test/abc123");
+  expect(t.ogUrl).toBe("https://og.math3d.test/abc123");
+});
+
+it.each(["/app/frame/abc123", "/app/sign-in-error"])(
+  "serves %s as noindex with no canonical link, without a lookup",
+  async (path) => {
+    const spy = vi.fn();
+    vi.stubGlobal("fetch", spy);
+    const res = await call(path, makeEnv(), { "If-None-Match": SHELL_ETAG });
+    expect(spy).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    expect(res.headers.get("x-robots-tag")).toBe("noindex");
+    expect(res.headers.get("etag")).toBeNull();
+    const t = await tags(res);
+    expect(t.canonical).toBeNull();
+    expect(t.ogUrl).toBeNull();
+    expect(t.title).toBe(DEFAULT_TITLE);
+  },
+);
 
 it.each([
   ["matches no route", "/app/nope"],
@@ -168,7 +202,10 @@ it.each([
     expect(spy).not.toHaveBeenCalled();
     expect(res.status).toBe(404);
     expect(res.headers.get("cache-control")).toContain("private");
-    expect(await res.text()).toContain(`<title>${DEFAULT_TITLE}</title>`);
+    const t = await tags(res);
+    expect(t.title).toBe(DEFAULT_TITLE);
+    expect(t.canonical).toBeNull();
+    expect(t.ogUrl).toBeNull();
   },
 );
 
@@ -196,13 +233,15 @@ it.each([
     const t = await tags(res);
     expect(t.title).toBe(DEFAULT_TITLE);
     expect(t.ogTitle).toBe(DEFAULT_TITLE);
+    // A missing scene has no canonical; one whose lookup failed keeps its own.
+    expect(t.canonical).toBe(
+      status === 404 ? null : "https://og.math3d.test/abc123",
+    );
   },
 );
 
-it("lets a client revalidate a page that isn't a scene", async () => {
-  const res = await call("/app/frame/x", makeEnv(), {
-    "If-None-Match": SHELL_ETAG,
-  });
+it("lets a client revalidate the home page at a path no asset matches (//)", async () => {
+  const res = await call("//", makeEnv(), { "If-None-Match": SHELL_ETAG });
   expect(res.status).toBe(304);
 });
 

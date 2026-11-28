@@ -60,7 +60,9 @@ harder image pipeline can never gate the cheap text win:
 Worker in a month and serve the built `./dist` from any dumb static host (backend still on
 Django), everything works: the app boots, fetches scene data from the API exactly as it
 does today, and link previews still unfurl — just with the static default image/title
-instead of per-scene values. Graceful degradation, already true after #1223.
+instead of per-scene values. Graceful degradation, already true after #1223. One edit
+goes with dropping it: remove the shell's `rel="canonical"` link, which names the home page
+and which the Worker rewrites or removes on every other page.
 
 The rule that keeps it true: **the SPA may _opportunistically consume_ edge-provided data
 purely as an optimization (hydrate-if-present, else fetch), but must never _depend_ on it.**

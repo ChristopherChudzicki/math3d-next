@@ -4,21 +4,26 @@
  * Runs for requests that match no static asset. For a single-segment scene-key
  * navigation it looks up the scene title via the read-only
  * `GET /scenes/{key}/meta/` endpoint and rewrites a fixed set of <head> tags in
- * the SPA shell via HTMLRewriter. It also rewrites og:image/twitter:image
- * (plus their alt text) to point at a per-scene render, gated on the
- * SCREENSHOTS_ORIGIN env var — unset, the shell's static default card is left
- * untouched. It is also the SPA fallback: any other path gets the shell, with
- * status 404 where the SPA renders not-found (no route matches, an invalid key,
- * or a key the API doesn't know), and /assets/ misses get a plain 404. The SPA
+ * the SPA shell via HTMLRewriter. The shell's canonical link and og:url name
+ * the home page, so it points them at each page's own path, or removes them
+ * where the page must not be indexed (a 404, frame, sign-in-error). It also
+ * rewrites og:image/twitter:image (plus their alt text) to point at a
+ * per-scene render, gated on the SCREENSHOTS_ORIGIN env var — unset, the
+ * shell's static default card is left untouched. It is also the SPA
+ * fallback: any other path gets the shell, with status 404 where the SPA
+ * renders not-found (no route matches, an invalid key, or a key the API
+ * doesn't know), and /assets/ misses get a plain 404. The SPA
  * never reads anything this injects — it's crawler-facing metadata only
  * (abandonability invariant). Dropping the Worker means setting
- * `not_found_handling` back to "single-page-application".
+ * `not_found_handling` back to "single-page-application" and removing the
+ * shell's canonical link, which would otherwise name home on every page.
  *
  * Design: docs/superpowers/specs/2026-07-11-og-metadata-worker-design.md
  */
+import { HELP_REFERENCE_NAME } from "../config/pageTitle";
 import { SCENE_KEY_PATTERN } from "../config/sceneKey";
-import { sceneDisplayName } from "../store/scene/sceneTitle";
-import { matchRoute } from "./routes";
+import { sceneDisplayName, tabTitle } from "../store/scene/sceneTitle";
+import { matchRoute, type RouteMatch } from "./routes";
 
 interface Env {
   ASSETS: Fetcher;
@@ -79,12 +84,55 @@ const lookUp = async (
   }
 };
 
+/** Points the canonical link and og:url at `url`. */
+const atUrl = (rewriter: HTMLRewriter, url: string): HTMLRewriter =>
+  rewriter
+    .on('link[rel="canonical"]', {
+      element(el) {
+        el.setAttribute("href", url);
+      },
+    })
+    .on('meta[property="og:url"]', {
+      element(el) {
+        el.setAttribute("content", url);
+      },
+    });
+
+/** Names the page `name`: its <title>, og:title and twitter:title. */
+const named = (rewriter: HTMLRewriter, name: string): HTMLRewriter =>
+  rewriter
+    .on("title", {
+      element(el) {
+        el.setInnerContent(tabTitle(name), { html: false });
+      },
+    })
+    .on('meta[property="og:title"]', {
+      element(el) {
+        el.setAttribute("content", name);
+      },
+    })
+    .on('meta[name="twitter:title"]', {
+      element(el) {
+        el.setAttribute("content", name);
+      },
+    });
+
+/** Removes the canonical link and og:url, which name the home page. */
+const withoutUrl = (shell: Response): Response =>
+  new HTMLRewriter()
+    .on('link[rel="canonical"], meta[property="og:url"]', {
+      element(el) {
+        el.remove();
+      },
+    })
+    .transform(shell);
+
 /**
- * Rewrite the shell's crawler-facing <head> tags for a scene. og:url is always
- * set to the scene's canonical URL. The <title>/og:title/twitter:title are
- * rewritten only for a *titled* scene; an untitled (blank) scene keeps the
- * shell's static rich defaults — matching the home page and the SPA's own
- * client-side title.
+ * Rewrite the shell's crawler-facing <head> tags for a scene. The canonical
+ * link and og:url always name the scene, even when its title lookup failed.
+ * The <title>/og:title/twitter:title are rewritten only for a *titled* scene;
+ * an untitled (blank) scene keeps the shell's static rich defaults — matching
+ * the home page and the SPA's own client-side title.
  *
  * The title is user-controlled: inject it ONLY via HTMLRewriter's escaping
  * setters (setInnerContent {html:false} / setAttribute) — never concatenate it
@@ -92,16 +140,12 @@ const lookUp = async (
  */
 const rewriteShell = (
   shell: Response,
-  rawTitle: string,
+  rawTitle: string | null,
   key: string,
   env: Env,
 ): Response => {
-  const ogUrl = `${env.SITE_ORIGIN}/${key}`;
-  let rewriter = new HTMLRewriter().on('meta[property="og:url"]', {
-    element(el) {
-      el.setAttribute("content", ogUrl);
-    },
-  });
+  let rewriter = atUrl(new HTMLRewriter(), `${env.SITE_ORIGIN}/${key}`);
+  if (rawTitle === null) return rewriter.transform(shell);
 
   const name = sceneDisplayName(rawTitle);
 
@@ -147,38 +191,49 @@ const rewriteShell = (
     }
   }
 
-  if (name !== null) {
-    const tabTitle = `${name} | Math3d`;
-    rewriter = rewriter
-      .on("title", {
-        element(el) {
-          el.setInnerContent(tabTitle, { html: false });
-        },
-      })
-      .on('meta[property="og:title"]', {
-        element(el) {
-          el.setAttribute("content", name);
-        },
-      })
-      .on('meta[name="twitter:title"]', {
-        element(el) {
-          el.setAttribute("content", name);
-        },
-      });
-  }
-
-  const rewritten = rewriter.transform(shell);
-  return new Response(rewritten.body, rewritten);
+  if (name !== null) rewriter = named(rewriter, name);
+  return rewriter.transform(shell);
 };
 
-/** `res` with `status`, kept out of shared caches and without its ETag: a
- * response built from the shell inherits its ETag whatever its status or body,
- * so that ETag validates none of them. */
-const asPrivate = (res: Response, status: number): Response => {
+/** `res` with `status` and without its ETag: a response built from the shell
+ * inherits the shell's ETag, which doesn't validate the rewritten page. */
+const withoutEtag = (res: Response, status = 200): Response => {
   const out = new Response(res.body, { status, headers: res.headers });
-  out.headers.set("Cache-Control", "private, max-age=0, must-revalidate");
   out.headers.delete("ETag");
   return out;
+};
+
+/** `withoutEtag`, and kept out of shared caches. */
+const asPrivate = (res: Response, status: number): Response => {
+  const out = withoutEtag(res, status);
+  out.headers.set("Cache-Control", "private, max-age=0, must-revalidate");
+  return out;
+};
+
+type FixedPath = Exclude<RouteMatch["path"], "/{-$sceneKey}">;
+
+/** Every route but a scene's. A new route fails typecheck here until it is
+ * given a page, so a public one can't fall into noindex by default. */
+const fixedPage = (path: FixedPath, shell: Response, env: Env): Response => {
+  switch (path) {
+    case "/app/help/reference":
+      return withoutEtag(
+        named(
+          atUrl(new HTMLRewriter(), `${env.SITE_ORIGIN}${path}`),
+          HELP_REFERENCE_NAME,
+        ).transform(shell),
+      );
+    case "/app/frame/$sceneKey":
+    case "/app/sign-in-error": {
+      const page = withoutEtag(withoutUrl(shell));
+      page.headers.set("X-Robots-Tag", "noindex");
+      return page;
+    }
+    default: {
+      const unhandled: never = path;
+      throw new Error(`No page for ${unhandled as string}`);
+    }
+  }
 };
 
 export default {
@@ -209,18 +264,21 @@ export default {
         new Request(new URL("/", url), { method: request.method }),
       );
 
+    const notFound = async () => asPrivate(withoutUrl(await freshShell()), 404);
+
     const route = matchRoute(url.pathname);
-    if (route === null) return asPrivate(await freshShell(), 404);
-    const key =
-      route.path === "/{-$sceneKey}" ? route.params.sceneKey : undefined;
-    // A page with no scene is the shell as is, conditional headers included.
+    if (route === null) return notFound();
+    if (route.path !== "/{-$sceneKey}") {
+      return fixedPage(route.path, await freshShell(), env);
+    }
+    const key = route.params.sceneKey;
+    // The home page, by a path the asset lookup missed: the shell as is,
+    // conditional headers included.
     if (key === undefined) {
       return env.ASSETS.fetch(new Request(new URL("/", url), request));
     }
     // {-$sceneKey}.tsx's params.parse renders not-found for these.
-    if (!SCENE_KEY_PATTERN.test(key)) {
-      return asPrivate(await freshShell(), 404);
-    }
+    if (!SCENE_KEY_PATTERN.test(key)) return notFound();
 
     // Fetch the shell and the title in parallel so the lookup never adds its
     // full latency on top of the shell fetch.
@@ -229,7 +287,7 @@ export default {
       lookUp(env, key),
     ]);
     return asPrivate(
-      title === null ? page : rewriteShell(page, title, key, env),
+      status === 404 ? withoutUrl(page) : rewriteShell(page, title, key, env),
       status,
     );
   },

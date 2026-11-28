@@ -8,6 +8,8 @@ test("help reference loads at /app/help/reference", async () => {
   ).toBeVisible();
   // A compiled doc, so this fails if the docs glob matches nothing.
   expect(await screen.findByText("sin(x)")).toBeVisible();
+  // The same <title> the metadata Worker writes.
+  expect(document.title).toBe("Function Reference | Math3d");
 });
 
 test("an overlay opens over an /app page (host wraps both subtrees)", async () => {

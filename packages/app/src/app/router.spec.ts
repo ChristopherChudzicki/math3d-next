@@ -60,3 +60,29 @@ it.each([...routeSamples, ...otherSamples])(
     expect(workerRoute(path)).toBe(await routerRoute(path));
   },
 );
+
+describe("the canonical link", () => {
+  const canonical = () => document.querySelector('link[rel="canonical"]');
+  const loaded = async (path: string) => {
+    const link = document.createElement("link");
+    link.rel = "canonical";
+    link.href = `https://math3d.test${path}`;
+    document.head.append(link);
+    const router = createAppRouter({ history: memoryHistory(path) });
+    await router.load();
+    return router;
+  };
+  afterEach(() => canonical()?.remove());
+
+  it("stays through the first load and a change of query alone", async () => {
+    const router = await loaded("/abc123");
+    await router.navigate({ href: "/abc123?overlay=scenes" });
+    expect(canonical()).not.toBeNull();
+  });
+
+  it("goes once the app navigates to another path", async () => {
+    const router = await loaded("/abc123");
+    await router.navigate({ to: "/app/help/reference" });
+    expect(canonical()).toBeNull();
+  });
+});
