@@ -6,7 +6,7 @@
   "devDependencies": {
     "@math3d/eslint-config": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
-    "@types/react": "^19.3.0",
+    "@types/react": "^19.3.3",
     "eslint": "^8.57.1",
     "vitest": "^4.1.12"
   },
