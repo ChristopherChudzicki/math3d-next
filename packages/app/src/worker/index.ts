@@ -7,11 +7,12 @@
  * the SPA shell via HTMLRewriter. The shell's canonical link and og:url name
  * the home page, so it points them at each page's own path, or removes them
  * where the page must not be indexed (a 404, frame, sign-in-error). It also
- * rewrites og:image/twitter:image (plus their alt text) to point at a per-scene render, gated on the
- * SCREENSHOTS_ORIGIN env var — unset, the shell's static default card is left
- * untouched. It is also the SPA fallback: any other path gets the shell, with
- * status 404 where the SPA renders not-found (no route matches, an invalid key,
- * or a key the API doesn't know), and /assets/ misses get a plain 404. The SPA
+ * rewrites og:image/twitter:image (plus their alt text) to point at a
+ * per-scene render, gated on the SCREENSHOTS_ORIGIN env var — unset, the
+ * shell's static default card is left untouched. It is also the SPA
+ * fallback: any other path gets the shell, with status 404 where the SPA
+ * renders not-found (no route matches, an invalid key, or a key the API
+ * doesn't know), and /assets/ misses get a plain 404. The SPA
  * never reads anything this injects — it's crawler-facing metadata only
  * (abandonability invariant). Dropping the Worker means setting
  * `not_found_handling` back to "single-page-application" and removing the
@@ -23,8 +24,6 @@ import { HELP_REFERENCE_NAME } from "../config/pageTitle";
 import { SCENE_KEY_PATTERN } from "../config/sceneKey";
 import { sceneDisplayName, tabTitle } from "../store/scene/sceneTitle";
 import { matchRoute, type RouteMatch } from "./routes";
-
-type FixedPath = Exclude<RouteMatch["path"], "/{-$sceneKey}">;
 
 interface Env {
   ASSETS: Fetcher;
@@ -210,6 +209,8 @@ const asPrivate = (res: Response, status: number): Response => {
   out.headers.set("Cache-Control", "private, max-age=0, must-revalidate");
   return out;
 };
+
+type FixedPath = Exclude<RouteMatch["path"], "/{-$sceneKey}">;
 
 /** Every route but a scene's. A new route fails typecheck here until it is
  * given a page, so a public one can't fall into noindex by default. */
